@@ -13,4 +13,6 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 2. Add new words or phrases after the video has been watched.
 3. Review flashcards based on a simple spaced repetition system.
 4. Track progress through statistics.
-5. Navigate the dictionary frame with your browser navigation bar (go back, refresh).
+
+## Tips
+Navigate the dictionary frame with your browser navigation bar (go back, refresh).
