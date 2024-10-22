@@ -10,7 +10,7 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 
 ## How It Works
 1. Select an integrated playlist or add your own.
-2. Add new words or phrases after video has been watched.
+2. Add new words or phrases after the video has been watched.
 3. Review flashcards based on a simple spaced repetition system.
 4. Track progress through statistics.
 5. Navigate the dictionary frame with your browser navigation bar (go back, refresh).
