@@ -38,6 +38,7 @@
             <p style="display: none;">Całkowita liczba filmów w playliście: <span id="total-videos"></span></p>
             <h2 class="count-normal">List of watched videos (<span id="watched-count">0</span>/<span id="total-videos-2">0</span>)</h2>
             <ul id="video-list"></ul>
+            <button id="toggle-add-to-watched" class="hidden-button" onclick="toggleAddToWatchedOnStart()">Create a note on beginning of movie</button>
         </div>
         <div class="right-column">
             <div class="dictionary-select-container">
@@ -58,7 +59,11 @@
             </div>
             <div id="separator"></div>
             <div class="iframe-container">
-                <iframe id="dictionary-frame" src="https://www.onelook.com/" frameborder="0"></iframe>
+                <div class="tabs-container">
+                    <div id="tabs"></div>
+                    <button id="add-tab" onclick="addNewTab()">+</button>
+                </div>
+                <div id="iframe-container"></div>
                 <div id="iframe-resizer"></div>
             </div>
         </div>

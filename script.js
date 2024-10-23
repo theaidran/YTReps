@@ -31,17 +31,10 @@ function initializeDefaultTrimTimes() {
     saveTrimTimesToLocalStorage();
 }
 
-function onYouTubeIframeAPIReady() {
-    console.log("API YouTube IFrame załadowane.");
-    loadPlaylistsFromLocalStorage();
-    loadTrimTimesFromLocalStorage();
-    loadWatchedVideosFromLocalStorage();
-    initializeWatchedVideos();
-    initializeDefaultTrimTimes();
-    createPlaylistButtons(); // Przenieliśmy to tutaj, po załadowaniu playlist
-    loadPlaylist(playlists[0].id);
-    updateWatchedCount();
-}
+// Zmień inicjalizację zmiennej globalnej
+var addToWatchedOnStart = true;
+
+
 
 function createPlaylistButtons() {
     var container = document.getElementById('playlist-container');
@@ -106,6 +99,9 @@ function loadPlaylist(playlistId) {
         player.destroy();
     }
     
+    var playerContainer = document.getElementById('player');
+    playerContainer.innerHTML = ''; // Wyczyść kontener przed utworzeniem nowego odtwarzacza
+    
     if (playlist && playlist.singleVideo) {
         loadSingleVideo(playlistId, playlist.singleVideo);
     } else {
@@ -135,7 +131,6 @@ function loadPlaylist(playlistId) {
     updateWatchedVideosList();
     updateWatchedCount();
     
-    // Dodaj to wywołanie
     setTimeout(autosizePlayer, 100);
 }
 
@@ -158,16 +153,24 @@ function onPlayerStateChange(event) {
         currentVideoTitle = videoData.title;
         console.log("Aktualny film:", currentVideoTitle);
 
+        // Dodaj film do listy obejrzanych na początku odtwarzania tylko jeśli flaga jest true
+        if (addToWatchedOnStart) {
+            markVideoAsWatched(currentVideoId, currentVideoTitle);
+        }
+
         // Sprawdzamy czas przycinania przy każdym odtworzeniu
         checkTrimTime();
         
-        // Dodaj to wywołanie
         setTimeout(autosizePlayer, 100);
     }
 
     if (event.data === YT.PlayerState.UNSTARTED && previousState === YT.PlayerState.PLAYING) {
         console.log("Film zakończył odtwarzanie.");
-        markVideoAsWatched(currentVideoId, currentVideoTitle);
+
+        // Dodaj film do listy obejrzanych na końcu odtwarzania, jeśli flaga jest false
+        if (!addToWatchedOnStart) {
+            markVideoAsWatched(currentVideoId, currentVideoTitle);
+        }
 
         if (!isAutoplayEnabled) {
             console.log("Auto-play wyłączony, zatrzymuję odtwarzanie.");
@@ -257,7 +260,9 @@ function markVideoAsWatched(videoId, title) {
     if (!watchedVideos[currentPlaylistId]) {
         watchedVideos[currentPlaylistId] = [];
     }
-    if (!watchedVideos[currentPlaylistId].some(video => video.id === videoId)) {
+    // Sprawdź, czy film już istnieje w liście obejrzanych
+    const existingVideo = watchedVideos[currentPlaylistId].find(video => video.id === videoId);
+    if (!existingVideo) {
         // Jeśli to pojedynczy film, użyj nazwy playlisty jako tytułu
         var playlist = playlists.find(p => p.id === currentPlaylistId);
         var videoTitle = playlist && playlist.singleVideo ? playlist.name : title;
@@ -290,10 +295,12 @@ function playPlaylistFromIndex(videoId) {
 function toggleNoteForm(videoId) {
     var listItem = document.getElementById(videoId);
     var noteForm = listItem.querySelector('.note-form');
+    var noteIcon = listItem.querySelector('.note-icon');
     var pairsContainer = listItem.querySelector('.word-translation-pairs');
     
     if (noteForm.style.display === 'none') {
         noteForm.style.display = 'block';
+        noteIcon.textContent = '➖'; // Zmieniamy ikonę na minus
         if (pairsContainer.children.length === 0) {
             addWordTranslationPair(videoId);
         } else {
@@ -314,6 +321,7 @@ function toggleNoteForm(videoId) {
     } else {
         saveNote(videoId);
         noteForm.style.display = 'none';
+        noteIcon.textContent = noteIcon.textContent === '➖' ? '➕' : '📝'; // Przywracamy oryginalną ikonę
         
         // Przywróć oryginalną pozycję playera YouTube
         resetYouTubePlayerPosition();
@@ -375,27 +383,17 @@ function autosizePlayer() {
         const defaultAspectRatio = 16 / 9; // Domyślny współczynnik proporcji
         
         let newWidth = Math.min(maxWidth, 640); // Nie większe niż oryginalne 640px
+        let newHeight = newWidth / defaultAspectRatio;
         
-        // Pobierz rzeczywiste wymiary filmu
-        const actualWidth = youtubeIframe.width;
-        const actualHeight = youtubeIframe.height;
-        const actualAspectRatio = actualWidth / actualHeight;
-        
-        // Użyj rzeczywistego współczynnika proporcji, jeśli jest dostępny
-        const aspectRatio = isNaN(actualAspectRatio) ? defaultAspectRatio : actualAspectRatio;
-        
-        let newHeight = newWidth / aspectRatio;
-        
-        // Upewnij się, że wysokość nie przekracza wysokości lewej kolumny
-        const maxHeight = leftColumn.offsetHeight - 100; // 100px na margines
-        if (newHeight > maxHeight) {
-            newHeight = maxHeight;
-            newWidth = newHeight * aspectRatio;
+        // Ograniczamy wysokość do maksymalnie 360px
+        if (newHeight > 360) {
+            newHeight = 360;
+            newWidth = newHeight * defaultAspectRatio;
         }
         
         playerContainer.style.width = newWidth + 'px';
         playerContainer.style.height = newHeight + 'px';
-        playerContainer.style.paddingBottom = '0';
+        playerContainer.style.paddingBottom = '0'; // Usuwamy padding-bottom
         
         youtubeIframe.style.width = '100%';
         youtubeIframe.style.height = '100%';
@@ -425,16 +423,24 @@ function onPlayerStateChange(event) {
         currentVideoTitle = videoData.title;
         console.log("Aktualny film:", currentVideoTitle);
 
+        // Dodaj film do listy obejrzanych na początku odtwarzania tylko jeśli flaga jest true
+        if (addToWatchedOnStart) {
+            markVideoAsWatched(currentVideoId, currentVideoTitle);
+        }
+
         // Sprawdzamy czas przycinania przy każdym odtworzeniu
         checkTrimTime();
         
-        // Dodaj to wywołanie
         setTimeout(autosizePlayer, 100);
     }
 
     if (event.data === YT.PlayerState.UNSTARTED && previousState === YT.PlayerState.PLAYING) {
         console.log("Film zakończył odtwarzanie.");
-        markVideoAsWatched(currentVideoId, currentVideoTitle);
+
+        // Dodaj film do listy obejrzanych na końcu odtwarzania, jeśli flaga jest false
+        if (!addToWatchedOnStart) {
+            markVideoAsWatched(currentVideoId, currentVideoTitle);
+        }
 
         if (!isAutoplayEnabled) {
             console.log("Auto-play wyłączony, zatrzymuję odtwarzanie.");
@@ -1015,20 +1021,19 @@ window.addEventListener('load', function() {
 });
 
 function changeDictionary() {
-    var select = document.getElementById('dictionary-select');
-    var iframe = document.getElementById('dictionary-frame');
-    var checkbox = document.getElementById('default-dictionary-checkbox');
+    const select = document.getElementById('dictionary-select');
+    const checkbox = document.getElementById('default-dictionary-checkbox');
+    const selectedUrl = select.value;
     
-    if (select.value === 'add_new') {
+    if (selectedUrl === 'add_new') {
         addNewDictionary();
-    } else if (select.value === 'remove_dictionary') {
+    } else if (selectedUrl === 'remove_dictionary') {
         removeDictionary();
     } else {
-        iframe.src = select.value;
-        
-        // Sprawdź, czy wybrany słownik jest domyślny
+        addNewTab();
+        // Aktualizuj stan checkboxa
         const defaultDictionary = localStorage.getItem('defaultDictionary');
-        checkbox.checked = (defaultDictionary === select.value);
+        checkbox.checked = (defaultDictionary === selectedUrl);
     }
 }
 
@@ -1409,18 +1414,18 @@ function loadDefaultDictionary() {
     const defaultDictionary = localStorage.getItem('defaultDictionary');
     const select = document.getElementById('dictionary-select');
     const checkbox = document.getElementById('default-dictionary-checkbox');
-    const iframe = document.getElementById('dictionary-frame');
     
     if (defaultDictionary) {
         select.value = defaultDictionary;
         checkbox.checked = true;
-        iframe.src = defaultDictionary;
     } else {
-        // Jeśli nie ma zapisanego domyślnego słownika, ustaw onelook.com
-        select.value = 'https://www.onelook.com/';
+        // Jeśli nie ma zapisanego domyślnego słownika, ustaw pierwszy z listy
+        select.selectedIndex = 0;
         checkbox.checked = false;
-        iframe.src = 'https://www.onelook.com/';
     }
+    
+    // Zwróć URL wybranego słownika
+    return select.value;
 }
 
 // Upewnijmy się, że loadDefaultDictionary jest wywoływane po załadowaniu strony
@@ -1446,3 +1451,214 @@ document.addEventListener('DOMContentLoaded', function() {
     adjustLayoutForMobile();
     window.addEventListener('resize', adjustLayoutForMobile);
 });
+
+// Dodaj nową funkcję do przełączania funkcjonalności
+function toggleAddToWatchedOnStart() {
+    addToWatchedOnStart = !addToWatchedOnStart;
+    var button = document.getElementById('toggle-add-to-watched');
+    button.textContent = addToWatchedOnStart ? 'Create a note on end of movie' : 'Create a note on beginning of movie';
+}
+
+// Dodaj nową funkcję do inicjalizacji przycisku
+function initializeAddToWatchedButton() {
+    var button = document.getElementById('toggle-add-to-watched');
+    button.textContent = 'Create a note on end of movie';
+    // Usunięto renderTabs();
+}
+
+// Dodaj wywołanie tej funkcji w onYouTubeIframeAPIReady lub w event listener 'load'
+window.addEventListener('load', function() {
+    // ... inne istniejące wywołania ...
+    initializeAddToWatchedButton();
+});
+
+let tabs = [];
+
+// Zmodyfikuj funkcję addNewTab
+function addNewTab() {
+    const dictionarySelect = document.getElementById('dictionary-select');
+    const selectedDictionary = dictionarySelect.value;
+    const dictionaryName = dictionarySelect.options[dictionarySelect.selectedIndex].text;
+    
+    const newTab = {
+        id: Date.now(),
+        name: dictionaryName,
+        url: selectedDictionary
+    };
+    
+    tabs.push(newTab);
+    renderTabs();
+    createIframe(newTab);
+    switchToTab(newTab.id);
+}
+
+// Dodaj nową funkcję createIframe
+function createIframe(tab) {
+    const iframeContainer = document.getElementById('iframe-container');
+    const iframe = document.createElement('iframe');
+    iframe.src = tab.url;
+    iframe.id = `iframe-${tab.id}`;
+    iframe.style.display = 'none';
+    iframeContainer.appendChild(iframe);
+}
+
+// Zmodyfikuj funkcję switchToTab
+function switchToTab(tabId) {
+    const tab = tabs.find(t => t.id === tabId);
+    if (!tab) return;
+    
+    const iframeContainer = document.getElementById('iframe-container');
+    const iframes = iframeContainer.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        iframe.style.display = 'none';
+    });
+    
+    const activeIframe = document.getElementById(`iframe-${tabId}`);
+    if (activeIframe) {
+        activeIframe.style.display = 'block';
+    }
+    
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-id="${tabId}"]`).classList.add('active');
+}
+
+// Zmodyfikuj funkcję renderTabs
+function renderTabs() {
+    const tabsContainer = document.getElementById('tabs');
+    tabsContainer.innerHTML = '';
+    
+    tabs.forEach(tab => {
+        const tabElement = document.createElement('div');
+        tabElement.className = 'tab';
+        tabElement.setAttribute('data-id', tab.id);
+        tabElement.onclick = () => switchToTab(tab.id); // Dodajemy to
+        
+        const tabText = document.createElement('span');
+        tabText.textContent = tab.name;
+        
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '×';
+        closeButton.className = 'close-tab';
+        closeButton.onclick = (e) => {
+            e.stopPropagation(); // Zapobiegamy propagacji zdarzenia do rodzica
+            closeTab(tab.id);
+        };
+        
+        tabElement.appendChild(tabText);
+        tabElement.appendChild(closeButton);
+        tabsContainer.appendChild(tabElement);
+    });
+}
+
+// Dodaj nową funkcję closeTab
+function closeTab(tabId) {
+    const tabIndex = tabs.findIndex(t => t.id === tabId);
+    if (tabIndex === -1) return;
+
+    // Usuń zakładkę z tablicy
+    tabs.splice(tabIndex, 1);
+
+    // Usuń odpowiadający iframe
+    const iframe = document.getElementById(`iframe-${tabId}`);
+    if (iframe) {
+        iframe.remove();
+    }
+
+    // Jeśli zamykamy aktywną zakładkę, przełącz na inną
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab && activeTab.getAttribute('data-id') == tabId) {
+        if (tabs.length > 0) {
+            switchToTab(tabs[0].id);
+        } else {
+            // Jeśli nie ma więcej zakładek, możesz np. pokazać pusty kontener
+            const iframeContainer = document.getElementById('iframe-container');
+            iframeContainer.innerHTML = '<p>No dictionary selected</p>';
+        }
+    }
+
+    // Przerysuj zakładki
+    renderTabs();
+}
+
+// Zmodyfikuj funkcję changeDictionary
+function changeDictionary() {
+    const select = document.getElementById('dictionary-select');
+    const checkbox = document.getElementById('default-dictionary-checkbox');
+    const selectedUrl = select.value;
+    
+    if (selectedUrl === 'add_new') {
+        addNewDictionary();
+    } else if (selectedUrl === 'remove_dictionary') {
+        removeDictionary();
+    } else {
+        addNewTab();
+        // Aktualizuj stan checkboxa
+        const defaultDictionary = localStorage.getItem('defaultDictionary');
+        checkbox.checked = (defaultDictionary === selectedUrl);
+    }
+}
+
+// Dodaj tę nową funkcję
+function updateDefaultDictionaryCheckbox() {
+    const select = document.getElementById('dictionary-select');
+    const checkbox = document.getElementById('default-dictionary-checkbox');
+    const defaultDictionary = localStorage.getItem('defaultDictionary');
+    checkbox.checked = (defaultDictionary === select.value);
+}
+
+// Zmodyfikuj funkcję initializeFirstTab
+function initializeFirstTab() {
+    const dictionaryUrl = loadDefaultDictionary();
+    const dictionarySelect = document.getElementById('dictionary-select');
+    const selectedOption = dictionarySelect.options[dictionarySelect.selectedIndex];
+    
+    const firstTab = {
+        id: Date.now(),
+        name: selectedOption.text,
+        url: dictionaryUrl
+    };
+    
+    tabs.push(firstTab);
+    renderTabs();
+    createIframe(firstTab);
+    switchToTab(firstTab.id);
+    updateDefaultDictionaryCheckbox();
+}
+
+// Dodaj nasłuchiwanie na zmiany w select
+document.getElementById('dictionary-select').addEventListener('change', updateDefaultDictionaryCheckbox);
+
+// Dodaj tę funkcję, aby inicjalizować pierwszą zakładkę przy ładowaniu strony
+function initializeFirstTab() {
+    const dictionaryUrl = loadDefaultDictionary();
+    const dictionarySelect = document.getElementById('dictionary-select');
+    const selectedOption = dictionarySelect.options[dictionarySelect.selectedIndex];
+    
+    const firstTab = {
+        id: Date.now(),
+        name: selectedOption.text,
+        url: dictionaryUrl
+    };
+    
+    tabs.push(firstTab);
+    renderTabs();
+    createIframe(firstTab);
+    switchToTab(firstTab.id);
+    updateDefaultDictionaryCheckbox();
+}
+
+// Zmodyfikuj funkcję onYouTubeIframeAPIReady
+function onYouTubeIframeAPIReady() {
+    console.log("API YouTube IFrame załadowane.");
+    loadPlaylistsFromLocalStorage();
+    loadTrimTimesFromLocalStorage();
+    loadWatchedVideosFromLocalStorage();
+    initializeWatchedVideos();
+    initializeDefaultTrimTimes();
+    createPlaylistButtons();
+    loadPlaylist(playlists[0].id);
+    updateWatchedCount();
+    initializeAddToWatchedButton();
+    initializeFirstTab(); // Przenieś to wywołanie tutaj
+    setTimeout(autosizePlayer, 100);
+}

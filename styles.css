@@ -1073,4 +1073,148 @@
     }
 }
 
+.hidden-button {
+    display: none;
+}
 
+.tabs-container {
+    display: flex;
+    flex-wrap: wrap; /* Dodajemy zawijanie, gdyby było zbyt wiele zakładek */
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border: none;
+    outline: none;
+    transition: 0.3s;
+    margin-right: 2px;
+    position: relative; /* Dodajemy to */
+}
+
+.tab span {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    pointer-events: none; /* Dodajemy to */
+}
+
+.close-tab {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 5px;
+    position: relative; /* Dodajemy to */
+    z-index: 1; /* Dodajemy to */
+}
+
+.close-tab:hover {
+    color: #333;
+}
+
+.tab:hover {
+    background-color: #ddd;
+}
+
+.tab.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007BFF;
+}
+
+#add-tab {
+    padding: 5px 12px;
+    background-color: #f1f1f1;
+    color: #555555; /* Zmieniamy kolor na ciemniejszy odcień szarego */
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 1;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+#add-tab:hover {
+    background-color: #ddd;
+    color: #333333; /* Pozostawiamy kolor przy najechaniu bez zmian */
+}
+
+#iframe-container {
+    display: flex;
+    height: calc(100% - 41px); /* Wysokość kontenera minus wysokość zakładek */
+}
+
+#iframe-container iframe {
+    flex: 1;
+    border: none;
+}
+
+/* Istniejący styl */
+.dictionary-select-row label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Zmodyfikowane style dla checkboxa */
+.dictionary-select-row input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 1px solid #007BFF;
+    border-radius: 2px;
+    outline: none;
+    transition: all 0.3s;
+    position: relative;
+    cursor: pointer;
+    margin-left: 0; /* Usuwamy lewy margines */
+    padding: 0;
+}
+
+.dictionary-select-row input[type="checkbox"]:checked {
+    background-color: #007BFF;
+}
+
+.dictionary-select-row input[type="checkbox"]:checked::before {
+    content: '\2714';
+    font-size: 12px; /* Zwiększamy rozmiar znacznika */
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Zachowaj istniejący styl dla tooltipa */
+.dictionary-select-row label[title]:hover:before {
+    content: attr(title);
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 10px;
+}
