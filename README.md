@@ -11,7 +11,7 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 
 ## How It Works
 1. Select an built-in BBC playlist or add your own video/playlist.
-2. Add new words or phrases while watching and check with the integrated dictionary.
+2. Add new words or phrases while watching and check them with the integrated dictionary.
 3. Review notes/flashcards based on a simple spaced repetition system.
 4. Track progress through statistics.
 
