@@ -10,8 +10,8 @@ It has compatibility with ANKI format, so you can export/inport flashcards to yo
 Also, it has integration of dictionaries like onelook.com, and you can add your own. But due to fact it is just a simple iframe, some websites may not work due to their policy.  
 
 ## How It Works
-1. Select an integrated BBC playlist or add your own video/playlist.
-2. Add new words or phrases while watching.
+1. Select an built-in BBC playlist or add your own video/playlist.
+2. Add new words or phrases while watching and check with the integrated dictionary.
 3. Review notes/flashcards based on a simple spaced repetition system.
 4. Track progress through statistics.
 
