@@ -16,5 +16,5 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 4. Track progress through statistics.
 
 ## Tips
-Navigate the dictionary frame with your browser navigation bar (go back, refresh).
+Navigate the dictionary frame with your browser navigation bar (go back, refresh).  
 Ads from YouTube should not be displayed when run locally. Anyway, extensions like uBlock Origin work.
