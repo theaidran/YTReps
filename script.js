@@ -926,213 +926,6 @@ function updateWordList() {
     columns[3].style.width = (translationWidth / totalWidth * 100) + '%';
 }
 
-// Dodaj tę funkcj na końcu sekcji <script>
-function makeDraggable(elmnt, isIframe = false) {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    var header = isIframe ? null : elmnt.querySelector('#word-list-header');
-    var resizer = isIframe ? document.getElementById('iframe-resizer') : elmnt.querySelector('#word-list-resizer');
-
-    if (header) {
-        header.onmousedown = dragMouseDown;
-    } else if (!isIframe) {
-        elmnt.onmousedown = dragMouseDown;
-    }
-
-    if (resizer) {
-        resizer.onmousedown = resizeMouseDown;
-    }
-
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-
-    function resizeMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeResizeElement;
-        document.onmousemove = elementResize;
-    }
-
-    function elementResize(e) {
-        e = e || window.event;
-        e.preventDefault();
-        var newWidth = elmnt.offsetWidth + (e.clientX - pos3);
-        var newHeight = elmnt.offsetHeight + (e.clientY - pos4);
-        
-        // Ustaw minimalne wymiary
-        newWidth = Math.max(newWidth, 300);
-        newHeight = Math.max(newHeight, 200);
-        
-        if (isIframe) {
-            // Ogranicz maksymalną wysokość do wysokości okna
-            var maxHeight = window.innerHeight - elmnt.getBoundingClientRect().top - 20;
-            newHeight = Math.min(newHeight, maxHeight);
-        }
-        
-        elmnt.style.width = newWidth + "px";
-        elmnt.style.height = newHeight + "px";
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-
-        if (isIframe) {
-            // Aktualizuj wysokość iframe'a
-            var iframe = elmnt.querySelector('iframe');
-            iframe.style.height = newHeight + "px";
-            iframe.style.width = newWidth + "px";
-        }
-    }
-
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-
-    function closeResizeElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-}
-
-// Wywołaj tę funkcję po załadowaniu strony
-window.addEventListener('load', function() {
-    var wordListContainer = document.getElementById("word-list-container");
-    makeDraggable(wordListContainer);
-
-    var iframeContainer = document.querySelector('.iframe-container');
-    makeDraggable(iframeContainer, true);
-});
-
-function changeDictionary() {
-    const select = document.getElementById('dictionary-select');
-    const checkbox = document.getElementById('default-dictionary-checkbox');
-    const selectedUrl = select.value;
-    
-    if (selectedUrl === 'add_new') {
-        addNewDictionary();
-    } else if (selectedUrl === 'remove_dictionary') {
-        removeDictionary();
-    } else {
-        addNewTab();
-        // Aktualizuj stan checkboxa
-        const defaultDictionary = localStorage.getItem('defaultDictionary');
-        checkbox.checked = (defaultDictionary === selectedUrl);
-    }
-}
-
-function addNewDictionary() {
-    const name = prompt("Enter the name of the new dictionary:");
-    if (name) {
-        let url = prompt("Enter the URL of the new dictionary (without https://):");
-        if (url) {
-            // Dodaj https:// jeśli nie zostało podane
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
-            }
-            
-            const select = document.getElementById('dictionary-select');
-            const option = document.createElement('option');
-            option.value = url;
-            option.textContent = name;
-            
-            // Wstaw nową opcję przed "Add new"
-            const addNewOption = select.querySelector('option[value="add_new"]');
-            select.insertBefore(option, addNewOption);
-            
-            select.value = url;
-            changeDictionary();
-            
-            // Zapisz nowy słownik w localStorage
-            const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
-            dictionaries.push({ name, url });
-            localStorage.setItem('customDictionaries', JSON.stringify(dictionaries));
-        }
-    }
-    // Jeśli użytkownik anulował, przywróć poprzednią wartość
-    const select = document.getElementById('dictionary-select');
-    if (select.value === 'add_new') {
-        select.value = select.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
-    }
-    changeDictionary();
-}
-
-function removeDictionary() {
-    const select = document.getElementById('dictionary-select');
-    
-    // Tworzymy nowe okno dialogowe
-    const dialog = document.createElement('dialog');
-    dialog.innerHTML = `
-        <h3>Select a dictionary to remove</h3>
-        <select id="dictionary-to-remove">
-            ${Array.from(select.options)
-                .filter(option => !['add_new', 'remove_dictionary'].includes(option.value))
-                .map(option => `<option value="${option.value}">${option.text}</option>`)
-                .join('')}
-        </select>
-        <div>
-            <button id="confirm-remove">Remove</button>
-            <button id="cancel-remove">Cancel</button>
-        </div>
-    `;
-    
-    document.body.appendChild(dialog);
-    dialog.showModal();
-
-    // Obsługa przycisków
-    dialog.querySelector('#confirm-remove').addEventListener('click', () => {
-        const selectToRemove = dialog.querySelector('#dictionary-to-remove');
-        const dictionaryToRemove = selectToRemove.options[selectToRemove.selectedIndex].text;
-        const optionToRemove = Array.from(select.options).find(option => option.text === dictionaryToRemove);
-        
-        if (optionToRemove) {
-            // Usuń z select
-            select.removeChild(optionToRemove);
-            
-            // Usuń z localStorage
-            const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
-            const updatedDictionaries = dictionaries.filter(dict => dict.name !== dictionaryToRemove);
-            localStorage.setItem('customDictionaries', JSON.stringify(updatedDictionaries));
-            
-            // Jeśli usunięty słownik był domyślny, usuń ustawienie domyślne
-            if (localStorage.getItem('defaultDictionary') === optionToRemove.value) {
-                localStorage.removeItem('defaultDictionary');
-                document.getElementById('default-dictionary-checkbox').checked = false;
-            }
-            
-            alert(`Dictionary "${dictionaryToRemove}" has been removed.`);
-        }
-        
-        dialog.close();
-        dialog.remove();
-    });
-
-    dialog.querySelector('#cancel-remove').addEventListener('click', () => {
-        dialog.close();
-        dialog.remove();
-    });
-
-    // Przywróć poprzednią wartość
-    select.value = select.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
-    changeDictionary();
-}
-
 // Dodaj tę funkcję, aby ładować niestandardowe słowniki przy starcie
 function loadCustomDictionaries() {
     const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
@@ -1662,3 +1455,54 @@ function onYouTubeIframeAPIReady() {
     initializeFirstTab(); // Przenieś to wywołanie tutaj
     setTimeout(autosizePlayer, 100);
 }
+
+// Dodaj na końcu pliku script.js
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('autoplay-btn').addEventListener('click', toggleAutoplay);
+    document.querySelector('.clear-button').addEventListener('click', clearWatchedVideos);
+    document.querySelector('.trim-button').addEventListener('click', setTrimTime);
+    document.querySelector('.word-list-button').addEventListener('click', toggleWordList);
+    document.getElementById('toggle-add-to-watched').addEventListener('click', toggleAddToWatchedOnStart);
+    document.getElementById('dictionary-select').addEventListener('change', changeDictionary);
+    document.getElementById('default-dictionary-checkbox').addEventListener('change', setDefaultDictionary);
+    document.getElementById('add-tab').addEventListener('click', addNewTab);
+    document.getElementById('export-word-list').addEventListener('click', exportWordList);
+    document.getElementById('clear-watched-videos').addEventListener('click', clearWatchedVideos);
+    document.getElementById('close-word-list').addEventListener('click', toggleWordList);
+});
+
+function updateCSPForDictionaries() {
+    const dictionaries = [
+        'https://www.onelook.com',
+        'https://www.diki.pl',
+        'https://dict.com',
+        'https://ling.pl'
+    ];
+    
+    // Dodaj niestandardowe słowniki
+    const customDictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
+    customDictionaries.forEach(dict => {
+        const url = new URL(dict.url);
+        dictionaries.push(url.origin);
+    });
+    
+    const uniqueDomains = [...new Set(dictionaries)];
+    
+    const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    let content = meta.getAttribute('content');
+    
+    // Aktualizuj frame-src
+    content = content.replace(/frame-src([^;]+);/, function(match, p1) {
+        return `frame-src${p1} ${uniqueDomains.join(' ')};`;
+    });
+    
+    // Aktualizuj connect-src
+    content = content.replace(/connect-src([^;]+);/, function(match, p1) {
+        return `connect-src${p1} ${uniqueDomains.join(' ')};`;
+    });
+    
+    meta.setAttribute('content', content);
+}
+
+// Wywołaj tę funkcję po załadowaniu strony i po dodaniu nowego słownika
+document.addEventListener('DOMContentLoaded', updateCSPForDictionaries);
