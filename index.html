@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-src https://www.youtube.com https://www.onelook.com https://www.diki.pl https://dict.com https://ling.pl; connect-src 'self' https://www.onelook.com https://www.diki.pl https://dict.com https://ling.pl;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My English Playlists</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script.js" defer></script>
+    <!-- Dodajemy linki do favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-column">
+            <div class="header-container">
+                <h1 class="main-title">My English Playlists</h1>
+                <a href="reps.html" class="quiz-button">Repetitions</a>
+            </div>
+            <div id="playlist-container" class="playlist-container"></div>
+            <div class="player-container">
+                <div id="player"></div>
+                <div id="watched-overlay" class="watched-overlay">
+                    ✔ Obejrzano
+                </div>
+                <div class="player-resizer"></div>
+            </div>
+            <button id="autoplay-btn" class="autoplay-button">Auto-play: OFF</button>
+            <!-- Ukrywamy przycisk "Wyczyść obejrzane filmy" -->
+            <button class="clear-button" style="display: none;">Wyczyść obejrzane filmy</button>
+            <!-- Ukrywamy przycisk "Przytnij video" -->
+            <button class="trim-button" style="display: none;">Przytnij video</button>
+            <button class="word-list-button">Word List</button>
+            <p style="display: none;">Całkowita liczba filmów w playliście: <span id="total-videos"></span></p>
+            <h2 class="count-normal">List of watched videos (<span id="watched-count">0</span>/<span id="total-videos-2">0</span>)</h2>
+            <ul id="video-list"></ul>
+            <button id="toggle-add-to-watched" class="hidden-button">Create a note on beginning of movie</button>
+        </div>
+        <div class="right-column">
+            <div class="dictionary-select-container">
+                <h3>Select Dictionary</h3>
+                <div class="dictionary-select-row">
+                    <select id="dictionary-select" onchange="changeDictionary()">
+                        <option value="https://www.onelook.com/">onelook.com</option>
+                        <option value="https://www.diki.pl/">diki.pl</option>
+                        <option value="https://dict.com/angielsko-polski">dict.com</option>
+                        <option value="https://ling.pl/">ling.pl</option>
+                        <option value="add_new">Add new</option>
+                        <option value="remove_dictionary">Remove dictionary</option>
+                    </select>
+                    <label for="default-dictionary-checkbox" title="Set as default dictionary">
+                        <input type="checkbox" id="default-dictionary-checkbox" onchange="setDefaultDictionary()">
+                    </label>
+                </div>
+            </div>
+            <div id="separator"></div>
+            <div class="iframe-container">
+                <div class="tabs-container">
+                    <div id="tabs"></div>
+                    <button id="add-tab" onclick="addNewTab()">+</button>
+                </div>
+                <div id="iframe-container"></div>
+                <div id="iframe-resizer"></div>
+            </div>
+        </div>
+    </div>
+    <div id="word-list-container" style="display: none;">
+        <div id="word-list-header">
+            <h2>List of all words</h2>
+            <div>
+                <button id="export-word-list" onclick="exportWordList()">Export to file</button>
+                <button id="clear-watched-videos" onclick="clearWatchedVideos()">Clear all data</button>
+                <button id="close-word-list" onclick="toggleWordList()">Close</button>
+            </div>
+        </div>
+        <div id="word-list-content">
+            <table id="word-list-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Word/Phrase</th>
+                        <th>Context</th>
+                        <th>Translation</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="note-form" style="display: none;">
+        <div class="word-translation-pairs"></div>
+        <button onclick="addWordTranslationPair('${videoId}')">+ Add word/phrase</button>
+        <button onclick="saveNote('${videoId}')">Save note</button>
+    </div>
+</body>
+</html>
