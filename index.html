@@ -7,7 +7,16 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="script.js" defer></script>
+    <script>
+        function loadScript(url) {
+            var script = document.createElement('script');
+            script.src = url + '?t=' + new Date().getTime();
+            document.head.appendChild(script);
+        }
+        loadScript('script.js');
+        // Dodaj inne skrypty, jeśli są
+        // loadScript('inny-skrypt.js');
+    </script>
     <!-- Dodajemy linki do favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
