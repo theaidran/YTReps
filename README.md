@@ -12,7 +12,7 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 ## How It Works
 1. Select an built-in BBC playlist or add your own video/playlist.
 2. Add new words or phrases while watching and check them with one of the chosen dictionaries.
-3. Review notes/flashcards based on a one of spaced repetition system (Supermemo, Leitner).
+3. Review notes/flashcards based on a spaced repetition system (Supermemo, Leitner).
 4. Track progress through statistics.
 
 ## Tips
