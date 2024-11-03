@@ -5,145 +5,8 @@ lastScrollPosition = 0;
 // Dodaj te zmienne globalne na początku pliku
 let flashcardsToReview = [];
 let currentFlashcardIndex = 0;
+let currentReviewMode = null;
 
-const translations = {
-    en: {
-        review: "Review",
-        browseFlashcards: "Browse Flashcards",
-        addFlashcard: "Add Flashcard",
-        statistics: "Statistics",
-        exportToFile: "Export to File",
-        importFromFile: "Import from File",
-        repetitions: "Repetitions",
-        myPlaylists: "My Playlists",
-        addNewFlashcard: "Add New Flashcard",
-        wordPhrase: "Word / Phrase",
-        contextExample: "Context / Example",
-        translation: "Translation",
-        imageLink: "Image link (http)",
-        audioLink: "Audio link (http)",
-        addFlashcardButton: "Add Flashcard",
-        yourFlashcards: "Your Flashcards",
-        no: "No.",
-        known: "Known",
-        media: "Media",
-        audio: "Audio",
-        actions: "Actions",
-        info: "Info",
-        howDoReviewsWork: "How do reviews work?",
-        reviewExplanation: "Our system uses a spaced repetition method to help you effectively memorize words:",
-        firstRecall: "After 1st correct recall: next review in 2 days",
-        secondRecall: "After 2nd correct recall: next review in 4 days",
-        thirdRecall: "After 3rd correct recall: next review in 8 days",
-        fourthRecall: "After 4th correct recall: next review in 16 days",
-        andSoOn: "and so on...",
-        reviewTip: "If you don't remember a word, it will return to the beginning of the cycle. Regular reviews are the key to success!",
-        close: "Close",
-        totalFlashcards: "Total number of flashcards:",
-        numberOfReviews: "Number of reviews:",
-        currentKnowledgeState: "Current knowledge state of all flashcards",
-        masteredLast7Days: "Number mastered in the last 7 days:",
-        masteredTooltip: "This is the number of flashcards that:\n1. Have been reviewed correctly at least 5 times (considered mastered).\n2. Their last review was within the last 7 days.",
-        showTranslation: "Show translation",
-        iKnow: "I know",
-        iDontKnow: "I don't know",
-        endOfReview: "End of review!",
-        checkNewFlashcards: "Check new flashcards",
-        repeatUnknown: "Repeat unknown only",
-        repeatAll: "Repeat all",
-        flashcardAdded: "Flashcard has been added!",
-        edit: "Edit",
-        delete: "Delete",
-        save: "Save",
-        cancel: "Cancel",
-        noFlashcardsToReview: "No flashcards to review today!",
-        nextReviewAvailable: "Next review will be available:",
-        flashcardCategories: "Flashcard categories:",
-        newFlashcards: "New",
-        newFlashcardsDescription: "(green): Flashcards that haven't been reviewed yet or weren't remembered.",
-        learningFlashcards: "Learning",
-        learningFlashcardsDescription: "(blue): Flashcards that were correctly reviewed 1 to 4 times.",
-        masteredFlashcards: "Mastered",
-        masteredFlashcardsDescription: "(turquoise): Flashcards that were correctly reviewed 5 or more times.",
-        currentKnowledgeStateTooltip: "Number of flashcards with correct answers to the total number of flashcards",
-        masteredLast7DaysTooltip: "This is the number of flashcards that:\n1. Have been reviewed correctly at least 5 times (considered mastered).\n2. Their last review was within the last 7 days.",
-        flashcardStatistics: "Flashcard Statistics",
-        deleteAll: "Delete All",
-        confirmDeleteAll: "Are you sure you want to delete all flashcards? This action cannot be undone.",
-        goBack: "Go back to previous flashcard",
-        yes: "Yes",
-        no2: "No",
-        dictionary: "Dictionary",
-    },
-    pl: {
-        review: "Powtórki",
-        browseFlashcards: "Przeglądaj fiszki",
-        addFlashcard: "Dodaj fiszkę",
-        statistics: "Statystyki",
-        exportToFile: "Eksportuj do pliku",
-        importFromFile: "Importuj z pliku",
-        repetitions: "Powtórki",
-        myPlaylists: "Moje playlisty",
-        addNewFlashcard: "Dodaj nową fiszkę",
-        wordPhrase: "Słowo / Fraza",
-        contextExample: "Kontekst / Przykład",
-        translation: "Tłumaczenie",
-        imageLink: "Link do obrazu (http)",
-        audioLink: "Link do audio (http)",
-        addFlashcardButton: "Dodaj fiszkę",
-        yourFlashcards: "Twoje fiszki",
-        no: "Lp.",
-        known: "Znane",
-        media: "Media",
-        audio: "Audio",
-        actions: "Akcje",
-        info: "Info",
-        howDoReviewsWork: "Jak działają powtórki?",
-        reviewExplanation: "Nasz system wykorzystuje metodę powtórek rozłożonych w czasie, aby pomóc Ci efektywnie zapamiętać słówka:",
-        firstRecall: "Po 1. poprawnym zapamiętaniu: następna powtórka za 2 dni",
-        secondRecall: "Po 2. poprawnym zapamiętaniu: następna powtórka za 4 dni",
-        thirdRecall: "Po 3. poprawnym zapamiętaniu: następna powtórka za 8 dni",
-        fourthRecall: "Po 4. poprawnym zapamiętaniu: następna powtrka za 16 dni",
-        andSoOn: "itd.",
-        reviewTip: "Jeśli nie zapamiętasz słówka, wróci ono do początku cyklu. Regularne powtórki to klucz do sukcesu!",
-        close: "Zamknij",
-        totalFlashcards: "Całkowita liczba fiszek:",
-        numberOfReviews: "Liczba powtórek:",
-        currentKnowledgeState: "Obecny stan znajomości wszystkich fiszek",
-        masteredLast7Days: "Liczba opanowanych przez ostatnie 7 dni:",
-        masteredTooltip: "To liczba fiszek, które:\n1. Zostały powtórzone co najmniej 5 razy (uznawane za opanowane).\n2. Ich ostatnie powtórzenie miało miejsce w ciągu ostatnich 7 dni.",
-        showTranslation: "Pokaż tłumaczenie",
-        iKnow: "Znam",
-        iDontKnow: "Nie znam",
-        endOfReview: "Koniec powtórki!",
-        checkNewFlashcards: "Sprawdź nowe fiszki",
-        repeatUnknown: "Powtórz tylko nieznane",
-        repeatAll: "Powtórz wszystkie",
-        flashcardAdded: "Fiszka została dodana!",
-        edit: "Edytuj",
-        delete: "Usuń",
-        save: "Zapisz",
-        cancel: "Anuluj",
-        noFlashcardsToReview: "Brak fiszek do powtórki na dziś!",
-        nextReviewAvailable: "Następna powtórka będzie dostępna:",
-        flashcardCategories: "Kategorie fiszek:",
-        newFlashcards: "Nowe",
-        newFlashcardsDescription: "(zielony): Fiszki, które nie były jeszcze powtarzane lub nie zostały zapamiętane.",
-        learningFlashcards: "Uczone",
-        learningFlashcardsDescription: "(niebieski): Fiszki, które były poprawnie powtórzone od 1 do 4 razy.",
-        masteredFlashcards: "Opanowane",
-        masteredFlashcardsDescription: "(turkusowy): Fiszki, które były poprawnie powtórzone 5 lub więcej razy.",
-        currentKnowledgeStateTooltip: "Liczba fiszek z poprawną odpowiedzią do liczby wszystkich fiszek",
-        masteredLast7DaysTooltip: "To liczba fiszek, które:\n1. Zostały powtórzone co najmniej 5 razy (uznawane za opanowane).\n2. Ich ostatnie powtórzenie miało miejsce w ciągu ostatnich 7 dni.",
-        flashcardStatistics: "Statystyki fiszek",
-        deleteAll: "Usuń wszystkie",
-        confirmDeleteAll: "Czy na pewno chcesz usunąć wszystkie fiszki? Tej akcji nie można cofnąć.",
-        goBack: "Wróć do poprzedniej fiszki",
-        yes: "Tak",
-        no2: "Nie",
-        dictionary: "Słownik",
-    }
-};
 
 // Globalna zmienna do przechowywania fiszek
 let flashcards = [];
@@ -190,15 +53,22 @@ function addFlashcard(word, context, translation, mediaUrl = '', audioUrl = '') 
     translation,
     mediaUrl,
     audioUrl,
-    repeats: 0,
+    streak: 0,
     lastReviewed: null,
-    createdAt: new Date().toISOString()
+    firstReviewDate: null, // dodajemy nowe pole
+    createdAt: new Date().toISOString(),
+    difficulty: 'medium', // domyślna trudność
+    nextReview: null,
+    easinessFactor: 2.5,
+    interval: 0,
+    repetitions: 0,
+    leitnerBox: 1
   };
   flashcards.push(newFlashcard);
   saveFlashcards();
   updateFlashcardTable();
   updateStats();
-  drawLearningProgressChart(); // Dodajemy tę linię
+  drawLearningProgressChart();
   showSection('view');
   const message = translations[currentLanguage].flashcardAdded || 'Flashcard has been added!';
   alert(message);
@@ -209,17 +79,35 @@ function updateFlashcardTable() {
     const tableBody = document.querySelector('#flashcardTable tbody');
     if (!tableBody) return;
     tableBody.innerHTML = '';
+    
+    const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
 
     flashcards.forEach((flashcard, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', flashcard.id);
-        const isKnown = flashcard.repeats > 0 ? translations[currentLanguage].yes : translations[currentLanguage].no2;
+        
+        // Określamy, czy fiszka jest opanowana w zależności od algorytmu
+        let isMastered = false;
+        switch(algorithm) {
+            case 'supermemo':
+                // Dla SuperMemo - fiszka jest opanowana, gdy EF > 2.0 i repetitions >= 5
+                isMastered = (flashcard.easinessFactor > 2.0 && flashcard.repetitions >= 5);
+                break;
+            case 'leitner':
+                // Dla systemu Leitnera - fiszka jest opanowana, gdy jest w pudełku 4 lub 5
+                isMastered = (flashcard.leitnerBox >= 5);// or 5 repetitions
+                break;
+            default:
+                // Dla standardowego algorytmu - fiszka jest opanowana po 5 poprawnych odpowiedziach
+                isMastered = (flashcard.streak >= 5); // or 5 repetitions
+        }
+
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${flashcard.word}</td>
             <td>${flashcard.context || ''}</td>
             <td>${flashcard.translation}</td>
-            <td>${isKnown}</td>
+            <td>${isMastered ? translations[currentLanguage].yes : translations[currentLanguage].no2}</td>
             <td>${flashcard.mediaUrl ? '<img src="' + flashcard.mediaUrl + '" alt="media" width="50">' : ''}</td>
             <td>${flashcard.audioUrl ? '<audio controls><source src="' + flashcard.audioUrl + '" type="audio/mpeg"></audio>' : ''}</td>
             <td>
@@ -301,123 +189,277 @@ function showSection(sectionId) {
     }
 }
 
-// Funkcja do aktualizacji statystyk
-function updateStats() {
-  let totalFlashcards = flashcards.length;
-  let knownFlashcards = countKnownFlashcards();
-  let masteredLast7Days = countMasteredLast7Days();
-  
-  const statsSection = document.getElementById('stats');
-  statsSection.innerHTML = generateStatsHTML();
-  
-  document.getElementById('totalFlashcards').textContent = totalFlashcards;
-  
-  // Oblicz procent znanych fiszek
-  let knownPercentage = totalFlashcards > 0 ? (knownFlashcards / totalFlashcards * 100).toFixed(1) : 0;
-  document.getElementById('knownFlashcards').textContent = `${knownPercentage}%`;
-  
-  document.getElementById('masteredLast7Days').textContent = masteredLast7Days;
 
-  drawLearningProgressChart();
-  changeLanguage(); // Dodajemy to wywołanie, aby przetłumaczyć nowo wygenerowaną zawartość
-}
 
 // Funkcja do rozpoczęcia powtórki
 function startReview() {
     console.log('Rozpoczęcie powtórki');
-    if (flashcardsToReview.length === 0) {
-        flashcardsToReview = flashcards.filter(flashcard => shouldReview(flashcard));
-        currentFlashcardIndex = 0;
+    showReviewModeSelection();
+}
+
+function showReviewModeSelection() {
+    const reviewSection = document.getElementById('reviewCard');
+    reviewSection.innerHTML = `
+        <div class="review-mode-selection">
+            <h3 data-translate="selectMode">Select review mode</h3>
+            <div class="review-modes">
+                <div class="review-mode-card" onclick="selectReviewMode('dueToday')">
+                    <h4 data-translate="dueToday">Due Today</h4>
+                    <p class="card-count" id="dueTodayCount">0</p>
+                </div>
+                <div class="review-mode-card" onclick="selectReviewMode('new')">
+                    <h4 data-translate="newFlashcardsOnly">New Flashcards Only</h4>
+                    <p class="card-count" id="newCount">0</p>
+                </div>
+                <div class="review-mode-card" onclick="selectReviewMode('newToday')">
+                    <h4 data-translate="newTodayOnly">New Today Only</h4>
+                    <p class="card-count" id="newTodayCount">0</p>
+                </div>
+                <div class="review-mode-card" onclick="selectReviewMode('hard')">
+                    <h4 data-translate="hardFlashcardsOnly">Hard Flashcards Only</h4>
+                    <p class="card-count" id="hardCount">0</p>
+                </div>
+                <div class="review-mode-card" onclick="selectReviewMode('random')">
+                    <h4 data-translate="randomFlashcards">Random Selection</h4>
+                    <p class="card-count" id="totalCount">0</p>
+                </div>
+            </div>
+            <div class="review-options">
+                <div class="cards-number-options">
+                    <label data-translate="numberOfCards">Number of cards:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-option">
+                            <input type="radio" name="cardsNumber" value="all" checked 
+                                   onchange="toggleCustomNumberInput()">
+                            <span data-translate="allCards">All cards</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="radio" name="cardsNumber" value="10" 
+                                   onchange="toggleCustomNumberInput()">
+                            <span>10</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="radio" name="cardsNumber" value="20" 
+                                   onchange="toggleCustomNumberInput()">
+                            <span>20</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="radio" name="cardsNumber" value="custom" 
+                                   onchange="toggleCustomNumberInput()">
+                            <span data-translate="customNumber">Custom number</span>
+                            <input type="number" id="customNumberInput" class="hidden" 
+                                   min="1" value="30" onclick="event.stopPropagation()">
+                        </label>
+                    </div>
+                </div>
+                <button onclick="startSelectedReview()" class="start-review-button" 
+                        data-translate="startReview">Start Review</button>
+            </div>
+        </div>
+    `;
+    
+    updateCardCounts();
+    changeLanguage();
+}
+
+// Zmodyfikuj funkcję toggleCustomNumberInput
+function toggleCustomNumberInput() {
+    const customInput = document.getElementById('customNumberInput');
+    const selectedValue = document.querySelector('input[name="cardsNumber"]:checked').value;
+    customInput.classList.toggle('hidden', selectedValue !== 'custom');
+}
+
+// Zmodyfikuj funkcję startSelectedReview
+function startSelectedReview() {
+    if (!currentReviewMode) {
+        currentReviewMode = 'dueToday';
     }
+
+    const selectedValue = document.querySelector('input[name="cardsNumber"]:checked').value;
+    const customInput = document.getElementById('customNumberInput');
+    let maxCards = null;
+
+    if (selectedValue === 'custom') {
+        maxCards = parseInt(customInput.value);
+    } else if (selectedValue !== 'all') {
+        maxCards = parseInt(selectedValue);
+    }
+
+    const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Ustaw dueToday jako domyślny tryb
+    if (!currentReviewMode) currentReviewMode = 'dueToday';
+    switch (currentReviewMode) {
+       case 'newToday':
+        flashcardsToReview = flashcards.filter(f => {
+            if (!f.firstReviewDate) return false;
+            const reviewDate = new Date(f.firstReviewDate);
+            return reviewDate.getFullYear() === today.getFullYear() &&
+                   reviewDate.getMonth() === today.getMonth() &&
+                   reviewDate.getDate() === today.getDate();
+        });
+        break;
+        case 'dueToday':
+            switch (algorithm) {
+                case 'supermemo':
+                    // Dla SuperMemo - fiszki z lastReviewed i nextReview <= now
+                    flashcardsToReview = flashcards.filter(f => 
+                        f.lastReviewed && // musi być już przeglądana
+                        (!f.nextReview || new Date(f.nextReview) <= now)
+                    );
+                    break;
+                case 'leitner':
+                    // Dla Leitnera - fiszki z lastReviewed i nextReview <= now
+                    flashcardsToReview = flashcards.filter(f => 
+                        f.lastReviewed && // musi być już przeglądana
+                        (!f.nextReview || new Date(f.nextReview) <= now)
+                    );
+                    break;
+                default:
+                    // Dla standardowego algorytmu - fiszki z lastReviewed i nextReview <= now
+                    flashcardsToReview = flashcards.filter(f => 
+                        f.lastReviewed && // musi być już przeglądana
+                        (!f.nextReview || new Date(f.nextReview) <= now)
+                    );
+            }
+            break;
+        case 'new':
+            switch (algorithm) {
+                case 'supermemo':
+                    flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
+                    break;
+                case 'leitner':
+                    flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
+                    break;
+                default:
+                    flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
+            }
+            break;
+        case 'hard':
+            switch (algorithm) {
+                case 'supermemo':
+                    flashcardsToReview = flashcards.filter(f => 
+                      f.lastReviewed && f.easinessFactor && f.easinessFactor < 2.1
+                    );
+                    break;
+                case 'leitner':
+                    // Dla Leitnera, trudne fiszki to te w pudełkach 1
+                    flashcardsToReview = flashcards.filter(f => 
+                      f.lastReviewed &&  f.leitnerBox && f.leitnerBox < 2
+                    );
+                    break;
+                default:
+                    flashcardsToReview = flashcards.filter(f => 
+                      f.lastReviewed &&  f.difficulty === 'hard' || f.difficulty === 'veryHard'
+                    );
+            }
+            break;
+        case 'random':
+            flashcardsToReview = [...flashcards.filter(f => 
+              f.lastReviewed )].sort(() => Math.random() - 0.5);
+            break;
+
+    }
+    if (currentReviewMode === 'new' && !maxCards ) // dla wybranej ilosci fisek
+       maxCards = 5; //nowe fiszki , dobierz tylko 5 lub tyle ile w polu maxCards
+
+    if (maxCards && maxCards > 0) {
+        flashcardsToReview = flashcardsToReview.slice(0, maxCards);
+    }
+
+    currentFlashcardIndex = 0;
     if (flashcardsToReview.length > 0) {
         showNextFlashcard();
-    } else {
-        let nextReviewDate = getNextReviewDate(flashcards);
-        document.getElementById('reviewCard').innerHTML = `
-            <p data-translate="noFlashcardsToReview">No flashcards to review today!</p>
-            <p><span data-translate="nextReviewAvailable">Next review will be available:</span> ${formatDate(nextReviewDate)}</p>
-            <div class="button-container">
-                <button onclick="startReview()" class="review-button" data-translate="checkNewFlashcards">Check new flashcards</button>
-                <button onclick="restartUnknownReview()" class="review-button" data-translate="repeatUnknown">Repeat unknown only</button>
-                <button onclick="restartReview()" class="review-button" data-translate="repeatAll">Repeat all</button>
-            </div>
-        `;
-    }
-    showSection('review');
-    changeLanguage();
-    updateFlashcardTable();
-}
+    } 
+    else if (currentReviewMode === 'new' || currentReviewMode === 'newToday') {
 
-// Funkcja do sprawdzania, czy fiszka powinna być powtórzona
-function shouldReview(flashcard) {
-  if (!flashcard.lastReviewed) return true;
-  const now = new Date();
-  const lastReviewed = new Date(flashcard.lastReviewed);
-  const daysSinceLastReview = (now - lastReviewed) / (1000 * 60 * 60 * 24);
-  return daysSinceLastReview >= Math.pow(2, flashcard.repeats);
-}
-
-// Funkcja do wyświetlania następnej fiszki
-function showNextFlashcard() {
-    if (currentFlashcardIndex < flashcardsToReview.length) {
-        const flashcard = flashcardsToReview[currentFlashcardIndex];
-        document.getElementById('reviewCard').innerHTML = `
-            <div class="card-content">
-                <p><strong data-translate="wordPhrase">Word / Phrase:</strong></p>
-                <pre>${flashcard.word}</pre>
-                <p><strong data-translate="contextExample">Context / Example:</strong></p>
-                <pre>${flashcard.context || 'No context provided'}</pre>
-                ${flashcard.mediaUrl ? `<img src="${flashcard.mediaUrl}" alt="media" width="200">` : ''}
-                ${flashcard.audioUrl ? `<audio controls><source src="${flashcard.audioUrl}" type="audio/mpeg"></audio>` : ''}
-                <div class="button-row">
-                    <button onclick="showTranslation(${currentFlashcardIndex})" class="show-translation" data-translate="showTranslation">Show translation</button>
-                    <button id="knownButton-${currentFlashcardIndex}" class="known-button hidden" onclick="markAsKnown(true)" data-translate="iKnow">I know</button>
-                    <button id="unknownButton-${currentFlashcardIndex}" class="unknown-button hidden" onclick="markAsKnown(false)" data-translate="iDontKnow">I don't know</button>
-                </div>
-                <div id="translation-${currentFlashcardIndex}" class="translation hidden">
-                    <p><strong data-translate="translation">Translation:</strong></p>
-                    <pre>${flashcard.translation}</pre>
-                </div>
-            </div>
-        `;
-    } else {
-        document.getElementById('reviewCard').innerHTML = `
-            <p data-translate="endOfReview">End of review!</p>
-            <div class="button-container">
-                <button onclick="startReview()" class="review-button" data-translate="checkNewFlashcards">Check new flashcards</button>
-                <button onclick="restartUnknownReview()" class="review-button" data-translate="repeatUnknown">Repeat unknown only</button>
-                <button onclick="restartReview()" class="review-button" data-translate="repeatAll">Repeat all</button>
-            </div>
-        `;
-        updateFlashcardTable();
+        showNoNewFlashcardsMessage();
     }
-    changeLanguage();
+    else {
+        showNoFlashcardsMessage();
+    }
 }
 
 // Funkcja do pokazywania tłumaczenia
 function showTranslation(index) {
-  document.getElementById(`translation-${index}`).classList.remove('hidden');
-  document.getElementById(`knownButton-${index}`).classList.remove('hidden');
-  document.getElementById(`unknownButton-${index}`).classList.remove('hidden');
-  document.querySelector('.show-translation').classList.add('hidden');
+    const translationDiv = document.getElementById(`translation-${index}`);
+    const qualityButtons = document.querySelector('.quality-buttons');
+    const showTranslationButton = document.querySelector('.show-translation');
+    
+    if (translationDiv) {
+        translationDiv.classList.remove('hidden');
+    }
+    
+    if (qualityButtons) {
+        qualityButtons.classList.remove('hidden');
+    }
+    
+    if (showTranslationButton) {
+        showTranslationButton.classList.add('hidden');
+    }
 }
 
-// Funkcja do oznaczania fiszki jako znanej lub nieznanej
-function markAsKnown(isKnown) {
-  const flashcard = flashcardsToReview[currentFlashcardIndex];
-  const previousRepeats = flashcard.repeats;
-  if (isKnown) {
-    flashcard.repeats++;
-  } else {
-    flashcard.repeats = 0;
-  }
-  flashcard.lastReviewed = new Date().toISOString();
-  flashcard.previousAnswer = { repeats: previousRepeats, lastReviewed: flashcard.lastReviewed };
-  saveFlashcards();
-  currentFlashcardIndex++;
-  showNextFlashcard();
-  updateStats();
-  updateFlashcardTable();
+// Modyfikacja funkcji gradeAnswer
+function gradeAnswer(grade) {
+    const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+    const flashcard = flashcardsToReview[currentFlashcardIndex];
+    const now = new Date();
+    const wasCorrect = grade >= 3;
+
+    // Ustaw firstReviewDate jeśli to pierwsza powtórka
+    if (!flashcard.lastReviewed)  flashcard.firstReviewDate = now.toISOString();
+    
+    switch (algorithm) {
+        case 'supermemo':
+            // Użyj algorytmu SuperMemo
+            const result = calculateSuperMemoInterval(flashcard, grade);
+            flashcard.easinessFactor = result.easinessFactor;
+            flashcard.interval = result.interval;
+            flashcard.repetitions = result.repetitions;
+            flashcard.lastReviewed = now.toISOString();
+            flashcard.nextReview = new Date(now.getTime() + result.interval * 24 * 60 * 60 * 1000).toISOString();
+            break;
+
+        case 'leitner':
+            // Użyj systemu Leitnera
+            updateLeitnerBox(flashcard, wasCorrect);
+            break;
+
+        default:
+            // Standardowy algorytm
+            // Aktualizuj trudność na podstawie oceny
+            if (grade <= 1) {
+                flashcard.difficulty = 'veryHard'; // will not be used for 4 buttons grade
+            } else if (grade === 2) {
+                flashcard.difficulty = 'hard';
+            } else if (grade === 3) {
+                flashcard.difficulty = 'medium';
+            } else {
+                flashcard.difficulty = 'easy';
+            }
+
+            // Aktualizuj streak i oblicz następny interwał
+            if (wasCorrect) {
+               flashcard.streak = flashcard.repetitions; // to have simialr results between standard and SuperMemo
+               flashcard.streak = (flashcard.streak || 0) + 1;
+               flashcard.repetitions++; // potentially to remove
+            } else {
+                flashcard.streak = 0;
+                flashcard.repetitions = 0; // potentially to remove
+            }
+
+            const interval = calculateNextInterval(flashcard, wasCorrect);
+            flashcard.lastReviewed = now.toISOString();
+            flashcard.nextReview = new Date(now.getTime() + interval * 24 * 60 * 60 * 1000).toISOString();
+            break;
+    }
+
+    saveFlashcards();
+    currentFlashcardIndex++;
+    showNextFlashcard();
+    updateStats();
 }
 
 // Funkcja do restartu powtórki
@@ -520,30 +562,53 @@ function cancelEdit() {
 
 // Funkcja do eksportu fiszek
 function exportFlashcards() {
-  let csvContent = "front;back;context;media;audio\n";
+  // Przygotuj dane w formacie CSV
+  let csvContent = "front;back;context;MediaUrl;AudioUrl;Algorithm;FirstReviewDate;LastReviewed;NextReview;Difficulty;Streak;EasinessFactor;Interval;Repetitions;LeitnerBox\n";
   
-  flashcards.forEach(flashcard => {
-    let front = escapeCSV(flashcard.word);
-    let back = escapeCSV(flashcard.translation);
-    let context = escapeCSV(flashcard.context || '');
-    let media = escapeCSV(flashcard.mediaUrl || '');
-    let audio = escapeCSV(flashcard.audioUrl || '');
-    
-    csvContent += `${front};${back};${context};${media};${audio}\n`;
-  });
+  const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+    flashcards.forEach(card => {
+        const row = [
+            // Podstawowe pola (zachowane oryginalne nazwy)
+            card.word.replace(/;/g, ','),          // front
+            card.translation.replace(/;/g, ','),   // back
+            card.context ? card.context.replace(/;/g, ',') : '', // context
+            
+            // Pozostałe pola
+            card.mediaUrl || '',
+            card.audioUrl || '',
+            currentAlgorithm,
+            card.firstReviewDate || '',
+            card.lastReviewed || '',
+            card.nextReview || '',
+            
+            // Pola dla standardowego algorytmu
+            card.difficulty || '',
+            card.streak || 0,
+            
+            // Pola dla SuperMemo
+            card.easinessFactor || 2.5,
+            card.interval || 0,
+            card.repetitions || 0,
+            
+            // Pola dla systemu Leitnera
+            card.leitnerBox || 1
+        ].join(';');
+        
+        csvContent += row + '\n';
+    });
 
-  // Tworzenie i pobieranie pliku
-  let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  let link = document.createElement("a");
-  if (link.download !== undefined) {
-    let url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "anki_flashcards.csv");
+    // Utwórz i pobierz plik
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'flashcards_export.csv');
     link.style.visibility = 'hidden';
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
 }
 
 function escapeCSV(str) {
@@ -553,48 +618,73 @@ function escapeCSV(str) {
 
 // Funkcja do importu fiszek
 function importFlashcards() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.csv';
-  input.onchange = function(event) {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const content = e.target.result;
-      const lines = content.split('\n');
-      let importedCount = 0;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const lines = content.split('\n');
+            let importedCount = 0;
 
-      // Pomijamy pierwszy wiersz (nagłówki)
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line) {
-          const [front, back, context, media, audio] = line.split(';').map(item => item.replace(/^"|"$/g, '').trim());
-          if (front && back) {
-            const newFlashcard = {
-              id: Date.now() + Math.random(),
-              word: front,
-              translation: back,
-              context: context || '',
-              mediaUrl: media || '',
-              audioUrl: audio || '',
-              repeats: 0,
-              lastReviewed: null,
-              createdAt: new Date().toISOString()
-            };
-            flashcards.push(newFlashcard);
-            importedCount++;
-          }
-        }
-      }
+            // Pomijamy pierwszy wiersz (nagłówki)
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) {
+                    const [
+                        front, 
+                        back, 
+                        context, 
+                        mediaUrl, 
+                        audioUrl,
+                        algorithm,  // Możemy zignorować tę wartość
+                        firstReviewDate,
+                        lastReviewed,
+                        nextReview,
+                        difficulty,
+                        streak,
+                        easinessFactor,
+                        interval,
+                        repetitions,
+                        leitnerBox
+                    ] = line.split(';').map(item => item.replace(/^"|"$/g, '').trim());
 
-      saveFlashcards();
-      updateFlashcardTable();
-      updateStats();
-      alert(`Zaimportowano ${importedCount} nowych fiszek.`);
+                    if (front && back) {
+                        const newFlashcard = {
+                            id: Date.now() + Math.random(),
+                            word: front,
+                            translation: back,
+                            context: context || '',
+                            mediaUrl: mediaUrl || '',
+                            audioUrl: audioUrl || '',
+                            firstReviewDate: firstReviewDate || null,
+                            lastReviewed: lastReviewed || null,
+                            nextReview: nextReview || null,
+                            difficulty: difficulty || 'medium',
+                            streak: parseInt(streak) || 0,
+                            easinessFactor: parseFloat(easinessFactor) || 2.5,
+                            interval: parseInt(interval) || 0,
+                            repetitions: parseInt(repetitions) || 0,
+                            leitnerBox: parseInt(leitnerBox) || 1,
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        flashcards.push(newFlashcard);
+                        importedCount++;
+                    }
+                }
+            }
+
+            saveFlashcards();
+            updateFlashcardTable();
+            updateStats();
+            alert(`Zaimportowano ${importedCount} nowych fiszek.`);
+        };
+        reader.readAsText(file);
     };
-    reader.readAsText(file);
-  };
-  input.click();
+    input.click();
 }
 
 // Funkcja do przełączania informacji o powtórkach
@@ -604,20 +694,30 @@ function toggleReviewInfo() {
   if (infoBox) {
     if (infoBox.style.display === 'none' || infoBox.style.display === '') {
       infoBox.style.display = 'block';
-      infoBox.innerHTML = `
-        <h3 data-translate="howDoReviewsWork">How do reviews work?</h3>
-        <p data-translate="reviewExplanation">Our system uses a spaced repetition method to help you effectively memorize words:</p>
-        <ul>
-          <li data-translate="firstRecall">After 1st correct recall: next review in 2 days</li>
-          <li data-translate="secondRecall">After 2nd correct recall: next review in 4 days</li>
-          <li data-translate="thirdRecall">After 3rd correct recall: next review in 8 days</li>
-          <li data-translate="fourthRecall">After 4th correct recall: next review in 16 days</li>
-          <li data-translate="andSoOn">and so on...</li>
-        </ul>
-        <p data-translate="reviewTip">If you don't remember a word, it will return to the beginning of the cycle. Regular reviews are the key to success!</p>
-        <button onclick="toggleReviewInfo()" class="close-button" data-translate="close">Close</button>
-      `;
-      changeLanguage(); // Dodaj to wywołanie, aby zaktualizować język po wygenerowaniu nowej zawartości
+			infoBox.innerHTML = `
+				<h3 data-translate="howDoReviewsWork">How do reviews work?</h3>
+				<p data-translate="reviewExplanation">Our system uses a spaced repetition method to help you effectively memorize words:</p>
+				<ul>
+					<li data-translate="firstRecall">After 1st correct recall: next review in 2 days</li>
+					<li data-translate="secondRecall">After 2nd correct recall: next review in 4 days</li>
+					<li data-translate="thirdRecall">After 3rd correct recall: next review in 8 days</li>
+					<li data-translate="fourthRecall">After 4th correct recall: next review in 16 days</li>
+					<li data-translate="andSoOn">and so on...</li>
+					<li data-translate="algorithmNote">The exact number of days is determined by the selected algorithm in settings (three dots)</li>
+				</ul>
+				<p data-translate="reviewTip">If you don't remember a word, it will return to the beginning of the cycle. Regular reviews are the key to success!</p>
+				<h4 data-translate="reviewModes">Review modes:</h4>
+				<ul>
+					<li data-translate="dueTodayDescription">Due Today - Scheduled reviews according to the selected learning algorithm.</li>
+					<li data-translate="newFlashcardsDescription2">Show 5 New Cards - Add 5 new flashcards to your learning pool. Choose your own learning pace, you can select a different amount via 'Number of cards' (on average, a person can learn 8/day).</li>
+					<li data-translate="newTodayDescription">New Today Only - Repeatedly review only flashcards added today.</li>
+					<li data-translate="hardFlashcardsDescription2">Hard Cards Only - Review only difficult flashcards that have already been reviewed, starting from the beginning of the deck.</li>
+					<li data-translate="randomFlashcardsDescription">Random Selection - Review all flashcards that have already been reviewed, starting from the beginning of the deck.</li>
+					<li data-translate="numberOfCardsDescription">Number of cards - Number of cards to display in one review session. For 'Show 5 New Cards' changes the default amount from 5 to selected (10, 20, custom).</li>
+				</ul>
+				<button onclick="toggleReviewInfo()" class="close-button" data-translate="close">Close</button>
+			`;
+      changeLanguage();
       console.log('Info box w powtórkach został wyświetlony');
     } else {
       infoBox.style.display = 'none';
@@ -627,21 +727,28 @@ function toggleReviewInfo() {
     console.error('Nie znaleziono elementu review-info');
   }
 }
-
 // Funkcja inicjalizująca aplikację
 function initializeApp() {
-  console.log('Inicjalizacja aplikacji...');
-  loadSavedLanguage(); // Dodaj tę linię
-  debugLocalStorage();
-  
-  // Najpierw próbujemy załadować fiszki z localStorage
-  const savedFlashcards = localStorage.getItem('fiszki');
-  if (savedFlashcards) {
-    flashcards = JSON.parse(savedFlashcards);
-    console.log('Załadowano fiszki z localStorage:', flashcards);
-  } else {
-    flashcards = [];
-  }
+    console.log('Inicjalizacja aplikacji...');
+    loadSavedLanguage();
+    debugLocalStorage();
+    
+    // Ustawienie domyślnych wartości przy pierwszym uruchomieniu
+    if (!localStorage.getItem('reviewAlgorithm')) {
+        localStorage.setItem('reviewAlgorithm', 'supermemo');
+    }
+    if (!localStorage.getItem('gradeButtonMode')) {
+        localStorage.setItem('gradeButtonMode', 'four');
+    }
+    
+    // Najpierw próbujemy załadować fiszki z localStorage
+    const savedFlashcards = localStorage.getItem('fiszki');
+    if (savedFlashcards) {
+      flashcards = JSON.parse(savedFlashcards);
+      console.log('Załadowano fiszki z localStorage:', flashcards);
+    } else {
+      flashcards = [];
+    }
 
   // Pobieramy dane z watchedVideos
   const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos')) || {};
@@ -669,7 +776,7 @@ function initializeApp() {
   console.log('Liczba fiszek po inicjalizacji:', flashcards.length);
   saveFlashcards();
   updateFlashcardTable();
-  updateStats();
+  //updateStats();
   ensureCanvasExists();
   initializeStatsSection();
   initializeReviewSection(); // Dodajemy tę linię
@@ -726,7 +833,7 @@ function ensureStatsInfoButtonExists() {
 
 // Dodaj nową funkcję do aktualizacji istniejących i dodawania nowych fiszek
 function updateExistingAndAddNewFlashcards(wordList) {
-  const updatedFlashcards = [...flashcards]; // Zachowaj istniejące fiszki
+  const updatedFlashcards = [...flashcards]; // Zachowaj istniejce fiszki
   
   wordList.forEach(word => {
     const existingFlashcard = updatedFlashcards.find(f => 
@@ -773,7 +880,7 @@ function isLocalStorageAvailable() {
   }
 }
 
-// Modyfikujemy istniejące nasłuchiwanie na załadowanie strony
+// Modyfikujemy istniejce nasłuchiwanie na załadowanie strony
 window.addEventListener('load', function() {
   if (isLocalStorageAvailable()) {
     initializeApp();
@@ -810,7 +917,7 @@ function restartUnknownReview() {
 
 function getNextReviewDate(flashcards) {
   let now = new Date();
-  let nextReview = new Date(now.getTime() + (365 * 24 * 60 * 60 * 1000)); // Ustaw na rok w przyszłość jako wartość domyślną
+  let nextReview = new Date(now.getTime() + (365 * 24 * 60 * 60 * 1000)); // Ustaw na rok w przyszość jako wartość domyślną
   flashcards.forEach(flashcard => {
     if (flashcard.lastReviewed) {
       let lastReviewed = new Date(flashcard.lastReviewed);
@@ -998,84 +1105,7 @@ function ensureCanvasExists() {
   return null;
 }
 
-function drawLearningProgressChart() {
-  console.log('Rozpoczęcie rysowania wykresu');
-  const canvas = ensureCanvasExists();
-  if (!canvas) {
-    console.error('Nie można utworzyć lub znaleźć elementu canvas');
-    return;
-  }
 
-  const ctx = canvas.getContext('2d');
-  const width = canvas.width;
-  const height = canvas.height;
-
-  console.log(`Wymiary canvas: ${width}x${height}`);
-
-  // Oblicz statystyki
-  const newCards = flashcards.filter(f => f.repeats === 0).length;
-  const learningCards = flashcards.filter(f => f.repeats > 0 && f.repeats < 5).length;
-  const masteredCards = flashcards.filter(f => f.repeats >= 5).length;
-
-  const total = flashcards.length;
-  const barWidth = width / 4;
-
-  console.log(`Statystyki: Nowe: ${newCards}, Uczone: ${learningCards}, Opanowane: ${masteredCards}`);
-
-  // Wyczyść canvas
-  ctx.clearRect(0, 0, width, height);
-
-  // Dodaj tytuł wykresu
-  ctx.fillStyle = '#333';
-  ctx.font = 'bold 18px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText(translations[currentLanguage].flashcardStatistics || 'Statystyki fiszek', width / 2, 30);
-
-  // Funkcja do rysowania słupka
-  function drawBar(x, count, color, label) {
-    const barHeight = (count / total) * (height - 120);
-    const y = height - barHeight - 40;
-
-    // Rysuj słupek
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, barWidth - 20, barHeight);
-
-    // Dodaj efekt 3D
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + 10, y - 10);
-    ctx.lineTo(x + barWidth - 10, y - 10);
-    ctx.lineTo(x + barWidth - 20, y);
-    ctx.closePath();
-    ctx.fill();
-
-    // Dodaj etykietę
-    ctx.fillStyle = '#333';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, x + (barWidth - 20) / 2, height - 20);
-
-    // Dodaj liczbę
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText(count, x + (barWidth - 20) / 2, y - 25);
-  }
-
-  // Rysuj słupki
-  if (total > 0) {
-    drawBar(width / 8, newCards, '#4CAF50', translations[currentLanguage].newFlashcards || 'Nowe');
-    drawBar(width * 3 / 8, learningCards, '#36A2EB', translations[currentLanguage].learningFlashcards || 'Uczone');
-    drawBar(width * 5 / 8, masteredCards, '#4BC0C0', translations[currentLanguage].masteredFlashcards || 'Opanowane');
-  } else {
-    ctx.fillStyle = '#333';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Brak danych do wyświetlenia', width / 2, height / 2);
-  }
-
-  console.log('Zakończono rysowanie wykresu');
-}
 
 // Dodajemy funkcję testową dla canvas
 function testCanvas() {
@@ -1156,16 +1186,17 @@ function initializeReviewSection() {
     // Usuń wszystkie istniejące nagłówki i przyciski Info
     reviewSection.querySelectorAll('.section-header, .review-header, h2, .info-button').forEach(el => el.remove());
 
-    // Dodaj nowy nagłówek z ikoną strzałki powrotu i przyciskiem Info
+    // Dodaj nowy nagłówek z ikoną strzałki powrotu, ikoną trzech kropek i przyciskiem Info
     const header = document.createElement('div');
     header.className = 'section-header';
     header.innerHTML = `
       <div class="review-header-left">
-        <h2 data-translate="review">Review</h2>
+        <h2 data-translate="review">${translations[currentLanguage].review}</h2>
       </div>
       <div class="review-header-right">
         <button onclick="goBackFlashcard()" class="go-back-button" data-tooltip="${translations[currentLanguage].goBack}">←</button>
-        <button onclick="toggleReviewInfo()" class="info-button" data-translate="info">Info</button>
+        <button onclick="openReviewSettings()" class="more-options-button" data-tooltip="${translations[currentLanguage].settings}">⋮</button>
+        <button onclick="toggleReviewInfo()" class="info-button" data-translate="info">${translations[currentLanguage].info}</button>
       </div>
     `;
     reviewSection.insertBefore(header, reviewSection.firstChild);
@@ -1188,41 +1219,126 @@ function initializeReviewSection() {
   }
 }
 
-// Modyfikujemy funkcję toggleReviewInfo
-function toggleReviewInfo() {
-  console.log('Funkcja toggleReviewInfo została wywołana');
-  const infoBox = document.getElementById('review-info');
-  if (infoBox) {
-    if (infoBox.style.display === 'none' || infoBox.style.display === '') {
-      infoBox.style.display = 'block';
-      infoBox.innerHTML = `
-        <h3 data-translate="howDoReviewsWork">How do reviews work?</h3>
-        <p data-translate="reviewExplanation">Our system uses a spaced repetition method to help you effectively memorize words:</p>
-        <ul>
-          <li data-translate="firstRecall">After 1st correct recall: next review in 2 days</li>
-          <li data-translate="secondRecall">After 2nd correct recall: next review in 4 days</li>
-          <li data-translate="thirdRecall">After 3rd correct recall: next review in 8 days</li>
-          <li data-translate="fourthRecall">After 4th correct recall: next review in 16 days</li>
-          <li data-translate="andSoOn">and so on...</li>
-        </ul>
-        <p data-translate="reviewTip">If you don't remember a word, it will return to the beginning of the cycle. Regular reviews are the key to success!</p>
-        <button onclick="toggleReviewInfo()" class="close-button" data-translate="close">Close</button>
-      `;
-      changeLanguage(); // Dodaj to wywołanie, aby zaktualizować język po wygenerowaniu nowej zawartości
-      console.log('Info box w powtórkach został wyświetlony');
-    } else {
-      infoBox.style.display = 'none';
-      console.log('Info box w powtórkach został ukryty');
+// Dodaj nową funkcję do obsługi kliknięcia przycisku ustawień
+function openReviewSettings() {
+    let settingsForm = document.getElementById('review-settings-form');
+    if (settingsForm) {
+        settingsForm.remove();
     }
-  } else {
-    console.error('Nie znaleziono elementu review-info');
-  }
+
+    // Zmiana domyślnych wartości
+    const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'supermemo'; // Zmieniono z 'standard' na 'supermemo'
+    const currentButtonMode = localStorage.getItem('gradeButtonMode') || 'four';     // Zmieniono z 'six' na 'four'
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'settings-overlay';
+    overlay.id = 'settings-overlay';
+    
+    settingsForm = document.createElement('div');
+    settingsForm.id = 'review-settings-form';
+    settingsForm.className = 'settings-form';
+    settingsForm.innerHTML = `
+        <h3 data-translate="algorithmSettings">Algorithm Settings</h3>
+        <div class="settings-group">
+            <label data-translate="currentAlgorithm">Current Algorithm:</label>
+            <select id="algorithmSelect">
+                <option value="standard" ${currentAlgorithm === 'standard' ? 'selected' : ''} 
+                        data-translate="standardAlgorithm">Standard Algorithm</option>
+                <option value="supermemo" ${currentAlgorithm === 'supermemo' ? 'selected' : ''} 
+                        data-translate="superMemoAlgorithm">SuperMemo Algorithm</option>
+                <option value="leitner" ${currentAlgorithm === 'leitner' ? 'selected' : ''} 
+                        data-translate="leitnerAlgorithm">Leitner System</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label data-translate="gradeButtonsOption">Grade buttons:</label>
+            <select id="buttonModeSelect">
+                <option value="four" ${currentButtonMode === 'four' ? 'selected' : ''} 
+                        data-translate="fourButtons">4 buttons</option>
+                <option value="six" ${currentButtonMode === 'six' ? 'selected' : ''} 
+                        data-translate="sixButtons">6 buttons</option>
+            </select>
+        </div>
+        <div class="algorithm-description">
+            <p data-translate="algorithmDescription">Algorithm Description:</p>
+            <p id="algorithmInfo" class="description-text">
+                ${getAlgorithmDescription(currentAlgorithm)}
+            </p>
+        </div>
+        <div class="more-info">
+            <p><span data-translate="moreInfo">More information</span>: <a href="https://github.com/theaidran/6_minutes_English_with_Reps" target="_blank">https://github.com/theaidran/6_minutes_English_with_Reps</a></p>
+        </div>
+        <div class="button-group">
+            <button type="button" onclick="saveAlgorithmSettings()" 
+                    class="submit-button" data-translate="saveSettings">Save Settings</button>
+            <button type="button" onclick="closeReviewSettings()" 
+                    class="cancel-button" data-translate="cancel">Cancel</button>
+        </div>
+    `;
+
+    const reviewSection = document.getElementById('review');
+    reviewSection.appendChild(overlay);
+    reviewSection.appendChild(settingsForm);
+    
+    document.getElementById('algorithmSelect').addEventListener('change', function(e) {
+        document.getElementById('algorithmInfo').textContent = getAlgorithmDescription(e.target.value);
+    });
+
+    overlay.addEventListener('click', closeReviewSettings);
+    changeLanguage();
+}
+
+// Dodaj funkcję pomocniczą do pobierania opisu algorytmu
+function getAlgorithmDescription(algorithm) {
+    switch(algorithm) {
+        case 'standard':
+            return translations[currentLanguage].standardDescription;
+        case 'supermemo':
+            return translations[currentLanguage].superMemoDescription;
+        case 'leitner':
+            return translations[currentLanguage].leitnerDescription;
+        default:
+            return translations[currentLanguage].standardDescription;
+    }
+}
+/*
+// Dodaj podstawową strukturę dla systemu Leitnera
+function initializeLeitnerSystem(flashcard) {
+    if (!flashcard.leitnerBox) {
+        flashcard.leitnerBox = 1;  // Wszystkie nowe fiszki zaczynają w pudełku 1
+    }
+} */
+
+function closeReviewSettings() {
+    const settingsForm = document.getElementById('review-settings-form');
+    const overlay = document.getElementById('settings-overlay');
+    if (settingsForm) {
+        settingsForm.remove();
+    }
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function saveAlgorithmSettings() {
+    const algorithm = document.getElementById('algorithmSelect').value;
+    const buttonMode = document.getElementById('buttonModeSelect').value;
+    
+    localStorage.setItem('reviewAlgorithm', algorithm);
+    localStorage.setItem('gradeButtonMode', buttonMode);
+    
+    updateStats();
+    updateCardCounts();
+    drawLearningProgressChart();
+    updateFlashcardTable();
+    
+    closeReviewSettings();
 }
 
 function initializeAddSection() {
   const addSection = document.getElementById('add');
   if (addSection) {
-    // Usuń wszystkie istniejące nagłówki
+    // Usuń wszystkie istniejące nagłwki
     addSection.querySelectorAll('.section-header, h2').forEach(el => el.remove());
 
     // Dodaj nowy nagłówek
@@ -1314,11 +1430,28 @@ function changeLanguage() {
     
     // Aktualizuj tooltipy
     document.querySelectorAll('[data-tooltip]').forEach(element => {
-        const key = element.getAttribute('data-tooltip');
-        if (translations[currentLanguage] && translations[currentLanguage][key]) {
-            element.setAttribute('data-tooltip', translations[currentLanguage][key]);
+        if (element.classList.contains('grade-0')) {
+            // Specjalne traktowanie dla przycisku grade-0
+            element.setAttribute('data-tooltip', translations[currentLanguage].startOverTooltip);
+        } else {
+            const key = element.getAttribute('data-tooltip');
+            if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                element.setAttribute('data-tooltip', translations[currentLanguage][key]);
+            }
         }
     });
+    // Aktualizuj tooltips w sekcji statystyk
+    const statsTooltips = {
+      'currentKnowledgeState': 'currentKnowledgeStateTooltip',
+      'masteredLast7Days': 'masteredLast7DaysTooltip'
+  };
+
+  Object.entries(statsTooltips).forEach(([selector, tooltipKey]) => {
+      const element = document.querySelector(`p:has(span[data-translate="${selector}"])`);
+      if (element) {
+          element.setAttribute('data-tooltip', translations[currentLanguage][tooltipKey]);
+      }
+  });
     
     // Aktualizuj przycisk Dictionary
     const dictionaryButton = document.getElementById('toggle-dictionary');
@@ -1398,3 +1531,235 @@ function toggleMultipleRowSelection(event) {
 
 // Dodaj nasłuchiwanie na kliknięcia z wciśniętym Shiftem
 document.addEventListener('click', toggleMultipleRowSelection);
+
+
+function updateCardCounts() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+    
+    // Fiszki na dziś
+    const dueTodayCount = flashcards.filter(f => f.lastReviewed && f.nextReview && new Date(f.nextReview) <= now).length;   
+    // Nowe fiszki - te, które nigdy nie były pokazywane
+    const newCount = flashcards.filter(f => !f.lastReviewed).length;
+    
+    // Nowe fiszki z dzisiaj - pierwsza powtórka była dzisiaj
+    const newTodayCount = flashcards.filter(f => {
+      if (!f.firstReviewDate) return false;
+      const reviewDate = new Date(f.firstReviewDate);
+      return reviewDate.getFullYear() === today.getFullYear() &&
+             reviewDate.getMonth() === today.getMonth() &&
+             reviewDate.getDate() === today.getDate();
+  }).length;
+
+
+    // Trudne fiszki - zależnie od algorytmu
+    let hardCount = 0;
+    switch (algorithm) {
+      case 'supermemo':
+        hardCount = flashcards.filter(f => 
+            f.lastReviewed && f.easinessFactor && f.easinessFactor < 2.1
+        ).length;
+        break;
+    case 'leitner':
+        hardCount = flashcards.filter(f => 
+            f.lastReviewed && f.leitnerBox && f.leitnerBox < 2
+        ).length;
+        break;
+    default:
+        hardCount = flashcards.filter(f => 
+            f.lastReviewed && (f.difficulty === 'hard' || f.difficulty === 'veryHard')
+        ).length;
+   }
+    
+    const totalCount = flashcards.filter(f => // fiszki dla funkcji random 
+      f.lastReviewed ).length;
+
+    document.getElementById('dueTodayCount').textContent = dueTodayCount; // na dziś
+    document.getElementById('newCount').textContent = newCount;// wszytkie nowe fiszki
+    document.getElementById('newTodayCount').textContent = newTodayCount;
+    document.getElementById('hardCount').textContent = hardCount;
+    document.getElementById('totalCount').textContent = totalCount; //funkcja random
+}
+
+function updateCustomNumberInput() {
+    const select = document.getElementById('cardNumberSelect');
+    const customInput = document.getElementById('customNumberInput');
+    customInput.classList.toggle('hidden', select.value !== 'custom');
+}
+
+// Zmodyfikuj funkcję selectReviewMode
+function selectReviewMode(mode) {
+    document.querySelectorAll('.review-mode-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    const selectedCard = document.querySelector(`.review-mode-card[onclick*="${mode}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    currentReviewMode = mode;
+}
+
+function showNoFlashcardsMessage() {
+    document.getElementById('reviewCard').innerHTML = `
+        <p data-translate="noFlashcardsToReview">No flashcards to review!</p>
+        <button onclick="startReview()" class="review-button" data-translate="backToModes">
+            Back to review modes
+        </button>
+    `;
+    changeLanguage();
+}
+
+function showNoNewFlashcardsMessage() {
+  document.getElementById('reviewCard').innerHTML = `
+      <p data-translate="noNewFlashcardsToReview">No new flashcards to review, add some!</p>
+      <button onclick="startReview()" class="review-button" data-translate="backToModes">
+          Back to review modes
+      </button>
+  `;
+  changeLanguage();
+}
+
+// Dodaj funkcje do wyświetlania postępu w systemie Leitnera
+function updateLeitnerProgress() {
+  const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+  if (algorithm === 'leitner') {
+      const flashcard = flashcardsToReview[currentFlashcardIndex];
+      if (flashcard) {
+          const progressInfo = document.createElement('div');
+          progressInfo.className = 'leitner-progress';
+          progressInfo.innerHTML = `
+              <div class="progress-header" data-translate="leitnerProgress">
+                  Progress in Leitner system
+              </div>
+              <div class="box-progress">
+                  <div class="current-box">
+                      <span data-translate="leitnerBoxDescription">Current box: </span>
+                      <strong>${flashcard.leitnerBox || 1}/5</strong>
+                  </div>
+                  <div class="next-box">
+                      <span data-translate="leitnerNextReview">Next review: </span>
+                      <strong>${calculateLeitnerInterval(flashcard.leitnerBox)|| 1} 
+                      <span data-translate="leitnerDays">days</span></strong>
+                  </div>
+              </div>
+          `;
+          
+          const cardContent = document.querySelector('.card-content');
+          if (cardContent) {
+              const existingProgress = cardContent.querySelector('.leitner-progress');
+              if (existingProgress) {
+                  existingProgress.replaceWith(progressInfo);
+              } else {
+                  cardContent.insertBefore(progressInfo, cardContent.firstChild);
+              }
+          }
+      }
+  }
+}
+
+// Dodaj style dla systemu Leitnera
+const leitnerStyles = {
+  box1: { color: '#dc3545', label: '1 day' },      // czerwony
+  box2: { color: '#fd7e14', label: '3 days' },     // pomarańczowy
+  box3: { color: '#ffc107', label: '7 days' },     // żółty
+  box4: { color: '#28a745', label: '14 days' },    // zielony
+  box5: { color: '#17a2b8', label: '30 days' }     // niebieski
+};
+
+
+
+// Modyfikacja funkcji showNextFlashcard
+function showNextFlashcard() {
+    if (currentFlashcardIndex < flashcardsToReview.length) {
+        const flashcard = flashcardsToReview[currentFlashcardIndex];
+        const algorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
+        const buttonMode = localStorage.getItem('gradeButtonMode') || 'six';
+        
+        let leitnerInfo = '';
+        if (algorithm === 'leitner') {
+            const box = flashcard.leitnerBox || 1;
+            const style = leitnerStyles[`box${box}`];
+            leitnerInfo = `
+                <div class="leitner-info" style="border-left: 4px solid ${style.color}">
+                    <div class="box-info">
+                        <span data-translate="leitnerBox">Box</span>: ${box}/5 
+                        (${style.label})
+                    </div>
+                    <div class="next-review">
+                        <span data-translate="leitnerNextReview">Next review</span>: 
+                        ${flashcard.nextReview ? new Date(flashcard.nextReview).toLocaleDateString() : 'Today'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Przygotuj przyciski oceny w zależności od wybranego trybu
+        const qualityButtons = buttonMode === 'four' ? `
+            <button onclick="gradeAnswer(0)" class="grade-button grade-0" data-tooltip="${translations[currentLanguage].startOverTooltip}" data-translate="completelyForgot">Completely forgot</button>
+            <button onclick="gradeAnswer(2)" class="grade-button grade-2" data-translate="hard">Hard</button>
+            <button onclick="gradeAnswer(3)" class="grade-button grade-3" data-translate="good">Good</button>
+            <button onclick="gradeAnswer(4)" class="grade-button grade-4" data-translate="easy">Easy</button>
+        ` : `
+            <button onclick="gradeAnswer(0)" class="grade-button grade-0" data-tooltip="${translations[currentLanguage].startOverTooltip}" data-translate="completelyForgot">Completely forgot</button>
+            <button onclick="gradeAnswer(1)" class="grade-button grade-1" data-translate="wrong">Wrong</button>
+            <button onclick="gradeAnswer(2)" class="grade-button grade-2" data-translate="hard">Hard</button>
+            <button onclick="gradeAnswer(3)" class="grade-button grade-3" data-translate="good">Good</button>
+            <button onclick="gradeAnswer(4)" class="grade-button grade-4" data-translate="easy">Easy</button>
+            <button onclick="gradeAnswer(5)" class="grade-button grade-5" data-translate="perfect">Perfect</button>
+        `;
+
+        document.getElementById('reviewCard').innerHTML = `
+            <div class="card-content">
+                ${algorithm === 'leitner' ? leitnerInfo : ''}
+                <p><strong data-translate="wordPhrase">Word / Phrase:</strong></p>
+                <pre>${flashcard.word}</pre>
+                <p><strong data-translate="contextExample">Context / Example:</strong></p>
+                <pre>${flashcard.context || 'No context provided'}</pre>
+                ${flashcard.mediaUrl ? `<img src="${flashcard.mediaUrl}" alt="media" width="200">` : ''}
+                ${flashcard.audioUrl ? `<audio controls><source src="${flashcard.audioUrl}" type="audio/mpeg"></audio>` : ''}
+                <div class="button-row">
+                    <button onclick="showTranslation(${currentFlashcardIndex})" class="show-translation" data-translate="showTranslation">Show translation</button>
+                    <div class="quality-buttons hidden">
+                        ${qualityButtons}
+                    </div>
+                </div>
+                <div id="translation-${currentFlashcardIndex}" class="translation hidden">
+                    <p><strong data-translate="translation">Translation:</strong></p>
+                    <pre>${flashcard.translation}</pre>
+                </div>
+            </div>
+        `;
+        
+        updateLeitnerProgress();
+        changeLanguage();
+    } else {
+        document.getElementById('reviewCard').innerHTML = `
+            <div class="review-complete">
+                <h3 data-translate="endOfReview">End of review!</h3>
+                <p data-translate="redirecting">Returning to review mode selection...</p>
+            </div>
+        `;
+        
+        updateFlashcardTable();
+        updateStats();
+        
+        setTimeout(() => {
+            showReviewModeSelection();
+        }, 2000);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

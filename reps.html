@@ -6,6 +6,9 @@
     <title data-translate="repetitions">Repetitions</title>
     <link rel="stylesheet" href="reps.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="stats.js" defer></script>
+    <script src="translations.js"></script>
+    <script src="algorithms.js"></script>
     <script src="reps.js" defer></script>
     <style>
         /* Istniejące style... */
@@ -240,6 +243,7 @@
                     </p>
                 </div>
                 <canvas id="learningProgressChart" width="300" height="200"></canvas>
+                <canvas id="leitnerBoxesChart" width="300" height="200"></canvas>
                 <div id="stats-info" class="info-box" style="display: none;">
                     <!-- Content for stats info-box -->
                 </div>
@@ -264,5 +268,7 @@
             }
         });
     </script>
+    <!-- Dodaj przed zamknięciem body -->
+  
 </body>
 </html>

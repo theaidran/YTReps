@@ -248,10 +248,7 @@ th {
     padding: 10px;
 }
 
-.show-translation {
-    background-color: #007bff;
-    color: white;
-}
+
 
 .known-button {
     background-color: #28a745;
@@ -403,12 +400,9 @@ th {
     background-color: #c82333;
 }
 
-.show-translation {
-    background-color: #007bff; /* Niebieski kolor dla przycisku "Pokaż tłumaczenie" */
-}
 
 .show-translation:hover {
-    background-color: #0056b3;
+    background-color: #5f5f5f;
 }
 
 /* Styl dla kontenera przycisków */
@@ -833,4 +827,477 @@ button[title]:hover::after {
   cursor: pointer;
 }
 
+.settings-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 10px;
+    transition: transform 0.3s ease;
+}
 
+.settings-button:hover {
+    transform: rotate(30deg);
+}
+
+.review-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.more-options-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 10px;
+    color: #007ACC;
+    position: relative;
+}
+
+.more-options-button:hover {
+    color: #005A9E;
+}
+
+.more-options-button::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    transition-delay: 1s;
+    pointer-events: none;
+}
+
+.more-options-button:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.settings-form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+}
+
+/*.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+*/
+.settings-group {
+    margin-bottom: 15px;
+}
+
+.settings-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.settings-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.algorithm-description {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+.description-text {
+    font-size: 14px;
+    color: #667;
+    margin: 5px 0;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.quality-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.grade-button {
+    flex: 1;
+    min-width: 150px;
+    /* height: 35px; /* Stała wysokość */
+    padding: 10px;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden; /* Ukrywa tekst, który nie mieści się w przycisku */
+    text-overflow: ellipsis; /* Dodaje kropki, jeśli tekst jest za długi */
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+    position: relative;
+    transform: translateY(0); /* Początkowa pozycja */
+    will-change: transform; /* Optymalizacja dla animacji */
+    backface-visibility: hidden; /* Zapobiega migotaniu */
+}
+
+.grade-button.grade-0 { background-color: #777777; }
+.grade-button.grade-1 { background-color: #777777;}
+.grade-button.grade-2 { background-color: #777777; }
+.grade-button.grade-3 { background-color: #777777; }
+.grade-button.grade-4 { background-color: #777777;}
+.grade-button.grade-5 { background-color: #777777; }
+
+.grade-button:hover {
+    background-color: #5f5f5f;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(17, 17, 17, 0.3);
+}
+
+.grade-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.difficulty-indicator {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.difficulty-easy { background-color: #28a745; color: white; }
+.difficulty-medium { background-color: #ffc107; color: black; }
+.difficulty-hard { background-color: #fd7e14; color: white; }
+.difficulty-veryHard { background-color: #dc3545; color: white; }
+
+.review-mode-selection {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.review-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.review-mode-card {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.review-mode-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.review-mode-card.selected {
+    background-color: #e7f5ff;
+    border-color: #007bff;
+}
+
+.card-count {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+    margin: 10px 0;
+}
+
+.review-options {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.number-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.number-selector select,
+.number-selector input {
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.start-review-button {
+    display: block;
+    width: 100%;
+    margin: 20px auto 0;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.start-review-button:hover {
+    background-color: #218838;
+}
+
+.cards-number-selection {
+    margin-bottom: 10px;
+}
+
+.review-complete {
+    text-align: center;
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.settings-form .button-group .submit-button {
+    background-color: #28a745;  /* zielony */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.settings-form .button-group .submit-button:hover {
+    background-color: #218838;  /* ciemniejszy zielony przy najechaniu */
+}
+
+.settings-form .button-group .cancel-button {
+    background-color: #dc3545;  /* czerwony */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.settings-form .button-group .cancel-button:hover {
+    background-color: #c82333;  /* ciemniejszy czerwony przy najechaniu */
+}
+
+.cards-number-options {
+    margin: 15px 0;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    transition: background-color 0.3s ease;
+}
+
+.checkbox-option:hover {
+    background-color: #e9ecef;
+}
+
+.checkbox-option input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.checkbox-option span {
+    font-size: 14px;
+}
+
+#customNumberInput {
+    width: 60px;
+    padding: 2px 5px;
+    margin-left: 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+#customNumberInput:not(.hidden) {
+    display: inline-block;
+}
+
+#leitnerBoxesChart, #superMemoChart, #superMemoIntervalsChart {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 600px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* Dodaj specyficzny odstęp dla pierwszego wykresu */
+#learningProgressChart {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    align-items: center; /* Align items vertically */
+}
+
+.show-translation {
+    background-color: #777777;
+    color: white;
+    flex: 1; /* Allow the button to grow and fill space */
+    margin-right: 10px; /* Add some space between the buttons */
+}
+
+.quality-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 0; /* Remove top margin to align with the button row */
+    flex: 1; /* Allow the buttons to grow and fill space */
+}
+
+.hidden {
+    display: none;
+}
+
+
+/* Usuwamy poprzednie style dla tooltipów i dodajemy nowe */
+
+
+.grade-button.grade-0[data-tooltip]:after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% - 32px); /* Zmieniono z calc(100% + 10px) na calc(100% - 35px) */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #777777;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    transition-delay: 5s;
+    z-index: 1000;
+}
+
+
+.grade-button.grade-0[data-tooltip]:hover:after {
+    opacity: 1;
+    visibility: hidden; /* tool tip disabled */
+    background-color:#5f5f5f;
+}
+
+.more-info {
+    margin: 15px 0;
+    padding: 10px;
+    border-top: 1px solid #dee2e6;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.more-info p {
+    margin: 0;
+    display: block;
+}
+
+.more-info span {
+    margin-left: 0; /* Zmieniono z 10px na 0 */
+    color: inherit;
+    font-size: 14px;
+}
+
+.more-info a {
+    margin-left: 0; /* Zmieniono z 10px na 0 */
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.more-info a:hover {
+    text-decoration: underline;
+}

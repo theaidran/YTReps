@@ -37,7 +37,6 @@
         .player-container {
             position: relative;
             width: 100%;
-            max-width: 640px;
             height: 0;
             padding-bottom: 56.25%; /* Aspect ratio 16:9 */
             transition: all 0.5s ease;
@@ -52,6 +51,7 @@
         }
 
         .player-resizer {
+            display: none; /* Ukrywa przycisk resize */
             position: absolute;
             right: 0;
             bottom: 0;
@@ -62,23 +62,10 @@
             border-top-left-radius: 5px;
         }
 
+        /* Ukrywamy również pseudoelementy */
         .player-resizer::before,
         .player-resizer::after {
-            content: '';
-            position: absolute;
-            right: 3px;
-            bottom: 3px;
-            background-color: white;
-        }
-
-        .player-resizer::before {
-            width: 10px;
-            height: 2px;
-        }
-
-        .player-resizer::after {
-            width: 2px;
-            height: 10px;
+            display: none;
         }
 
         .autoplay-button {
@@ -501,16 +488,16 @@
 
         .left-column {
             width: 45%; /* Zmieniamy z 40% na 45% */
-            padding-right: 10px;
+            padding-right: 15px;
         }
 
         .right-column {
-            width: calc(55% - 20px); /* Zmniejszamy szerokość o 20px */
+            width: calc(55% - 0px); /* Zmniejszamy szerokość o 20px */
             display: flex;
             flex-direction: column;
             position: relative;
             padding-left: 20px;
-            padding-right: 20px; /* Dodajemy padding z prawej strony */
+            padding-right: 10px; /* Dodajemy padding z prawej strony */
         }
 
         .right-column h3 {
@@ -544,13 +531,11 @@
         /* Dostosuj szerokość player-container */
         .player-container {
             width: 100%;
-            max-width: 640px;
         }
 
         /* Dostosuj szerokość playera YouTube */
         #player {
             width: 100%;
-            max-width: 640px;
             height: 360px;
         }
 
@@ -640,6 +625,7 @@
             display: flex;
             flex-direction: column;
             transition: margin-top 0.3s ease;
+            
         }
 
         #dictionary-select {
@@ -655,6 +641,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            
         }
 
         .dictionary-select-container {
@@ -753,7 +740,7 @@
         .main-container {
             min-height: 100vh;
         }
-
+     
         .count-normal {
             font-weight: normal;
         }
@@ -980,22 +967,22 @@
             padding: 5px 10px;
             cursor: pointer;
         }
-
+/* 
         .main-container {
             display: flex;
             position: relative;
         }
 
-        .left-column {
-            width: 45%;
+       .left-column {
+            width: 65%;
             transition: width 0.3s ease;
         }
 
         .right-column {
-            width: 55%;
+            width: 35%;
             transition: width 0.3s ease;
         }
-
+*/
         .column-resizer {
             position: absolute;
             top: 50%;
@@ -1021,6 +1008,7 @@
 
         .expanded .right-column {
             width: 0;
+            
         }
 
         .expanded .column-resizer {
@@ -1070,6 +1058,7 @@
 
     .mobile-view .right-column {
         display: block;
+        
     }
 }
 
@@ -1217,4 +1206,45 @@
     top: 50%;
     transform: translateY(-50%);
     margin-right: 10px;
+}
+
+#leitnerBoxesChart {
+    margin-top: 2rem;
+    max-width: 100%;
+    height: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.column-divider {
+    width: 2%;
+    background-color: transparent;
+    cursor: col-resize;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.column-divider::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-color: transparent; /* Zmieniono z #ddd na transparent */
+    transition: background-color 0.3s;
+}
+
+.column-divider:hover::after,
+.column-divider:active::after {
+    background-color: #007bff; /* Pojawia się tylko przy najechaniu/aktywności */
+}
+
+/* Usuwamy niepotrzebne style */
+.column-divider:hover,
+.column-divider:active {
+    background-color: transparent; /* Zmieniono z #007bff na transparent */
 }
