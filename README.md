@@ -1,6 +1,6 @@
-# 6_minutes_English_with_Reps
+# YoutubeReps
 Youtube videos player with notes and Anki like reviews. Watch eg. BBC learning English videos or yours, make notes and repeat them later.
-Link to the web app: https://theaidran.github.io/6_minutes_English_with_Reps
+Link to the web app: https://theaidran.github.io/YoutubeReps
 
 ## Overview
 A simple web application to enhance English language learning through video playlists and a flashcard system.
