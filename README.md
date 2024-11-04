@@ -1,5 +1,5 @@
 # YoutubeReps
-Youtube video player with notes and Anki like reviews. Watch eg. BBC learning English videos or yours, make notes and repeat them later.
+Youtube video player with notes and Anki like reviews. Watch eg. BBC learning English videos or add yours, make notes and repeat them later.
 Link to the web app: https://theaidran.github.io/YoutubeReps
 
 ## Overview
