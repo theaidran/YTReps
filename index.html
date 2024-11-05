@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My English Playlists</title>
+    <title>My Playlists</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api" defer></script>
@@ -18,7 +18,7 @@
     <div class="main-container">
         <div class="left-column">
             <div class="header-container">
-                <h1 class="main-title">My English Playlists</h1>
+                <h1 class="main-title">My Playlists</h1>
                 <a href="reps.html" class="quiz-button">Repetitions</a>
             </div>
             <div id="playlist-container" class="playlist-container"></div>
@@ -35,6 +35,7 @@
             <!-- Ukrywamy przycisk "Przytnij video" -->
             <button class="trim-button" onclick="setTrimTime()" style="display: none;">Przytnij video</button>
             <button class="word-list-button" onclick="toggleWordList()">Word List</button>
+            <button class="settings-button" onclick="openSettings()">⋮</button>
             <p style="display: none;">Całkowita liczba filmów w playliście: <span id="total-videos"></span></p>
             <h2 class="count-normal">List of watched videos (<span id="watched-count">0</span>/<span id="total-videos-2">0</span>)</h2>
             <ul id="video-list"></ul>

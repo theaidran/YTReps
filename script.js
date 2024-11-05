@@ -675,7 +675,7 @@ function addCustomPlaylist(playlistLink) {
     var playlistId = extractPlaylistId(playlistLink);
     
     if (playlistId) {
-        var playlistName = prompt("Podaj nazwę dla tej playlisty:");
+        var playlistName = prompt("Enter a name for this playlist:");
         if (playlistName) {
             playlists.push({ id: playlistId, name: playlistName, custom: true });
             trimTimes[playlistId] = 0;
@@ -686,7 +686,7 @@ function addCustomPlaylist(playlistLink) {
             loadPlaylist(playlistId);
         }
     } else {
-        alert("Nieprawidłowy link do playlisty. Spróbuj ponownie.");
+        alert("Invalid playlist link. Please try again.");
     }
 }
 
@@ -694,7 +694,7 @@ function addSingleVideo(videoLink) {
     var videoId = extractVideoId(videoLink);
     
     if (videoId) {
-        var videoName = prompt("Podaj nazwę dla tego filmu:");
+        var videoName = prompt("Enter a name for this video:");
         if (videoName) {
             var customPlaylistId = 'custom_videos_' + Date.now();
             playlists.push({ id: customPlaylistId, name: videoName, custom: true, singleVideo: videoId });
@@ -706,7 +706,7 @@ function addSingleVideo(videoLink) {
             loadSingleVideo(customPlaylistId, videoId);
         }
     } else {
-        alert("Nieprawidłowy link do filmu. Spróbuj ponownie.");
+        alert("Invalid video link. Please try again.");
     }
 }
 
@@ -762,14 +762,8 @@ function savePlaylistsToLocalStorage() {
     localStorage.setItem('customPlaylists', JSON.stringify(playlists));
 }
 
-function loadPlaylistsFromLocalStorage() {
-    var storedPlaylists = localStorage.getItem('customPlaylists');
-    if (storedPlaylists) {
-        playlists = JSON.parse(storedPlaylists);
-    }
-    
-    // Upewnij się, że domyślne playlisty zawsze są dostępne
-    var defaultPlaylists = [
+    // Domyślne playlisty BBC
+    const defaultPlaylists = [
         { id: 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt', name: '6 Minute English' },
         { id: 'PLcetZ6gSk96_Fprtuj6gKN9upPjaDrARH', name: 'English In A Minute' },
         { id: 'PLcetZ6gSk96_sototkO7HFkGA8zL8H0lq', name: 'The English We Speak' },
@@ -777,17 +771,31 @@ function loadPlaylistsFromLocalStorage() {
         { id: 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ', name: '6 Minute Grammar' }
     ];
 
-    defaultPlaylists.forEach(function(defaultPlaylist) {
-        if (!playlists.some(p => p.id === defaultPlaylist.id)) {
-            playlists.push(defaultPlaylist);
-        }
-    });
+function loadPlaylistsFromLocalStorage() {
+    var storedPlaylists = localStorage.getItem('customPlaylists');
+    if (storedPlaylists) {
+        playlists = JSON.parse(storedPlaylists);
+    }
+    
+    // Sprawdź ustawienie BBC playlist
+    const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
+    
+
+
+    // Dodaj domyślne playlisty tylko jeśli BBC jest włączone
+    if (bbcPlaylistEnabled) {
+        defaultPlaylists.forEach(function(defaultPlaylist) {
+            if (!playlists.some(p => p.id === defaultPlaylist.id)) {
+                playlists.push(defaultPlaylist);
+            }
+        });
+    }
 
     savePlaylistsToLocalStorage(); // Zapisz zaktualizowaną listę
 }
 
 function removePlaylist(playlistId) {
-    if (confirm("Czy na pewno chcesz usunąć tę playlistę?")) {
+    if (confirm("Are you sure you want to remove this playlist?")) {
         playlists = playlists.filter(p => p.id !== playlistId);
         savePlaylistsToLocalStorage();
         createPlaylistButtons();
@@ -809,7 +817,7 @@ function updateActivePlaylistButton(playlistId) {
 
 function getPlaylistName(playlistId) {
     var playlist = playlists.find(p => p.id === playlistId);
-    return playlist ? playlist.name : 'Nieznana playlista';
+    return playlist ? playlist.name : 'Unknown playlist';
 }
 
 function setTrimTime() {
@@ -1310,6 +1318,7 @@ function makeResizable(element) {
 
     document.addEventListener('mouseup', function() {
         isResizing = false;
+        document.body.style.cursor = 'default';
         adjustResizerPosition(); // Dodajemy to wywołanie
     });
 }
@@ -1719,3 +1728,118 @@ function initializeColumnResizer() {
 
 // Dodaj wywołanie funkcji przy ładowaniu strony
 window.addEventListener('load', initializeColumnResizer);
+
+function openSettings() {
+    let settingsForm = document.getElementById('review-settings-form');
+    let overlay = document.getElementById('settings-overlay');
+    
+    // Jeśli formularz jest już otwarty, zamknij go
+    if (settingsForm) {
+        settingsForm.remove();
+        overlay.remove();
+        return;
+    }
+
+    overlay = document.createElement('div');
+    overlay.className = 'settings-overlay';
+    overlay.id = 'settings-overlay';
+    
+    // Pobierz aktualny stan z localStorage
+    const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
+    
+    settingsForm = document.createElement('div');
+    settingsForm.id = 'review-settings-form';
+    settingsForm.className = 'settings-form';
+    settingsForm.innerHTML = `
+        <div class="settings-header">
+            <h3>Settings</h3>
+            <button onclick="closeSettings()" class="close-button">×</button>
+        </div>
+        <div class="settings-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="bbcPlaylistCheckbox" ${bbcPlaylistEnabled ? 'checked' : ''}>
+                BBC learning English playlists
+            </label>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(settingsForm);
+    
+    // Dodaj event listener dla checkboxa
+    const checkbox = settingsForm.querySelector('#bbcPlaylistCheckbox');
+    checkbox.addEventListener('change', function() {
+        localStorage.setItem('bbcPlaylistEnabled', this.checked);
+        updatePlaylistVisibility();
+    });
+    
+    overlay.addEventListener('click', closeSettings);
+}
+
+// Funkcja do aktualizacji widoczności playlist
+function updatePlaylistVisibility() {
+    const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
+    
+    if (!bbcPlaylistEnabled) {
+        // Jeśli BBC jest wyłączone, usuwamy TYLKO domyślne playlisty BBC, zachowując custom playlisty
+        playlists = playlists.filter(playlist => 
+            !defaultPlaylists.some(defaultPlaylist => defaultPlaylist.id === playlist.id)
+        );
+    } else {
+        // Jeśli BBC jest włączone, dodajemy domyślne playlisty BBC
+        defaultPlaylists.forEach(bbcPlaylist => {
+            if (!playlists.some(p => p.id === bbcPlaylist.id)) {
+                playlists.push(bbcPlaylist);
+            }
+        });
+    }
+
+    // Zapisz stan playlist w localStorage
+    savePlaylistsToLocalStorage();
+    
+    // Aktualizuj przyciski playlist
+    createPlaylistButtons();
+    
+    // Jeśli nie ma aktywnej playlisty lub aktywna playlista została usunięta,
+    // załaduj pierwszą dostępną playlistę
+    if (!playlists.some(p => p.id === currentPlaylistId)) {
+        if (playlists.length > 0) {
+            loadPlaylist(playlists[0].id);
+        }
+    }
+}
+
+// Dodaj wywołanie przy starcie aplikacji
+window.addEventListener('load', function() {
+    // Wczytaj stan z localStorage
+    const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled');
+    // Jeśli nie ma zapisanego stanu, ustaw domyślnie na true
+    if (bbcPlaylistEnabled === null) {
+        localStorage.setItem('bbcPlaylistEnabled', 'true');
+    }
+    updatePlaylistVisibility();
+});
+
+function closeSettings(){
+    const settingsForm = document.getElementById('review-settings-form');
+    const overlay = document.getElementById('settings-overlay');
+    if (settingsForm) settingsForm.remove();
+    if (overlay) overlay.remove();
+}
+
+function extractPlaylistId(link) {
+    // Obsługa różnych formatów linków do playlist YouTube
+    const patterns = [
+        /[?&]list=([^&]+)/,  // Format: ?list= lub &list=
+        /youtu.be\/.*[?&]list=([^&]+)/, // Format: youtu.be z list=
+        /youtube.com\/playlist\?list=([^&]+)/ // Format: bezpośredni link do playlisty
+    ];
+
+    for (let pattern of patterns) {
+        const match = link.match(pattern);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    return null;
+}
