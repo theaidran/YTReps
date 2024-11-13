@@ -18,3 +18,4 @@ Also, it has integration of dictionaries like onelook.com, and you can add your 
 ## Tips
 * Navigate the dictionary frame with your browser navigation bar (go back, refresh).  
 * Ads from YouTube should not be displayed when run locally. Anyway, extensions like uBlock Origin work.
+* To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use synchronization feature (uBlock Origin needs to be off or set to website exception).
