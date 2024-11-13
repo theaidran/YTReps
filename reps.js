@@ -6,6 +6,7 @@ lastScrollPosition = 0;
 let flashcardsToReview = [];
 let currentFlashcardIndex = 0;
 let currentReviewMode = null;
+let isSyncing = false; // Dodajemy zmienną isSyncing na początku
 
 
 // Globalna zmienna do przechowywania fiszek
@@ -535,6 +536,9 @@ function editFlashcard(id) {
 function updateFlashcard(id, updatedData) {
     const index = flashcards.findIndex(f => f.id === id);
     if (index !== -1) {
+        // Dodaj znacznik czasu modyfikacji
+        updatedData.lastModified = new Date().toISOString();
+
         flashcards[index] = { ...flashcards[index], ...updatedData };
         saveFlashcards();
         showSection('view');
@@ -628,6 +632,8 @@ function importFlashcards() {
             const content = e.target.result;
             const lines = content.split('\n');
             let importedCount = 0;
+            let duplicateCount = 0;
+            let updatedCount = 0;
 
             // Pomijamy pierwszy wiersz (nagłówki)
             for (let i = 1; i < lines.length; i++) {
@@ -639,7 +645,7 @@ function importFlashcards() {
                         context, 
                         mediaUrl, 
                         audioUrl,
-                        algorithm,  // Możemy zignorować tę wartość
+                        algorithm,
                         firstReviewDate,
                         lastReviewed,
                         nextReview,
@@ -652,27 +658,57 @@ function importFlashcards() {
                     ] = line.split(';').map(item => item.replace(/^"|"$/g, '').trim());
 
                     if (front && back) {
-                        const newFlashcard = {
-                            id: Date.now() + Math.random(),
-                            word: front,
-                            translation: back,
-                            context: context || '',
-                            mediaUrl: mediaUrl || '',
-                            audioUrl: audioUrl || '',
-                            firstReviewDate: firstReviewDate || null,
-                            lastReviewed: lastReviewed || null,
-                            nextReview: nextReview || null,
-                            difficulty: difficulty || 'medium',
-                            streak: parseInt(streak) || 0,
-                            easinessFactor: parseFloat(easinessFactor) || 2.5,
-                            interval: parseInt(interval) || 0,
-                            repetitions: parseInt(repetitions) || 0,
-                            leitnerBox: parseInt(leitnerBox) || 1,
-                            createdAt: new Date().toISOString()
-                        };
-                        
-                        flashcards.push(newFlashcard);
-                        importedCount++;
+                        // Sprawdź czy fiszka już istnieje
+                        const existingFlashcard = flashcards.find(f => 
+                            f.word === front && 
+                            f.translation === back && 
+                            f.context === (context || '')
+                        );
+
+                        if (existingFlashcard) {
+                            // Aktualizuj istniejącą fiszkę, jeśli nowa ma nowsze dane
+                            const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
+                            const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+
+                            if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
+                                // Aktualizuj tylko pola związane z postępem nauki
+                                existingFlashcard.firstReviewDate = firstReviewDate || existingFlashcard.firstReviewDate;
+                                existingFlashcard.lastReviewed = lastReviewed || existingFlashcard.lastReviewed;
+                                existingFlashcard.nextReview = nextReview || existingFlashcard.nextReview;
+                                existingFlashcard.difficulty = difficulty || existingFlashcard.difficulty;
+                                existingFlashcard.streak = parseInt(streak) || existingFlashcard.streak;
+                                existingFlashcard.easinessFactor = parseFloat(easinessFactor) || existingFlashcard.easinessFactor;
+                                existingFlashcard.interval = parseInt(interval) || existingFlashcard.interval;
+                                existingFlashcard.repetitions = parseInt(repetitions) || existingFlashcard.repetitions;
+                                existingFlashcard.leitnerBox = parseInt(leitnerBox) || existingFlashcard.leitnerBox;
+                                updatedCount++;
+                            } else {
+                                duplicateCount++;
+                            }
+                        } else {
+                            // Dodaj nową fiszkę
+                            const newFlashcard = {
+                                id: Date.now() + Math.random(),
+                                word: front,
+                                translation: back,
+                                context: context || '',
+                                mediaUrl: mediaUrl || '',
+                                audioUrl: audioUrl || '',
+                                firstReviewDate: firstReviewDate || null,
+                                lastReviewed: lastReviewed || null,
+                                nextReview: nextReview || null,
+                                difficulty: difficulty || 'medium',
+                                streak: parseInt(streak) || 0,
+                                easinessFactor: parseFloat(easinessFactor) || 2.5,
+                                interval: parseInt(interval) || 0,
+                                repetitions: parseInt(repetitions) || 0,
+                                leitnerBox: parseInt(leitnerBox) || 1,
+                                createdAt: new Date().toISOString()
+                            };
+                            
+                            flashcards.push(newFlashcard);
+                            importedCount++;
+                        }
                     }
                 }
             }
@@ -680,7 +716,9 @@ function importFlashcards() {
             saveFlashcards();
             updateFlashcardTable();
             updateStats();
-            alert(`Zaimportowano ${importedCount} nowych fiszek.`);
+            
+            const message = `Zaimportowano ${importedCount} nowych fiszek, zaktualizowano ${updatedCount}, pominięto ${duplicateCount} duplikatów.`;
+            showNotification(message, 'success');
         };
         reader.readAsText(file);
     };
@@ -740,7 +778,22 @@ function initializeApp() {
     if (!localStorage.getItem('gradeButtonMode')) {
         localStorage.setItem('gradeButtonMode', 'four');
     }
+    if (!localStorage.getItem('auto_sync')) {
+        localStorage.setItem('auto_sync', 'false');
+    }
+    if (!localStorage.getItem('sync_interval')) {
+        localStorage.setItem('sync_interval', '5');
+    }
+    // Zmiana: sprawdzamy czy wartość już istnieje
+    if (localStorage.getItem('enable_sync_check') === null) {
+        localStorage.setItem('enable_sync_check', 'true'); // Domyślnie włączone tylko przy pierwszym uruchomieniu
+    }
     
+    // Sprawdź czy sprawdzanie synchronizacji jest włączone
+    if (localStorage.getItem('enable_sync_check') === 'true') {
+        initSyncCheck();
+    }
+
     // Najpierw próbujemy załadować fiszki z localStorage
     const savedFlashcards = localStorage.getItem('fiszki');
     if (savedFlashcards) {
@@ -772,7 +825,8 @@ function initializeApp() {
   
   // Aktualizujemy istniejące i dodajemy nowe fiszki
   flashcards = updateExistingAndAddNewFlashcards(wordList);
-  
+  window.flashcards = flashcards;
+
   console.log('Liczba fiszek po inicjalizacji:', flashcards.length);
   saveFlashcards();
   updateFlashcardTable();
@@ -795,6 +849,33 @@ function initializeApp() {
   showSection('view');  // Zmienione z 'add' na 'view'
   loadSavedLanguage();
   setupAutoResizingTextareas(); // Dodaj tę linię
+   // Dodaj window.saveFlashcards i window.handleSync do globalnego obiektu
+   window.saveFlashcards = saveFlashcards;
+   window.handleSync = window.handleSync || handleSync; // Użyj istniejcej funkcji z synchronization.js
+
+   // Sprawdź czy mamy zapisany klucz API i ustaw automatyczną synchronizację
+   const apiKey = localStorage.getItem('pushbullet_api_key');
+   if (apiKey) {
+       console.log('Found API key, setting up automatic sync');
+       setupAutomaticSync();
+   }
+      initializeSyncButton();
+      initializeDeleteNotesButton();
+
+    // Dodaj inicjalizację sprawdzania synchronizacji
+   // if (typeof window.initSyncCheck === 'function') {
+   //     window.initSyncCheck();
+  //  }
+
+    // Dodaj domyślne ustawienie dla enable_sync_check
+    if (!localStorage.getItem('enable_sync_check')) {
+        localStorage.setItem('enable_sync_check', 'true'); // Domyślnie włączone
+    }
+
+    // Sprawdź czy sprawdzanie synchronizacji jest włączone
+    if (localStorage.getItem('enable_sync_check') === 'true') {
+        initSyncCheck();
+    }
 }
 
 // Dodaj tę funkcję, aby upewnić się, że przycisk Info jest prawidłowo dodany
@@ -831,9 +912,9 @@ function ensureStatsInfoButtonExists() {
   }
 }
 
-// Dodaj nową funkcję do aktualizacji istniejących i dodawania nowych fiszek
+// Funkcja do aktualizacji istniejących i dodawania nowych fiszek
 function updateExistingAndAddNewFlashcards(wordList) {
-  const updatedFlashcards = [...flashcards]; // Zachowaj istniejce fiszki
+  const updatedFlashcards = [...flashcards];
   
   wordList.forEach(word => {
     const existingFlashcard = updatedFlashcards.find(f => 
@@ -841,19 +922,31 @@ function updateExistingAndAddNewFlashcards(wordList) {
     );
     
     if (existingFlashcard) {
-      // Aktualizuj istniejącą fiszkę
-      existingFlashcard.context = word.context; // Aktualizuj kontekst, jeśli się zmienił
+      existingFlashcard.context = word.context;
+      //existingFlashcard.lastModified = new Date().toISOString();
     } else {
-      // Dodaj nową fiszkę
+      const now = new Date().toISOString();
+      const nowMs = Date.now();
       updatedFlashcards.push({
-        id: Date.now() + Math.random(),
+        id: nowMs + Math.random(),
         word: word.word,
         context: word.context,
         translation: word.translation,
-        media: '',
-        audio: '',
+        mediaUrl: '',
+        audioUrl: '',
         repeats: 0,
-        lastReviewed: null
+        lastReviewed: null,
+        firstReviewDate: null,
+        createdAt: now,
+        lastModified: null,
+        difficulty: 'medium',
+        nextReview: null,
+        easinessFactor: 2.5,
+        interval: 0,
+        repetitions: 0,
+        leitnerBox: 1,
+        lastSync: null,
+        streak: 0
       });
     }
   });
@@ -1032,15 +1125,51 @@ function restoreOriginalContent() {
 
 // Funkcja do usuwania fiszki
 function deleteFlashcard(id) {
-  const index = flashcards.findIndex(f => f.id === id);
-  if (index !== -1) {
-    if (confirm('Czy na pewno chcesz usunąć tę fiszkę?')) {
-      flashcards.splice(index, 1);
-      saveFlashcards();
-      updateFlashcardTable();
-      updateStats();
+    const index = flashcards.findIndex(f => f.id === id);
+    if (index !== -1) {
+        const confirmDialog = document.createElement('div');
+        confirmDialog.className = 'confirm-dialog';
+        confirmDialog.innerHTML = `
+            <div class="confirm-content">
+                <h3 data-translate="confirmDelete">Delete Flashcard</h3>
+                <p data-translate="confirmDeleteMessage">Are you sure you want to delete this flashcard?</p>
+                <p class="sync-warning" data-translate="syncDeleteWarning">Note: If you are using Synchronization, to prevent the deleted flashcard from reappearing in the table, you must also delete all notes on the server. Settings -> Delete all Notes. Then press the Sync button to update the flashcards on the server.</p>
+                <div class="confirm-buttons">
+                    <button class="confirm-yes" data-translate="yes">Yes</button>
+                    <button class="confirm-no" data-translate="no2">No</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(confirmDialog);
+        changeLanguage();
+
+        return new Promise((resolve) => {
+            const yesButton = confirmDialog.querySelector('.confirm-yes');
+            const noButton = confirmDialog.querySelector('.confirm-no');
+
+            yesButton.addEventListener('click', () => {
+                flashcards.splice(index, 1);
+                saveFlashcards();
+                updateFlashcardTable();
+                updateStats();
+                confirmDialog.remove();
+                resolve(true);
+            });
+
+            noButton.addEventListener('click', () => {
+                confirmDialog.remove();
+                resolve(false);
+            });
+
+            confirmDialog.addEventListener('click', (e) => {
+                if (e.target === confirmDialog) {
+                    confirmDialog.remove();
+                    resolve(false);
+                }
+            });
+        });
     }
-  }
 }
 
 function setupAutoResizingTextareas() {
@@ -1483,14 +1612,49 @@ function loadSavedLanguage() {
 }
 
 function deleteAllFlashcards() {
-  const confirmMessage = translations[currentLanguage].confirmDeleteAll || 'Are you sure you want to delete all flashcards? This action cannot be undone.';
-  if (confirm(confirmMessage)) {
-    flashcards = [];
-    saveFlashcards();
-    updateFlashcardTable();
-    updateStats();
-    drawLearningProgressChart();
-  }
+    const confirmDialog = document.createElement('div');
+    confirmDialog.className = 'confirm-dialog';
+    confirmDialog.innerHTML = `
+        <div class="confirm-content">
+            <h3 data-translate="confirmDeleteAll">Delete All Flashcards</h3>
+            <p data-translate="confirmDeleteAllMessage">Are you sure you want to delete all flashcards? This action cannot be undone.</p>
+            <p class="sync-warning" data-translate="syncDeleteWarning">Note: If you are using Synchronization, to prevent the deleted flashcards from reappearing in the table, you must also delete all notes on the server. Settings -> Delete all Notes. Then press the Sync button to update the flashcards on the server.</p>
+            <div class="confirm-buttons">
+                <button class="confirm-yes" data-translate="yes">Yes</button>
+                <button class="confirm-no" data-translate="no2">No</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(confirmDialog);
+    changeLanguage();
+
+    return new Promise((resolve) => {
+        const yesButton = confirmDialog.querySelector('.confirm-yes');
+        const noButton = confirmDialog.querySelector('.confirm-no');
+
+        yesButton.addEventListener('click', () => {
+            flashcards = [];
+            saveFlashcards();
+            updateFlashcardTable();
+            updateStats();
+            drawLearningProgressChart();
+            confirmDialog.remove();
+            resolve(true);
+        });
+
+        noButton.addEventListener('click', () => {
+            confirmDialog.remove();
+            resolve(false);
+        });
+
+        confirmDialog.addEventListener('click', (e) => {
+            if (e.target === confirmDialog) {
+                confirmDialog.remove();
+                resolve(false);
+            }
+        });
+    });
 }
 
 function goBackFlashcard() {
@@ -1752,6 +1916,501 @@ function showNextFlashcard() {
 
 
 
+// Obsługa synchronizacji
+async function handleSync() {
+    console.log('handleSync called');
+    const syncButton = document.getElementById('sync-button');
+    if (!syncButton) {
+        console.error('Sync button not found in handleSync');
+        return;
+    }
+    
+    if (isSyncing) {
+        console.log('Sync already in progress');
+        return;
+    }
+    
+    const apiKey = localStorage.getItem('pushbullet_api_key');
+    if (!apiKey) {
+        console.log('No API key found, showing Pushbullet dialog');
+        showPushbulletDialog();
+        return;
+    }
+
+    try {
+        console.log('Starting sync process');
+        isSyncing = true;
+        syncButton.classList.add('syncing');
+        syncButton.querySelector('[data-translate="sync"]').textContent = 
+            translations[currentLanguage].syncInProgress;
+
+        await waitForFlashcards();
+        await fetchFromPushbullet();
+        await syncWithPushbullet();
+        //updateLastSyncTime();
+
+        // Po udanej synchronizacji usuń klasę new-sync
+        syncButton.classList.remove('new-sync');
+
+        console.log('Sync completed successfully');
+        updateFlashcardTable();
+        updateStats();
+        showNotification(translations[currentLanguage].syncSuccess, 'success');
+    } catch (error) {
+        console.error('Sync failed:', error);
+        showNotification(translations[currentLanguage].syncError + ': ' + error.message, 'error');
+    } finally {
+        console.log('Sync process finished');
+        isSyncing = false;
+        syncButton.classList.remove('syncing');
+        syncButton.querySelector('[data-translate="sync"]').textContent = 
+            translations[currentLanguage].sync;
+    }
+}
+
+// Dodaj funkcję pomocniczą do czekania na inicjalizację fiszek
+function waitForFlashcards() {
+  return new Promise((resolve, reject) => {
+      const maxAttempts = 10;
+      let attempts = 0;
+
+      function checkFlashcards() {
+          if (typeof window.flashcards !== 'undefined' && window.flashcards) {
+              resolve();
+          } else if (attempts >= maxAttempts) {
+              reject(new Error('Flashcards initialization timeout'));
+          } else {
+              attempts++;
+              setTimeout(checkFlashcards, 500);
+          }
+      }
+
+      checkFlashcards();
+  });
+}
+
+function showPushbulletDialog() {
+    const dialog = document.createElement('div');
+    dialog.className = 'pushbullet-dialog';
+    dialog.innerHTML = `
+        <h3 data-translate="pushbulletSetup">Pushbullet Setup</h3>
+        <p class="settings-description" data-translate="syncDescription">Synchronization allows you to review flashcards on two devices.</p>
+        <div class="api-key-input">
+            <input type="password" id="pushbullet-api-key" placeholder="${translations[currentLanguage].enterApiKey}"/>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)">
+                👁
+            </button>
+        </div>
+        <div class="api-key-info">
+            <a href="https://www.pushbullet.com/#settings/account" 
+               target="_blank" 
+               data-translate="getApiKey">Get your API key</a>
+            <span style="margin-left: 5px;" data-translate="apiKeyLimit">(Free account: Limited to 500 pushes per month, which should be sufficient for daily synchronization of 100 reviewed flashcards)</span>
+        </div>
+        <div class="dialog-buttons">
+            <button onclick="connectPushbullet()" class="submit-button" data-translate="connect">Connect</button>
+            <button onclick="closePushbulletDialog()" class="cancel-button" data-translate="cancel">Cancel</button>
+        </div>
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'dialog-overlay';
+    overlay.onclick = closePushbulletDialog;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+    
+    changeLanguage();
+}
+
+async function connectPushbullet() {
+  const apiKey = document.getElementById('pushbullet-api-key').value;
+  if (!apiKey) {
+      showNotification(translations[currentLanguage].enterApiKey, 'error');
+      return;
+  }
+
+  try {
+      const connected = await initPushbullet(apiKey);
+      if (connected) {
+          showNotification(translations[currentLanguage].syncEnabled, 'success');
+          closePushbulletDialog();
+          setupAutomaticSync();
+          handleSync(); // Rozpocznij pierwszą synchronizację
+      }
+  } catch (error) {
+      console.error('Pushbullet connection failed:', error);
+      showNotification(`${translations[currentLanguage].syncError}: ${error.message}`, 'error');
+  }
+}
+
+function closePushbulletDialog() {
+  const dialog = document.querySelector('.pushbullet-dialog');
+  const overlay = document.querySelector('.dialog-overlay');
+  if (dialog) dialog.remove();
+  if (overlay) overlay.remove();
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+      <div class="notification-content">
+          <span class="notification-message">${message}</span>
+          <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Automatycznie usuń powiadomienie po 5 sekundach
+  setTimeout(() => {
+      if (notification.parentElement) {
+          notification.remove();
+      }
+  }, 5000);
+}
+
+// Dodaj nasłuchiwanie na przycisk synchronizacji po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', () => {
+  const syncButton = document.getElementById('sync-button');
+  if (syncButton) {
+      syncButton.addEventListener('click', handleSync);
+  }
+
+  // Sprawdź czy synchronizacja jest już skonfigurowana
+  const apiKey = localStorage.getItem('pushbullet_api_key');
+  if (apiKey) {
+      setupAutomaticSync();
+  }
+});
+
+// Dodaj nową funkcję inicjalizacji przycisku synchronizacji
+function initializeSyncButton() {
+    const syncButton = document.getElementById('sync-button');
+    if (syncButton) {
+        console.log('Initializing sync button');
+        
+        // Usuń wszystkie istniejące event listenery
+        const newSyncButton = syncButton.cloneNode(true);
+        syncButton.parentNode.replaceChild(newSyncButton, syncButton);
+        
+        // Dodaj nowy event listener
+        newSyncButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Sync button clicked');
+            if (typeof window.handleSync === 'function') {
+                try {
+                    await window.handleSync();
+                } catch (error) {
+                    console.error('Sync error:', error);
+                    showNotification('Synchronization failed: ' + error.message, 'error');
+                }
+            } else {
+                console.error('handleSync function not found');
+                showNotification('Synchronization function not available', 'error');
+            }
+        });
+    } else {
+        console.error('Sync button not found');
+    }
+}
+
+// Funkcja otwierająca okno ustawień
+function openMainSettings() {
+    const currentApiKey = localStorage.getItem('pushbullet_api_key') || '';
+    const autoSync = localStorage.getItem('auto_sync') === 'true';
+    const syncInterval = localStorage.getItem('sync_interval') || '5';
+    const inactivityTimeout = localStorage.getItem('inactivity_timeout') || '10';
+    const enableSyncCheck = localStorage.getItem('enable_sync_check') === 'true';
+    
+    const settingsDialog = document.createElement('div');
+    settingsDialog.className = 'main-settings-dialog';
+    settingsDialog.innerHTML = `
+        <h2 data-translate="mainSettings">Main Settings</h2>
+        
+        <div class="settings-section">
+            <h3 data-translate="syncSettings">Synchronization Settings</h3>
+            <p class="settings-description" data-translate="syncDescription">Synchronization allows you to study on two devices.</p>
+            <div class="settings-content">
+                <div class="settings-group">
+                    <label for="pushbullet-api-key" data-translate="pushbulletApiKey">Pushbullet API Key:</label>
+                    <div class="api-key-input">
+                        <input 
+                            type="password" 
+                            id="pushbullet-api-key" 
+                            value="${currentApiKey}"
+                            placeholder="Enter your Pushbullet API key"
+                        >
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)">
+                            👁
+                        </button>
+                        <button type="button" class="remove-api-key" onclick="removeApiKey()" data-translate="removeKey">✕</button>
+                    </div>
+                    <div class="api-key-info">
+                        <a href="https://www.pushbullet.com/#settings/account" 
+                           target="_blank" 
+                           data-translate="getApiKey">Get your API key</a>
+                        <span style="margin-left: 5px;" data-translate="apiKeyLimit">(Free account: Limited to 500 pushes per month, which should be sufficient for daily synchronization of 100 reviewed flashcards)</span>
+                    </div>
+                </div>
+
+                <div class="settings-group sync-settings">
+                    <!-- Przeniesiona opcja sprawdzania synchronizacji na początek -->
+                    <div class="sync-check-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enable-sync-check" ${enableSyncCheck ? 'checked' : ''}>
+                            <span data-translate="enableSyncCheck">Enable sync check on start</span>
+                        </label>
+                    </div>
+
+                    <div class="auto-sync-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-sync" ${autoSync ? 'checked' : ''}>
+                            <span data-translate="enableAutoSync">Enable automatic synchronization</span>
+                        </label>
+                    </div>
+                    
+                    <div class="sync-interval-option ${!autoSync ? 'disabled' : ''}">
+                        <label for="sync-interval" data-translate="syncInterval">Sync interval (minutes):</label>
+                        <select id="sync-interval" ${!autoSync ? 'disabled' : ''}>
+                            <option value="5" ${syncInterval === '5' ? 'selected' : ''}>5</option>
+                            <option value="10" ${syncInterval === '10' ? 'selected' : ''}>10</option>
+                            <option value="15" ${syncInterval === '15' ? 'selected' : ''}>15</option>
+                            <option value="30" ${syncInterval === '30' ? 'selected' : ''}>30</option>
+                            <option value="60" ${syncInterval === '60' ? 'selected' : ''}>60</option>
+                        </select>
+                    </div>
+
+                    <div class="inactivity-timeout-option">
+                        <label for="inactivity-timeout" data-translate="inactivityTimeout">Stop sync after inactivity (minutes):</label>
+                        <select id="inactivity-timeout">
+                            <option value="5" ${inactivityTimeout === '5' ? 'selected' : ''}>5</option>
+                            <option value="10" ${inactivityTimeout === '10' ? 'selected' : ''}>10</option>
+                            <option value="15" ${inactivityTimeout === '15' ? 'selected' : ''}>15</option>
+                            <option value="30" ${inactivityTimeout === '30' ? 'selected' : ''}>30</option>
+                            <option value="60" ${inactivityTimeout === '60' ? 'selected' : ''}>60</option>
+                        </select>
+                    </div>
+
+                    <div class="delete-notes-option">
+                        <button type="button" class="delete-notes-button" onclick="handleDeleteNotes()">
+                            <span data-translate="deleteAllNotes">Delete All Sync Notes</span>
+                        </button>
+                        <div class="delete-notes-info">
+                            <span data-translate="deleteNotesWarning">Warning: This will delete all synchronization notes from Pushbullet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+          <!--  <h3 data-translate="generalSettings">General Settings</h3>
+            <div class="settings-content">
+                <!-- Przyszłe opcje ustawień 
+            </div> -->
+        </div>
+
+        <div class="settings-footer">
+            <button class="settings-save" data-translate="save">Save</button>
+            <button class="settings-cancel" data-translate="cancel">Cancel</button>
+        </div>
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'settings-overlay';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(settingsDialog);
+
+    // Obsługa zmiany stanu auto-sync
+    const autoSyncCheckbox = settingsDialog.querySelector('#auto-sync');
+    const syncIntervalSelect = settingsDialog.querySelector('#sync-interval');
+    const syncIntervalOption = settingsDialog.querySelector('.sync-interval-option');
+
+    autoSyncCheckbox.addEventListener('change', function() {
+        syncIntervalSelect.disabled = !this.checked;
+        syncIntervalOption.classList.toggle('disabled', !this.checked);
+    });
+
+    // Obsługa przycisków
+    const saveButton = settingsDialog.querySelector('.settings-save');
+    const cancelButton = settingsDialog.querySelector('.settings-cancel');
+
+    saveButton.addEventListener('click', async () => {
+        const newApiKey = document.getElementById('pushbullet-api-key').value.trim();
+        const newAutoSync = document.getElementById('auto-sync').checked;
+        const newSyncInterval = document.getElementById('sync-interval').value;
+        const newInactivityTimeout = document.getElementById('inactivity-timeout').value;
+        const newEnableSyncCheck = document.getElementById('enable-sync-check').checked; // Dodane
+        
+        if (newApiKey !== currentApiKey) {
+            try {
+                const isValid = await initPushbullet(newApiKey);
+                if (isValid) {
+                    showNotification(translations[currentLanguage].apiKeySaved || 'API key saved successfully', 'success');
+                } else {
+                    showNotification(translations[currentLanguage].invalidApiKey || 'Invalid API key', 'error');
+                    return;
+                }
+            } catch (error) {
+                showNotification(translations[currentLanguage].apiKeyError || 'Error saving API key', 'error');
+                return;
+            }
+        }
+
+        // Zapisz ustawienia synchronizacji
+        localStorage.setItem('auto_sync', newAutoSync);
+        localStorage.setItem('sync_interval', newSyncInterval);
+        localStorage.setItem('inactivity_timeout', newInactivityTimeout);
+        localStorage.setItem('enable_sync_check', newEnableSyncCheck); // Dodane
+
+        if (newAutoSync) {
+            // Uruchom automatyczną synchronizację z nowym interwałem
+            setupAutomaticSync(parseInt(newSyncInterval) * 60 * 1000);
+            showNotification(translations[currentLanguage].autoSyncEnabled || 'Automatic sync enabled', 'success');
+        } else {
+            // Wyłącz automatyczną synchronizację
+            clearAutomaticSync();
+            showNotification(translations[currentLanguage].autoSyncDisabled || 'Automatic sync disabled', 'info');
+        }
+        
+        closeMainSettings();
+    });
+
+    cancelButton.addEventListener('click', closeMainSettings);
+    overlay.addEventListener('click', closeMainSettings);
+
+    // Przetłumacz teksty
+    changeLanguage();
+}
+
+// Funkcja zamykająca okno ustawień
+function closeMainSettings() {
+    const dialog = document.querySelector('.main-settings-dialog');
+    const overlay = document.querySelector('.settings-overlay');
+    
+    if (dialog) dialog.remove();
+    if (overlay) overlay.remove();
+}
+
+// Dodaj event listener do przycisku ustawień
+document.addEventListener('DOMContentLoaded', () => {
+    const settingsButton = document.getElementById('main-settings');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', openMainSettings);
+    }
+});
+
+// Funkcja do przełączania widoczności hasła
+function togglePasswordVisibility(button) {
+    const input = button.parentElement.querySelector('input');
+    if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🔒';
+    } else {
+        input.type = 'password';
+        button.textContent = '👁';
+    }
+}
+
+// Funkcja do usuwania wszystkich notatek
+async function handleDeleteNotes() {
+    const deleteButton = document.querySelector('.delete-notes-button');
+    if (!deleteButton) return;
+
+    const originalContent = deleteButton.innerHTML;
+
+    const confirmDialog = document.createElement('div');
+    confirmDialog.className = 'confirm-dialog';
+    confirmDialog.innerHTML = `
+        <div class="confirm-content">
+            <h3 data-translate="confirmDelete">Confirm Deletion</h3>
+            <p data-translate="confirmDeleteMessage">Are you sure you want to delete all synchronization notes? This action cannot be undone.</p>
+            <div class="confirm-buttons">
+                <button class="confirm-yes" data-translate="yes">Yes, delete all</button>
+                <button class="confirm-no" data-translate="no2">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(confirmDialog);
+    changeLanguage();
+
+    try {
+        const confirmed = await new Promise((resolve) => {
+            const yesButton = confirmDialog.querySelector('.confirm-yes');
+            const noButton = confirmDialog.querySelector('.confirm-no');
+
+            yesButton.addEventListener('click', () => {
+                confirmDialog.remove();
+                resolve(true);
+            });
+
+            noButton.addEventListener('click', () => {
+                confirmDialog.remove();
+                resolve(false);
+            });
+
+            confirmDialog.addEventListener('click', (e) => {
+                if (e.target === confirmDialog) {
+                    confirmDialog.remove();
+                    resolve(false);
+                }
+            });
+        });
+
+        if (!confirmed) return;
+
+        deleteButton.innerHTML = `
+            <span class="loading-icon">↻</span>
+            <span data-translate="deletingNotes">Deleting notes: 0/0</span>
+        `;
+        deleteButton.classList.add('deleting');
+        deleteButton.disabled = true;
+
+        const result = await window.deleteAllPushbulletNotes((deletedCount, skippedCount, totalNotes) => {
+            deleteButton.innerHTML = `
+                <span class="loading-icon">↻</span>
+                <span data-translate="deletingNotes">Deleting notes: ${deletedCount + skippedCount}/${totalNotes}</span>
+                <span class="delete-progress">(${Math.round(((deletedCount + skippedCount) / totalNotes) * 100)}%)</span>
+            `;
+        });
+
+        const message = `Processed ${result.totalNotes} notes: ${result.deletedCount} deleted, ${result.skippedCount} skipped, ${result.errorCount} errors`;
+        showNotification(message, result.errorCount > 0 ? 'warning' : 'success');
+
+    } catch (error) {
+        console.error('Error during deletion:', error);
+        showNotification(translations[currentLanguage].deleteError || 'Error deleting notes', 'error');
+    } finally {
+        if (deleteButton) {
+            deleteButton.innerHTML = originalContent;
+            deleteButton.classList.remove('deleting');
+            deleteButton.disabled = false;
+        }
+    }
+}
+
+// Funkcja do usuwania klucza API
+function removeApiKey() {
+    if (confirm(translations[currentLanguage].confirmRemoveKey || 'Are you sure you want to remove the API key?')) {
+        localStorage.removeItem('pushbullet_api_key');
+        localStorage.removeItem('last_sync_time');
+        document.getElementById('pushbullet-api-key').value = '';
+        showNotification(translations[currentLanguage].apiKeyRemoved || 'API key has been removed', 'success');
+        
+        // Wyłącz automatyczną synchronizację
+        localStorage.setItem('auto_sync', 'false');
+        clearAutomaticSync();
+        
+        // Odśwież widok ustawień
+        closeMainSettings();
+        openMainSettings();
+    }
+}
 
 
 

@@ -9,6 +9,7 @@
     <script src="stats.js" defer></script>
     <script src="translations.js"></script>
     <script src="algorithms.js"></script>
+    <script src="synchronization.js"></script>
     <script src="reps.js" defer></script>
     <style>
         /* Istniejące style... */
@@ -164,6 +165,10 @@
                 <a href="index.html" class="nav-button center-button" data-translate="myPlaylists">My Playlists</a>
             </div>
             <div class="header-right">
+                <button id="sync-button" class="sync-button" data-tooltip="syncButtonTooltip">
+                    <span class="sync-icon">↻</span>
+                    <span data-translate="sync">Sync</span>
+                </button>
                 <div class="language-select">
                     <select id="language-select" onchange="changeLanguage()">
                         <option value="en">English</option>
@@ -182,6 +187,7 @@
             <button onclick="exportFlashcards()" class="nav-button" data-translate="exportToFile">Export to File</button>
             <button onclick="importFlashcards()" class="nav-button" data-translate="importFromFile">Import from File</button>
             <button id="toggle-dictionary" class="nav-button" data-translate="dictionary">Dictionary</button>
+            <button id="main-settings" class="nav-button main-settings-button" data-tooltip="Settings">⋮</button>
         </nav>
   
         <div class="container">

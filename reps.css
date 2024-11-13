@@ -360,6 +360,8 @@ th {
     border: 1px solid #dee2e6;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100% !important;
+    height: auto !important;
 }
 
 @media (max-width: 768px) {
@@ -1205,7 +1207,7 @@ button[title]:hover::after {
 #learningProgressChart {
     margin-top: 2rem;
     margin-bottom: 3rem;
-    max-width: 600px;
+    max-width: 300px;
     display: block;
     margin-left: 0;
     margin-right: auto;
@@ -1213,6 +1215,8 @@ button[title]:hover::after {
     border: 1px solid #dee2e6;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100% !important;
+    height: auto !important;
 }
 
 .button-row {
@@ -1300,4 +1304,752 @@ button[title]:hover::after {
 
 .more-info a:hover {
     text-decoration: underline;
+}
+
+/* Style dla przycisku Sync */
+.sync-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    height: 32px;
+}
+
+.sync-button:hover {
+    background-color: #218838;
+}
+
+.sync-button.syncing {
+    background-color: #dc3545;
+    animation: pulse 2s infinite;
+    cursor: wait;
+}
+
+.sync-button.syncing:hover {
+    background-color: #c82333;
+}
+
+.sync-button.new-sync {
+    background-color: #dc3545;
+    animation: pulse 2s infinite;
+}
+
+.sync-button.new-sync:hover {
+    background-color: #c82333;
+}
+
+.sync-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.syncing .sync-icon {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Style dla powiadomień */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    max-width: 300px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-message {
+    flex-grow: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+/* Kolory powiadomień */
+.notification.info {
+    background-color:#17a2b8; /* #cce5ff; */
+
+}
+
+.notification.success {
+    background-color: #28a745; /* #d4edda; */
+
+}
+
+.notification.error {
+    background-color: #dc3545; /* #f8d7da; */
+
+}
+
+.notification.warning {
+    background-color: #f3c23c;
+
+}
+
+/* Animacje dla powiadomień */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.fade-out {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .notification {
+        top: auto;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+
+/* Style dla okna dialogowego Pushbullet */
+.pushbullet-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    width: 90%;
+    max-width: 400px;
+}
+
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.pushbullet-dialog h3 {
+    margin: 0 0 16px 0;
+    color: #333;
+}
+
+.pushbullet-dialog p {
+    margin: 0 0 16px 0;
+    color: #667;
+}
+
+.pushbullet-dialog input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Dodatkowe style dla przycisku w headerze */
+.header-right .sync-button {
+    margin-right: 10px;
+}
+
+/* Style dla przycisku podczas usuwania notatek */
+.sync-button.deleting {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Style dla przycisku MainSettings */
+.main-settings-button {
+    background: rgba(0, 0, 0, 0) !important; /* Przezroczyste tło */
+    color: #333 !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    min-width: 40px;
+    position: relative;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Zmiana tła przy najechaniu */
+.nav-button.main-settings-button:hover,
+.main-settings-button:hover {
+    background: rgba(0, 0, 0, 0.05) !important; /* Lekko przyciemnione tło przy hover */
+    color: #333 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.main-settings-button[data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background-color: #333;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.main-settings-button[data-tooltip]:hover::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    z-index: 1000;
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .main-settings-button {
+        width: 100%;
+        height: 40px;
+        margin: 5px 0;
+    }
+}
+
+/* Style dla okna ustawień głównych */
+.main-settings-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideDown 0.3s ease-out;
+}
+
+.main-settings-dialog h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 24px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.settings-section {
+    margin-bottom: 25px;
+}
+
+.settings-section h3 {
+    color: #555;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.settings-content {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.settings-footer button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.settings-save {
+    background-color: #28a745;
+    color: white;
+}
+
+.settings-save:hover {
+    background-color: #218838;
+}
+
+.settings-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.settings-cancel:hover {
+    background-color: #c82333;
+}
+
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 1000;
+    backdrop-filter: none;
+}
+
+/* Animacja dla okna dialogowego */
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+.main-settings-dialog {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Style dla sekcji API key */
+.settings-group {
+    margin-bottom: 15px;
+}
+
+.settings-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.api-key-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.api-key-input input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.toggle-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    color: #667;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: #333;
+}
+
+.api-key-info {
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.api-key-info a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.api-key-info a:hover {
+    text-decoration: underline;
+}
+
+/* Style dla opcji synchronizacji */
+.sync-settings {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.auto-sync-option {
+    margin-bottom: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.sync-interval-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.sync-interval-option.disabled {
+    opacity: 0.5;
+}
+
+.sync-interval-option select {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100px;
+}
+
+.sync-interval-option select:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+/* Style dla przycisku usuwania notatek */
+.delete-notes-option {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.delete-notes-button {
+    background-color: #6c757d; /* Zmieniono z #dc3545 (czerwony) na #6c757d (szary) */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: auto;
+    min-width: 120px;
+    transition: background-color 0.2s ease;
+}
+
+.delete-notes-button:hover {
+    background-color: #5a6268; /* Zmieniono z #c82333 na ciemniejszy odcień szarego */
+}
+
+.delete-notes-button.deleting {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.delete-notes-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6c757d; /* Zmieniono kolor tekstu ostrzeżenia również na szary */
+    text-align: center;
+    width: 100%;
+}
+
+.delete-notes-info span {
+    display: block;
+    line-height: 1.4;
+}
+
+/* Style dla okna potwierdzenia */
+.confirm-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+}
+
+.confirm-content {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 400px;
+    width: 90%;
+}
+
+.confirm-content h3 {
+    margin: 0 0 16px 0;
+    color: #dc3545;
+}
+
+.confirm-content p {
+    margin: 0 0 20px 0;
+    color: #667;
+    line-height: 1.5;
+}
+
+.confirm-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.confirm-yes {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirm-yes:hover {
+    background-color: #c82333;
+}
+
+.confirm-no {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirm-no:hover {
+    background-color: #5a6268;
+}
+
+/* Style dla ikony ładowania */
+.loading-icon {
+    display: inline-block;
+    animation: rotate 1s linear infinite;
+    margin-right: 8px;
+}
+
+.delete-notes-button.deleting {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.delete-notes-button.deleting .loading-icon {
+    display: inline-block;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Style dla wskaźnika postępu usuwania */
+.delete-progress {
+    margin-left: 8px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.delete-notes-button.deleting {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Style dla opisu w sekcji ustawień */
+.settings-description {
+    margin: 0 0 15px 0;
+    color: #667;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.sync-warning {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #666;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Style dla przycisku sync z nową synchronizacją */
+.sync-button.new-sync {
+    background-color: #dc3545;
+    animation: pulse 2s infinite;
+}
+
+.sync-button.new-sync:hover {
+    background-color: #c82333;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Style dla tooltipa przycisku sync */
+.sync-button[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -70px; /* Zwiększona odległość ze względu na dłuższy tekst */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background-color: #333;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    white-space: normal; /* Pozwala na zawijanie tekstu */
+    max-width: 300px; /* Maksymalna szerokość tooltipa */
+    width: max-content;
+    text-align: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.sync-button[data-tooltip]:hover::before {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Dodaj strzałkę do tooltipa */
+.sync-button[data-tooltip]::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #333 transparent;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sync-button[data-tooltip]:hover::after {
+    visibility: visible;
+    opacity: 1;
+}
+
+.remove-api-key {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    transition: color 0.2s ease;
+}
+
+.remove-api-key:hover {
+    color: #000;
 }
