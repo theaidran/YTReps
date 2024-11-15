@@ -532,6 +532,9 @@ function addWordTranslationPair(videoId, word = '', context = '', translation = 
         var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 6);
         smoothScrollTo(targetScrollPosition, 500);
     }, 100);
+	
+    //Zapisz aktualny stan notki
+    saveNote2(videoId);	
 }
 
 function autoResize() {
@@ -546,6 +549,28 @@ function adjustAllTextareas() {
     document.querySelectorAll('.word-translation-pair textarea').forEach(textarea => {
         autoResize.call(textarea);
     });
+}
+
+function saveNote2(videoId) {
+    var listItem = document.getElementById(videoId);
+    var pairs = listItem.querySelectorAll('.word-translation-pair');
+    var notes = [];
+    pairs.forEach(pair => {
+        var word = pair.querySelector('.word-input').value.trim();
+        var context = pair.querySelector('.context-input').value.trim();
+        var translation = pair.querySelector('.translation-input').value.trim();
+        if (word || context || translation) {
+            notes.push({ word, context, translation });
+        }
+    });
+
+    var video = watchedVideos[currentPlaylistId].find(v => v.id === videoId);
+    if (video) {
+        video.notes = notes;
+        saveWatchedVideosToLocalStorage();
+        //updateWatchedVideosList();
+    }
+	
 }
 
 function saveNote(videoId) {
