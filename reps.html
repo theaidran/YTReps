@@ -165,10 +165,17 @@
                 <a href="index.html" class="nav-button center-button" data-translate="myPlaylists">My Playlists</a>
             </div>
             <div class="header-right">
-                <button id="sync-button" class="sync-button" data-tooltip="syncButtonTooltip">
-                    <span class="sync-icon">↻</span>
-                    <span data-translate="sync">Sync</span>
-                </button>
+                <div class="buttons-container">
+                    <button id="save-button" class="sync-button" data-tooltip="saveTooltip">
+                        <span class="sync-icon">↓</span>
+                        <span data-translate="save">Save</span>
+                    </button>
+                    <button id="sync-button" class="sync-button" data-tooltip="syncButtonTooltip">
+                        <span class="sync-icon">↻</span>
+                        <span data-translate="sync">Sync</span>
+                    </button>
+                    <div id="save-link" class="save-link"></div>
+                </div>
                 <div class="language-select">
                     <select id="language-select" onchange="changeLanguage()">
                         <option value="en">English</option>

@@ -564,56 +564,77 @@ function cancelEdit() {
     window.scrollTo(0, lastScrollPosition);  // Dodaj tę linię
 }
 
-// Funkcja do eksportu fiszek
-function exportFlashcards() {
+// Zmodyfikowana funkcja exportFlashcards
+function createExportBlob() {
   // Przygotuj dane w formacie CSV
   let csvContent = "front;back;context;MediaUrl;AudioUrl;Algorithm;FirstReviewDate;LastReviewed;NextReview;Difficulty;Streak;EasinessFactor;Interval;Repetitions;LeitnerBox\n";
   
   const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
-    flashcards.forEach(card => {
-        const row = [
-            // Podstawowe pola (zachowane oryginalne nazwy)
-            card.word.replace(/;/g, ','),          // front
-            card.translation.replace(/;/g, ','),   // back
-            card.context ? card.context.replace(/;/g, ',') : '', // context
-            
-            // Pozostałe pola
-            card.mediaUrl || '',
-            card.audioUrl || '',
-            currentAlgorithm,
-            card.firstReviewDate || '',
-            card.lastReviewed || '',
-            card.nextReview || '',
-            
-            // Pola dla standardowego algorytmu
-            card.difficulty || '',
-            card.streak || 0,
-            
-            // Pola dla SuperMemo
-            card.easinessFactor || 2.5,
-            card.interval || 0,
-            card.repetitions || 0,
-            
-            // Pola dla systemu Leitnera
-            card.leitnerBox || 1
-        ].join(';');
-        
-        csvContent += row + '\n';
-    });
+  flashcards.forEach(card => {
+      const row = [
+          // Podstawowe pola (zachowane oryginalne nazwy)
+          card.word.replace(/;/g, ','),          // front
+          card.translation.replace(/;/g, ','),   // back
+          card.context ? card.context.replace(/;/g, ',') : '', // context
+          
+          // Pozostałe pola
+          card.mediaUrl || '',
+          card.audioUrl || '',
+          currentAlgorithm,
+          card.firstReviewDate || '',
+          card.lastReviewed || '',
+          card.nextReview || '',
+          
+          // Pola dla standardowego algorytmu
+          card.difficulty || '',
+          card.streak || 0,
+          
+          // Pola dla SuperMemo
+          card.easinessFactor || 2.5,
+          card.interval || 0,
+          card.repetitions || 0,
+          
+          // Pola dla systemu Leitnera
+          card.leitnerBox || 1
+      ].join(';');
+      
+      csvContent += row + '\n';
+  });
 
-    // Utwórz i pobierz plik
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'flashcards_export.csv');
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Utwórz i zwróć blob
+  return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 }
+
+// Oryginalna funkcja exportFlashcards (bez zmian)
+function exportFlashcards() {
+  const blob = createExportBlob();
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'flashcards_export.csv');
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Nowa funkcja do wysyłania eksportu przez Pushbullet
+async function sendExportToPushbullet() {
+    try {
+        const blob = createExportBlob();
+        const result = await window.sendCsvToPushbullet(blob);
+        console.log('Export result:', result);
+        return result;
+    } catch (error) {
+        console.error('Error sending export to Pushbullet:', error);
+        throw error;
+    }
+}
+
+// Eksportuj nową funkcję
+window.sendExportToPushbullet = sendExportToPushbullet;
 
 function escapeCSV(str) {
   if (str == null) return '';
@@ -869,12 +890,31 @@ function initializeApp() {
 
     // Dodaj domyślne ustawienie dla enable_sync_check
     if (!localStorage.getItem('enable_sync_check')) {
-        localStorage.setItem('enable_sync_check', 'true'); // Domyślnie włączone
+        localStorage.setItem('enable_sync_check', 'false'); // Domyślnie włączone
     }
 
     // Sprawdź czy sprawdzanie synchronizacji jest włączone
     if (localStorage.getItem('enable_sync_check') === 'true') {
         initSyncCheck();
+    }
+
+    // Dodaj inicjalizację ustawienia export_to_server jeśli nie istnieje
+    if (localStorage.getItem('export_to_server') === null) {
+        localStorage.setItem('export_to_server', 'false'); // Domyślnie wyłączone
+    }
+    
+    // Dodaj wywołanie funkcji aktualizującej widoczność przycisku Save
+    updateSaveButtonVisibility();
+
+    // Dodaj obsługę przycisku Save
+    const saveButton = document.getElementById('save-button');
+    if (saveButton) {
+        saveButton.addEventListener('click', handleSave);
+    }
+
+    // Sprawdź pliki save na serwerze
+    if (typeof window.checkSaveFiles === 'function') {
+        window.checkSaveFiles();
     }
 }
 
@@ -1395,7 +1435,7 @@ function openReviewSettings() {
             </p>
         </div>
         <div class="more-info">
-            <p><span data-translate="moreInfo">More information</span>: <a href="https://github.com/theaidran/6_minutes_English_with_Reps" target="_blank">https://github.com/theaidran/6_minutes_English_with_Reps</a></p>
+            <p><span data-translate="moreInfo">More information</span>: <a href="https://github.com/theaidran/YoutubeReps" target="_blank">https://github.com/theaidran/YoutubeReps</a></p>
         </div>
         <div class="button-group">
             <button type="button" onclick="saveAlgorithmSettings()" 
@@ -1639,6 +1679,8 @@ function deleteAllFlashcards() {
             updateFlashcardTable();
             updateStats();
             drawLearningProgressChart();
+            // Resetujemy czas ostatniej synchronizacji
+            localStorage.setItem('last_sync_time', '0');
             confirmDialog.remove();
             resolve(true);
         });
@@ -1944,10 +1986,13 @@ async function handleSync() {
         syncButton.querySelector('[data-translate="sync"]').textContent = 
             translations[currentLanguage].syncInProgress;
 
+
+
         await waitForFlashcards();
         await fetchFromPushbullet();
         await syncWithPushbullet();
         //updateLastSyncTime();
+
 
         // Po udanej synchronizacji usuń klasę new-sync
         syncButton.classList.remove('new-sync');
@@ -1966,6 +2011,22 @@ async function handleSync() {
         syncButton.querySelector('[data-translate="sync"]').textContent = 
             translations[currentLanguage].sync;
     }
+
+                    // Dodajemy wywołanie funkcji Save po synchronizacji
+                    const exportToServer = localStorage.getItem('export_to_server') === 'true';
+                    // if (exportToServer) { //zawsze wysyłaj plik 
+                         try {
+                             await sendExportToPushbullet();
+                             // Odświeżamy link do pobrania
+                             if (typeof window.checkSaveFiles === 'function') {
+                                 await window.checkSaveFiles();
+                             }
+                         } catch (error) {
+                             console.error('Save during sync failed:', error);
+                             // Kontynuujemy synchronizację nawet jeśli save się nie powiedzie
+                         }
+                    // }
+    
 }
 
 // Dodaj funkcję pomocniczą do czekania na inicjalizację fiszek
@@ -2124,6 +2185,7 @@ function openMainSettings() {
     const syncInterval = localStorage.getItem('sync_interval') || '5';
     const inactivityTimeout = localStorage.getItem('inactivity_timeout') || '10';
     const enableSyncCheck = localStorage.getItem('enable_sync_check') === 'true';
+    const exportToServer = localStorage.getItem('export_to_server') === 'true';
     
     const settingsDialog = document.createElement('div');
     settingsDialog.className = 'main-settings-dialog';
@@ -2146,7 +2208,7 @@ function openMainSettings() {
                         <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)">
                             👁
                         </button>
-                        <button type="button" class="remove-api-key" onclick="removeApiKey()" data-translate="removeKey">✕</button>
+                        <button type="button" class="remove-api-key" onclick="removeApiKey()">✕</button>
                     </div>
                     <div class="api-key-info">
                         <a href="https://www.pushbullet.com/#settings/account" 
@@ -2157,7 +2219,15 @@ function openMainSettings() {
                 </div>
 
                 <div class="settings-group sync-settings">
-                    <!-- Przeniesiona opcja sprawdzania synchronizacji na początek -->
+                    <!-- Opcja Export to server -->
+                    <div class="export-server-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="export-to-server" ${exportToServer ? 'checked' : ''}>
+                            <span data-translate="exportToServer">Export flashcards to server as a save file</span>
+                        </label>
+                    </div>
+
+                    <!-- Opcja Enable sync check -->
                     <div class="sync-check-option">
                         <label class="checkbox-label">
                             <input type="checkbox" id="enable-sync-check" ${enableSyncCheck ? 'checked' : ''}>
@@ -2165,6 +2235,7 @@ function openMainSettings() {
                         </label>
                     </div>
 
+                    <!-- Pozostałe opcje -->
                     <div class="auto-sync-option">
                         <label class="checkbox-label">
                             <input type="checkbox" id="auto-sync" ${autoSync ? 'checked' : ''}>
@@ -2244,7 +2315,8 @@ function openMainSettings() {
         const newAutoSync = document.getElementById('auto-sync').checked;
         const newSyncInterval = document.getElementById('sync-interval').value;
         const newInactivityTimeout = document.getElementById('inactivity-timeout').value;
-        const newEnableSyncCheck = document.getElementById('enable-sync-check').checked; // Dodane
+        const newEnableSyncCheck = document.getElementById('enable-sync-check').checked;
+        const newExportToServer = document.getElementById('export-to-server').checked; // Dodane
         
         if (newApiKey !== currentApiKey) {
             try {
@@ -2265,7 +2337,8 @@ function openMainSettings() {
         localStorage.setItem('auto_sync', newAutoSync);
         localStorage.setItem('sync_interval', newSyncInterval);
         localStorage.setItem('inactivity_timeout', newInactivityTimeout);
-        localStorage.setItem('enable_sync_check', newEnableSyncCheck); // Dodane
+        localStorage.setItem('enable_sync_check', newEnableSyncCheck);
+        localStorage.setItem('export_to_server', newExportToServer); // Dodane
 
         if (newAutoSync) {
             // Uruchom automatyczną synchronizację z nowym interwałem
@@ -2278,6 +2351,9 @@ function openMainSettings() {
         }
         
         closeMainSettings();
+
+        // Dodaj wywołanie funkcji aktualizującej widoczność przycisku Save
+        updateSaveButtonVisibility();
     });
 
     cancelButton.addEventListener('click', closeMainSettings);
@@ -2412,9 +2488,66 @@ function removeApiKey() {
     }
 }
 
+// Dodaj funkcję do aktualizacji widoczności przycisku Save
+function updateSaveButtonVisibility() {
+    const saveButton = document.getElementById('save-button');
+    const exportToServer = localStorage.getItem('export_to_server') === 'true';
+    
+    if (saveButton) {
+        saveButton.classList.toggle('show', exportToServer);
+    }
+}
+
+// Dodaj funkcję obsługi przycisku Save
+// Funkcja obsługi przycisku Save
+async function handleSave() {
+    const saveButton = document.getElementById('save-button');
+    const saveLinkContainer = document.getElementById('save-link');
+    const exportToServer = localStorage.getItem('export_to_server') === 'true';
+    
+    if (!saveButton || !saveLinkContainer || !exportToServer) return;
+
+    try {
+        saveLinkContainer.style.display = 'none';
+        saveLinkContainer.innerHTML = '';
+
+        saveButton.classList.add('syncing');
+        saveButton.querySelector('[data-translate="save"]').textContent = 
+            translations[currentLanguage].savingInProgress || 'Saving...';
+
+        console.log('Starting save process...');
+        const result = await sendExportToPushbullet();
+        console.log('Save result:', result);
+
+        if (result && result.file_url) {
+            console.log('Creating download link for:', result.file_url);
+            // Wyciągamy nazwę pliku z URL
+            const fileName = result.file_name || result.file_url.split('/').pop();
+            saveLinkContainer.innerHTML = `
+                <a href="${result.file_url}" target="_blank">
+                    Download ${fileName}
+                </a>
+            `;
+            saveLinkContainer.style.display = 'block';
+        } else {
+            console.log('No file URL in result:', result);
+        }
+
+        showNotification(translations[currentLanguage].saveSuccess || 'Flashcards saved successfully', 'success');
+    } catch (error) {
+        console.error('Save failed:', error);
+        showNotification(translations[currentLanguage].saveError || 'Error saving flashcards', 'error');
+    } finally {
+        saveButton.classList.remove('syncing');
+        saveButton.querySelector('[data-translate="save"]').textContent = 
+            translations[currentLanguage].save || 'Save';
+    }
+}
 
 
 
+// Eksportujemy funkcje
+window.sendExportToPushbullet = sendExportToPushbullet;
 
 
 

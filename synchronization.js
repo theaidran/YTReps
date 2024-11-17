@@ -105,13 +105,19 @@ async function fetchNotes() {
         let hasMore = true;
         
         // Ustaw datę początkową na 5 lat temu
-        const fiveYearsAgo = new Date();
-        fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
-        const modifiedAfter = Math.floor(fiveYearsAgo.getTime() / 1000);
+       // const fiveYearsAgo = new Date();
+      //  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+     //   const modifiedAfter = Math.floor(fiveYearsAgo.getTime() / 1000);
+
+        // Używamy czasu ostatniej synchronizacji
+        const lastSyncTime = localStorage.getItem('last_sync_time') || '0';
+        // Konwertujemy na sekundy dla API Pushbullet
+       const modifiedAfter = Math.floor(parseInt(lastSyncTime) / 1000);
 
         while (hasMore) {
             const url = new URL(`${PUSHBULLET_API_URL}/pushes`);
             url.searchParams.append('limit', '500');
+            url.searchParams.append('active', 'true');
             url.searchParams.append('modified_after', modifiedAfter);
             if (cursor) {
                 url.searchParams.append('cursor', cursor);
@@ -306,6 +312,8 @@ async function fetchFromPushbullet() {
 
     // Grupuj notatki według zestawów (timestamp i device_id)
     const noteSets = new Map(); // Map<setKey, Map<chunkNumber, note>>
+    
+    const lastSyncTime = parseInt(localStorage.getItem('last_sync_time') || '0');
 
     // Najpierw pogrupuj wszystkie notatki
     for (const note of notes) {
@@ -313,7 +321,7 @@ async function fetchFromPushbullet() {
             if (!note.title?.startsWith('sync_')) continue;
             
             const syncData = JSON.parse(note.body);
-            if (syncData.device_id === deviceId) continue; // Pomiń własne notatki
+            if (syncData.device_id === deviceId && lastSyncTime > 0 ) continue; // Pomiń własne notatki
             
             const setKey = `${syncData.device_id}_${syncData.timestamp}`;
             if (!noteSets.has(setKey)) {
@@ -738,4 +746,134 @@ function updateLastSyncTime() {
 window.updateLastSyncTime = updateLastSyncTime;
 window.checkNewSyncs = checkNewSyncs;
 window.initSyncCheck = initSyncCheck;
+
+// Funkcja do wysyłania pliku CSV przez Pushbullet
+async function sendCsvToPushbullet(csvContent) {
+    const apiKey = localStorage.getItem('pushbullet_api_key');
+    if (!apiKey) {
+        throw new Error('No API key found');
+    }
+
+    try {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        const now = new Date();
+        const dateStr = now.getFullYear() + '_' +
+            String(now.getMonth() + 1).padStart(2, '0') + '_' +
+            String(now.getDate()).padStart(2, '0') + '_' +
+            String(now.getHours()).padStart(2, '0') + '_' +
+            String(now.getMinutes()).padStart(2, '0') + '_' +
+            String(now.getSeconds()).padStart(2, '0');
+            
+        const fileName = `flashcards_save_${dateStr}.csv`;
+
+        const uploadRequestData = {
+            file_name: fileName,
+            file_type: 'text/csv'
+        };
+
+        const uploadResponse = await fetch(`${PUSHBULLET_API_URL}/upload-request`, {
+            method: 'POST',
+            headers: {
+                'Access-Token': apiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(uploadRequestData)
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error('Failed to get upload URL');
+        }
+
+        const uploadData = await uploadResponse.json();
+        console.log('Upload data received:', uploadData);
+
+        const formData = new FormData();
+        for (const [key, value] of Object.entries(uploadData.data)) {
+            formData.append(key, value);
+        }
+        formData.append('file', blob, fileName);
+
+        const fileUploadResponse = await fetch(uploadData.upload_url, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!fileUploadResponse.ok) {
+            console.error('Upload response:', fileUploadResponse);
+            throw new Error('Failed to upload file');
+        }
+
+        const pushResponse = await fetch(`${PUSHBULLET_API_URL}/pushes`, {
+            method: 'POST',
+            headers: {
+                'Access-Token': apiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: 'file',
+                file_name: fileName,
+                file_type: 'text/csv',
+                file_url: uploadData.file_url,
+                title: 'Flashcards Save'
+            })
+        });
+
+        if (!pushResponse.ok) {
+            throw new Error('Failed to create push');
+        }
+
+        console.log('CSV file successfully sent to Pushbullet');
+        return uploadData; // Zwracamy cały obiekt uploadData, który zawiera file_url
+    } catch (error) {
+        console.error('Error sending CSV to Pushbullet:', error);
+        throw error;
+    }
+}
+
+// Eksportuj funkcję do globalnego obiektu window
+window.sendCsvToPushbullet = sendCsvToPushbullet;
+
+// Funkcja do sprawdzania plików save na serwerze
+async function checkSaveFiles() {
+    const apiKey = localStorage.getItem('pushbullet_api_key');
+    const exportToServer = localStorage.getItem('export_to_server') === 'true';
+    if (!apiKey ) return; //|| !exportToServer
+
+    try {
+        const response = await fetch(`${PUSHBULLET_API_URL}/pushes?limit=500&active=true`, {
+            headers: {
+                'Access-Token': apiKey,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data.pushes && data.pushes.length > 0) {
+            const saveFile = data.pushes
+                .find(push => push.file_name && 
+                            push.file_name.startsWith('flashcards_save_') && 
+                            push.file_url);
+
+            if (saveFile) {
+                const saveLinkContainer = document.getElementById('save-link');
+                if (saveLinkContainer) {
+                    saveLinkContainer.innerHTML = `
+                        <a href="${saveFile.file_url}" target="_blank">
+                            Download ${saveFile.file_name}
+                        </a>
+                    `;
+                    saveLinkContainer.style.display = 'block';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking save files:', error);
+    }
+}
+
+// Eksportuj funkcję
+window.checkSaveFiles = checkSaveFiles;
 

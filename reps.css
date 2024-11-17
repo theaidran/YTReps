@@ -1997,7 +1997,7 @@ button[title]:hover::after {
 .sync-button[data-tooltip]::before {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: -70px; /* Zwiększona odległość ze względu na dłuższy tekst */
+    bottom: -80px;
     left: 50%;
     transform: translateX(-50%);
     padding: 8px 12px;
@@ -2005,37 +2005,23 @@ button[title]:hover::after {
     color: white;
     font-size: 14px;
     border-radius: 4px;
-    white-space: normal; /* Pozwala na zawijanie tekstu */
-    max-width: 300px; /* Maksymalna szerokość tooltipa */
+    white-space: normal;
+    max-width: 300px;
     width: max-content;
     text-align: center;
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.3s;
     z-index: 1000;
+    transition-delay: 1s; /* Dodane: opóźnienie 1 sekunda */
+}
+
+/* Usuwamy całkowicie strzałkę */
+.sync-button[data-tooltip]::after {
+    display: none;
 }
 
 .sync-button[data-tooltip]:hover::before {
-    visibility: visible;
-    opacity: 1;
-}
-
-/* Dodaj strzałkę do tooltipa */
-.sync-button[data-tooltip]::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 6px;
-    border-style: solid;
-    border-color: transparent transparent #333 transparent;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.sync-button[data-tooltip]:hover::after {
     visibility: visible;
     opacity: 1;
 }
@@ -2052,4 +2038,142 @@ button[title]:hover::after {
 
 .remove-api-key:hover {
     color: #000;
+}
+
+.header-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 0px;
+    overflow: visible; /* Dodane: pozwala na wyświetlanie elementów poza kontenerem */
+}
+
+#save-button, #sync-button {
+    margin-right: 0; /* Usuwamy wszystkie dodatkowe marginesy */
+}
+
+.save-container {
+    position: relative;
+    display: inline-block;
+}
+
+.save-link {
+    position: absolute;
+    top: 100%;
+    left: -100px; /* Przesunięcie w lewo */
+    margin-top: 5px;
+    font-size: 12px;
+    z-index: 1000;
+    white-space: nowrap;
+    padding-right: 10px;
+    pointer-events: auto; /* Dodane: zapewnia działanie linku */
+    width: fit-content; /* Dodane: szerokość dopasowana do zawartości */
+}
+
+.save-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.save-link a:hover {
+    text-decoration: underline;
+}
+
+/* Style dla przycisku Save */
+#save-button {
+    min-width: 85px; /* Dodane: stała minimalna szerokość */
+    width: 85px;    /* Dodane: stała szerokość */
+}
+
+#save-button .sync-icon {
+    animation: none !important; /* Wyłączenie animacji dla ikony w przycisku Save */
+}
+
+/* Zachowujemy animację tylko dla przycisku Sync */
+#sync-button .sync-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+#sync-button.syncing .sync-icon {
+    animation: rotate 1s linear infinite;
+}
+
+#save-button {
+    display: none; /* Domyślnie ukryty */
+}
+
+#save-button.show {
+    display: flex; /* Pokazujemy tylko gdy ma klasę show */
+}
+
+.header-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 0px;
+    overflow: visible;
+}
+
+.buttons-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 8px;  /* usuwa lukę z prawej */
+}
+
+#save-button {
+    display: none;
+}
+
+#save-button.show {
+    display: flex;
+}
+
+.save-link {
+    position: absolute;
+    top: 100%;
+    /* left: -105px; */
+    margin-top: 5px;
+    font-size: 12px;
+    z-index: 1000;
+    white-space: nowrap;
+ 
+}
+
+.save-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.save-link a:hover {
+    text-decoration: underline;
+}
+
+/* Dodajemy media query dla małych ekranów */
+@media (max-width: 768px) {
+    .save-link {
+        left: 0; /* Resetujemy przesunięcie w lewo */
+   
+      
+    }
+}
+
+/* Resetowanie opóźnienia gdy myszka opuści przycisk */
+.sync-button[data-tooltip]:not(:hover)::before {
+    transition-delay: 0s;
+}
+
+/* Media query dla małych ekranów */
+@media (max-width: 768px) {
+    #sync-button[data-tooltip]::before {
+        top: -10px;
+        bottom: -10px;
+        left: 70px; /* Resetujemy left */
+        right: 0; /* Przesuwamy w prawo */
+        transform: none; /* Usuwamy transformację */
+    }
 }
