@@ -8,7 +8,7 @@ https://github.com/user-attachments/assets/f9cb1e82-96e7-40bb-81fb-712b24d35e8c
 A simple web application to enhance English language learning through watching videos and repeating them with a flashcard system. 
 The main goal here was to create an app as a simple HTML file, which you run straight from your desktop, no servers, no frameworks, no API required.
 Basicly, it is a clean YouTube player where you can add notes to each video and save it as a flashcard. Later, you can switch to the Repetitions page and start the review process.
-It has compatibility with Anki format, so you can export/inport flashcards to your favorite mobile/desktop app.
+It has compatibility with Anki format, so you can export/import flashcards to your favorite mobile/desktop app.
 Also, it has integration of dictionaries like onelook.com, and you can add your own. But due to fact it is just a simple iframe, some websites may not work due to their policy.  
 
 ## How It Works
