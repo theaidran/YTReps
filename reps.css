@@ -2177,3 +2177,76 @@ button[title]:hover::after {
         transform: none; /* Usuwamy transformację */
     }
 }
+
+/* Dodaj style dla nowej opcji */
+.auto-save-option {
+    margin-bottom: 15px;
+}
+
+.auto-save-option .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.auto-save-option .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.auto-save-option .checkbox-label span {
+    flex: 1; /* Pozwala tekstowi się zawijać */
+}
+
+/* Ujednolicone style dla wszystkich opcji w ustawieniach */
+.export-server-option,
+.auto-save-option,
+.sync-check-option,
+.sync-after-review-option,
+.auto-sync-option {
+    margin-bottom: 15px;
+}
+
+/* Usuń specyficzne style dla poszczególnych opcji */
+.auto-save-option .checkbox-label,
+.export-server-option .checkbox-label,
+.sync-check-option .checkbox-label {
+    /* Usuń specyficzne style, będą dziedziczyć z .settings-group .checkbox-label */
+}
+
+/* Dodaj style dla tooltipa w ustawieniach */
+.settings-group .checkbox-label[data-tooltip] {
+    position: relative;
+}
+
+.settings-group .checkbox-label[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 0;
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: normal;
+    max-width: 300px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+    transition-delay: 1s;
+    z-index: 1000;
+    line-height: 1.4;
+}
+
+.settings-group .checkbox-label[data-tooltip]:hover::before {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Resetowanie opóźnienia gdy myszka opuści element */
+.settings-group .checkbox-label[data-tooltip]:not(:hover)::before {
+    transition-delay: 0s;
+}

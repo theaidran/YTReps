@@ -799,21 +799,6 @@ function initializeApp() {
     if (!localStorage.getItem('gradeButtonMode')) {
         localStorage.setItem('gradeButtonMode', 'four');
     }
-    if (!localStorage.getItem('auto_sync')) {
-        localStorage.setItem('auto_sync', 'false');
-    }
-    if (!localStorage.getItem('sync_interval')) {
-        localStorage.setItem('sync_interval', '5');
-    }
-    // Zmiana: sprawdzamy czy wartość już istnieje
-    if (localStorage.getItem('enable_sync_check') === null) {
-        localStorage.setItem('enable_sync_check', 'true'); // Domyślnie włączone tylko przy pierwszym uruchomieniu
-    }
-    
-    // Sprawdź czy sprawdzanie synchronizacji jest włączone
-    if (localStorage.getItem('enable_sync_check') === 'true') {
-        initSyncCheck();
-    }
 
     // Najpierw próbujemy załadować fiszki z localStorage
     const savedFlashcards = localStorage.getItem('fiszki');
@@ -888,9 +873,15 @@ function initializeApp() {
    //     window.initSyncCheck();
   //  }
 
-    // Dodaj domyślne ustawienie dla enable_sync_check
-    if (!localStorage.getItem('enable_sync_check')) {
-        localStorage.setItem('enable_sync_check', 'false'); // Domyślnie włączone
+    if (!localStorage.getItem('auto_sync')) {
+        localStorage.setItem('auto_sync', 'false');
+    }
+    if (!localStorage.getItem('sync_interval')) {
+        localStorage.setItem('sync_interval', '5');
+    }
+    // Zmiana: sprawdzamy czy wartość już istnieje
+    if (localStorage.getItem('enable_sync_check') === null) {
+        localStorage.setItem('enable_sync_check', 'true'); // Domyślnie włączone tylko przy pierwszym uruchomieniu
     }
 
     // Sprawdź czy sprawdzanie synchronizacji jest włączone
@@ -898,9 +889,20 @@ function initializeApp() {
         initSyncCheck();
     }
 
-    // Dodaj inicjalizację ustawienia export_to_server jeśli nie istnieje
+    // Dodaj inicjalizację ustawienia export_to_server jeśli nie istnieje (save button)
     if (localStorage.getItem('export_to_server') === null) {
         localStorage.setItem('export_to_server', 'false'); // Domyślnie wyłączone
+    }
+
+    // Dodaj inicjalizację ustawienia enable_auto_save jeśli nie istnieje (auto save during sync)
+    if (localStorage.getItem('enable_auto_save') === null) {
+        localStorage.setItem('enable_auto_save', 'false'); // Domyślnie wyłączone
+    }
+
+    
+    // Dodaj inicjalizację ustawienia enable_sync_after_review jeśli nie istnieje (auto sync after review)
+    if (localStorage.getItem('enable_sync_after_review') === null) {
+        localStorage.setItem('enable_sync_after_review', 'true'); // Domyślnie wyłączone
     }
     
     // Dodaj wywołanie funkcji aktualizującej widoczność przycisku Save
@@ -1950,6 +1952,18 @@ function showNextFlashcard() {
         updateFlashcardTable();
         updateStats();
         
+        // Dodaj automatyczną synchronizację po zakończeniu powtórki
+        const enableSyncAfterReview = localStorage.getItem('enable_sync_after_review') === 'true';
+        if (enableSyncAfterReview) {
+            setTimeout(async () => {
+                try {
+                    await handleSync();
+                } catch (error) {
+                    console.error('Auto sync after review failed:', error);
+                }
+            }, 1); // Małe opóźnienie przed synchronizacją
+        }
+        
         setTimeout(() => {
             showReviewModeSelection();
         }, 2000);
@@ -2013,8 +2027,8 @@ async function handleSync() {
     }
 
                     // Dodajemy wywołanie funkcji Save po synchronizacji
-                    const exportToServer = localStorage.getItem('export_to_server') === 'true';
-                    // if (exportToServer) { //zawsze wysyłaj plik 
+                    const enable_auto_save = localStorage.getItem('enable_auto_save') === 'true';
+                     if (enable_auto_save) { //zawsze wysyłaj plik 
                          try {
                              await sendExportToPushbullet();
                              // Odświeżamy link do pobrania
@@ -2025,7 +2039,7 @@ async function handleSync() {
                              console.error('Save during sync failed:', error);
                              // Kontynuujemy synchronizację nawet jeśli save się nie powiedzie
                          }
-                    // }
+                     }
     
 }
 
@@ -2186,6 +2200,8 @@ function openMainSettings() {
     const inactivityTimeout = localStorage.getItem('inactivity_timeout') || '10';
     const enableSyncCheck = localStorage.getItem('enable_sync_check') === 'true';
     const exportToServer = localStorage.getItem('export_to_server') === 'true';
+    const enableAutoSave = localStorage.getItem('enable_auto_save') === 'true';
+    const enableSyncAfterReview = localStorage.getItem('enable_sync_after_review') === 'true'; // Dodane
     
     const settingsDialog = document.createElement('div');
     settingsDialog.className = 'main-settings-dialog';
@@ -2219,11 +2235,19 @@ function openMainSettings() {
                 </div>
 
                 <div class="settings-group sync-settings">
-                    <!-- Opcja Export to server -->
+                    <!-- Opcja Export to server z tooltipem -->
                     <div class="export-server-option">
-                        <label class="checkbox-label">
+                        <label class="checkbox-label" data-tooltip="${translations[currentLanguage].exportToServerTooltip}">
                             <input type="checkbox" id="export-to-server" ${exportToServer ? 'checked' : ''}>
-                            <span data-translate="exportToServer">Export flashcards to server as a save file</span>
+                            <span data-translate="exportToServer">Enable Save button (useful if free 500 pushes is not enough)</span>
+                        </label>
+                    </div>
+
+                    <!-- Dodajemy nową opcję Auto Save -->
+                    <div class="auto-save-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enable-auto-save" ${enableAutoSave ? 'checked' : ''}>
+                            <span data-translate="enableAutoSave">Enable Auto Save during Sync</span>
                         </label>
                     </div>
 
@@ -2232,6 +2256,14 @@ function openMainSettings() {
                         <label class="checkbox-label">
                             <input type="checkbox" id="enable-sync-check" ${enableSyncCheck ? 'checked' : ''}>
                             <span data-translate="enableSyncCheck">Enable sync check on start</span>
+                        </label>
+                    </div>
+
+                    <!-- Dodajemy nową opcję Enable Sync after Review -->
+                    <div class="sync-after-review-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enable-sync-after-review" ${enableSyncAfterReview ? 'checked' : ''}>
+                            <span data-translate="enableSyncAfterReview">Enable Sync after Review</span>
                         </label>
                     </div>
 
@@ -2310,13 +2342,16 @@ function openMainSettings() {
     const saveButton = settingsDialog.querySelector('.settings-save');
     const cancelButton = settingsDialog.querySelector('.settings-cancel');
 
-    saveButton.addEventListener('click', async () => {
+    // Funkcja do zapisywania ustawień
+    async function saveSettings() {
         const newApiKey = document.getElementById('pushbullet-api-key').value.trim();
         const newAutoSync = document.getElementById('auto-sync').checked;
         const newSyncInterval = document.getElementById('sync-interval').value;
         const newInactivityTimeout = document.getElementById('inactivity-timeout').value;
         const newEnableSyncCheck = document.getElementById('enable-sync-check').checked;
-        const newExportToServer = document.getElementById('export-to-server').checked; // Dodane
+        const newExportToServer = document.getElementById('export-to-server').checked;
+        const newEnableAutoSave = document.getElementById('enable-auto-save').checked;
+        const newEnableSyncAfterReview = document.getElementById('enable-sync-after-review').checked;
         
         if (newApiKey !== currentApiKey) {
             try {
@@ -2325,35 +2360,47 @@ function openMainSettings() {
                     showNotification(translations[currentLanguage].apiKeySaved || 'API key saved successfully', 'success');
                 } else {
                     showNotification(translations[currentLanguage].invalidApiKey || 'Invalid API key', 'error');
-                    return;
+                    return false;
                 }
             } catch (error) {
                 showNotification(translations[currentLanguage].apiKeyError || 'Error saving API key', 'error');
-                return;
+                return false;
             }
         }
 
-        // Zapisz ustawienia synchronizacji
+        // Zapisz ustawienia
         localStorage.setItem('auto_sync', newAutoSync);
         localStorage.setItem('sync_interval', newSyncInterval);
         localStorage.setItem('inactivity_timeout', newInactivityTimeout);
         localStorage.setItem('enable_sync_check', newEnableSyncCheck);
-        localStorage.setItem('export_to_server', newExportToServer); // Dodane
+        localStorage.setItem('export_to_server', newExportToServer);
+        localStorage.setItem('enable_auto_save', newEnableAutoSave);
+        localStorage.setItem('enable_sync_after_review', newEnableSyncAfterReview);
 
         if (newAutoSync) {
-            // Uruchom automatyczną synchronizację z nowym interwałem
             setupAutomaticSync(parseInt(newSyncInterval) * 60 * 1000);
             showNotification(translations[currentLanguage].autoSyncEnabled || 'Automatic sync enabled', 'success');
         } else {
-            // Wyłącz automatyczną synchronizację
             clearAutomaticSync();
-            showNotification(translations[currentLanguage].autoSyncDisabled || 'Automatic sync disabled', 'info');
+           // showNotification(translations[currentLanguage].autoSyncDisabled || 'Automatic sync disabled', 'info');
         }
         
-        closeMainSettings();
-
-        // Dodaj wywołanie funkcji aktualizującej widoczność przycisku Save
         updateSaveButtonVisibility();
+        return true;
+    }
+
+    // Obsługa kliknięcia na overlay
+    overlay.addEventListener('click', async () => {
+        if (await saveSettings()) {
+            closeMainSettings();
+        }
+    });
+
+    // Obsługa przycisku Save
+    saveButton.addEventListener('click', async () => {
+        if (await saveSettings()) {
+            closeMainSettings();
+        }
     });
 
     cancelButton.addEventListener('click', closeMainSettings);
@@ -2548,6 +2595,9 @@ async function handleSave() {
 
 // Eksportujemy funkcje
 window.sendExportToPushbullet = sendExportToPushbullet;
+window.initSyncCheck = initSyncCheck;
+
+
 
 
 
