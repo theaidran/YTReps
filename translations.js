@@ -156,6 +156,8 @@ const translations = {
         enableAutoSave: "Enable Save file during Sync (auto export to server)",
         enableAutoSync: "Enable automatic synchronization in time",
         enableSyncAfterReview: "Enable Sync after Review",
+        numberOfNewCards: "Number of new cards:",
+        reviewModesVisibility: "Show review modes:",
     },
     pl: {
         review: "Powtórki",
@@ -313,5 +315,7 @@ const translations = {
         enableAutoSave: "Włącz zapis pliku podczas synchronizacji (auto eksport na serwer)",
         enableAutoSync: "Włącz automatyczną synchronizację w czasie",
         enableSyncAfterReview: "Włącz synchronizację po zakończeniu powtórki",
+        numberOfNewCards: "Liczba nowych fiszek:",
+        reviewModesVisibility: "Pokazuj tryby powtórek:",
     }
 };

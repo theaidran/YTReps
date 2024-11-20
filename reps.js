@@ -200,30 +200,47 @@ function startReview() {
 
 function showReviewModeSelection() {
     const reviewSection = document.getElementById('reviewCard');
+    const showNewToday = localStorage.getItem('show_new_today') !== 'false';
+    const showHardCards = localStorage.getItem('show_hard_cards') !== 'false';
+    const showRandom = localStorage.getItem('show_random') !== 'false';
+
+    let reviewModesHTML = `
+        <div class="review-mode-card" onclick="selectReviewMode('dueToday')">
+            <h4 data-translate="dueToday">Due Today</h4>
+            <p class="card-count" id="dueTodayCount">0</p>
+        </div>
+        <div class="review-mode-card" onclick="selectReviewMode('new')">
+            <h4 data-translate="newFlashcardsOnly">Add 5 New Cards</h4>
+            <p class="card-count" id="newCount">0</p>
+        </div>`;
+
+    if (showNewToday) {
+        reviewModesHTML += `
+            <div class="review-mode-card" onclick="selectReviewMode('newToday')">
+                <h4 data-translate="newTodayOnly">New Cards From Today Only</h4>
+                <p class="card-count" id="newTodayCount">0</p>
+            </div>`;
+    }
+    if (showHardCards) {
+        reviewModesHTML += `
+            <div class="review-mode-card" onclick="selectReviewMode('hard')">
+                <h4 data-translate="hardFlashcardsOnly">Hard Cards Only</h4>
+                <p class="card-count" id="hardCount">0</p>
+            </div>`;
+    }
+    if (showRandom) {
+        reviewModesHTML += `
+            <div class="review-mode-card" onclick="selectReviewMode('random')">
+                <h4 data-translate="randomFlashcards">Random Selection</h4>
+                <p class="card-count" id="totalCount">0</p>
+            </div>`;
+    }
+
     reviewSection.innerHTML = `
         <div class="review-mode-selection">
             <h3 data-translate="selectMode">Select review mode</h3>
             <div class="review-modes">
-                <div class="review-mode-card" onclick="selectReviewMode('dueToday')">
-                    <h4 data-translate="dueToday">Due Today</h4>
-                    <p class="card-count" id="dueTodayCount">0</p>
-                </div>
-                <div class="review-mode-card" onclick="selectReviewMode('new')">
-                    <h4 data-translate="newFlashcardsOnly">New Flashcards Only</h4>
-                    <p class="card-count" id="newCount">0</p>
-                </div>
-                <div class="review-mode-card" onclick="selectReviewMode('newToday')">
-                    <h4 data-translate="newTodayOnly">New Today Only</h4>
-                    <p class="card-count" id="newTodayCount">0</p>
-                </div>
-                <div class="review-mode-card" onclick="selectReviewMode('hard')">
-                    <h4 data-translate="hardFlashcardsOnly">Hard Flashcards Only</h4>
-                    <p class="card-count" id="hardCount">0</p>
-                </div>
-                <div class="review-mode-card" onclick="selectReviewMode('random')">
-                    <h4 data-translate="randomFlashcards">Random Selection</h4>
-                    <p class="card-count" id="totalCount">0</p>
-                </div>
+                ${reviewModesHTML}
             </div>
             <div class="review-options">
                 <div class="cards-number-options">
@@ -1398,8 +1415,8 @@ function openReviewSettings() {
     }
 
     // Zmiana domyślnych wartości
-    const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'supermemo'; // Zmieniono z 'standard' na 'supermemo'
-    const currentButtonMode = localStorage.getItem('gradeButtonMode') || 'four';     // Zmieniono z 'six' na 'four'
+    const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'supermemo';
+    const currentButtonMode = localStorage.getItem('gradeButtonMode') || 'four';
     
     const overlay = document.createElement('div');
     overlay.className = 'settings-overlay';
@@ -1409,6 +1426,33 @@ function openReviewSettings() {
     settingsForm.id = 'review-settings-form';
     settingsForm.className = 'settings-form';
     settingsForm.innerHTML = `
+        <h3 data-translate="reviewSettings">Review Settings</h3>
+        <div class="settings-group">
+   
+        </div>
+
+        <div class="settings-group review-modes-options">
+            <label data-translate="reviewModesVisibility">Show review modes:</label>
+            <div class="checkbox-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-new-today" ${localStorage.getItem('show_new_today') !== 'false' ? 'checked' : ''}>
+                    <span data-translate="newTodayOnly">New Cards From Today Only</span>
+                </label>
+            </div>
+            <div class="checkbox-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-hard-cards" ${localStorage.getItem('show_hard_cards') !== 'false' ? 'checked' : ''}>
+                    <span data-translate="hardFlashcardsOnly">Hard Cards Only</span>
+                </label>
+            </div>
+            <div class="checkbox-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-random" ${localStorage.getItem('show_random') !== 'false' ? 'checked' : ''}>
+                    <span data-translate="randomFlashcards">Random Selection</span>
+                </label>
+            </div>
+        </div>
+
         <h3 data-translate="algorithmSettings">Algorithm Settings</h3>
         <div class="settings-group">
             <label data-translate="currentAlgorithm">Current Algorithm:</label>
@@ -1455,8 +1499,13 @@ function openReviewSettings() {
         document.getElementById('algorithmInfo').textContent = getAlgorithmDescription(e.target.value);
     });
 
-    overlay.addEventListener('click', closeReviewSettings);
+   //overlay.addEventListener('click', closeReviewSettings);
     changeLanguage();
+
+    // Zmiana obsługi kliknięcia na overlay
+    overlay.addEventListener('click', () => {
+        saveAlgorithmSettings();
+    });
 }
 
 // Dodaj funkcję pomocniczą do pobierania opisu algorytmu
@@ -1494,16 +1543,25 @@ function closeReviewSettings() {
 function saveAlgorithmSettings() {
     const algorithm = document.getElementById('algorithmSelect').value;
     const buttonMode = document.getElementById('buttonModeSelect').value;
+    const showNewToday = document.getElementById('show-new-today').checked;
+    const showHardCards = document.getElementById('show-hard-cards').checked;
+    const showRandom = document.getElementById('show-random').checked;
     
     localStorage.setItem('reviewAlgorithm', algorithm);
     localStorage.setItem('gradeButtonMode', buttonMode);
+    localStorage.setItem('show_new_today', showNewToday);
+    localStorage.setItem('show_hard_cards', showHardCards);
+    localStorage.setItem('show_random', showRandom);
     
-    updateStats();
-    updateCardCounts();
-    drawLearningProgressChart();
-    updateFlashcardTable();
+     updateStats();
+    // updateCardCounts();
+     drawLearningProgressChart();
+   // updateFlashcardTable();
     
     closeReviewSettings();
+    
+    // Odśwież sekcję review
+    showReviewModeSelection();
 }
 
 function initializeAddSection() {

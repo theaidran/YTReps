@@ -1159,12 +1159,10 @@ button[title]:hover::after {
     cursor: pointer;
     padding: 5px 10px;
     border-radius: 4px;
-    background-color: #f8f9fa;
-    transition: background-color 0.3s ease;
 }
 
 .checkbox-option:hover {
-    background-color: #e9ecef;
+    background-color: transparent;
 }
 
 .checkbox-option input[type="radio"] {
