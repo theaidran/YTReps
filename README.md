@@ -18,6 +18,7 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 4. Track progress through statistics.
 
 ## Tips
-* Navigate the dictionary frame with your browser navigation bar (go back, refresh).  
+* Navigate the dictionary frame with your browser navigation bar (go back, refresh).
+* Navigate YouTube player with a physical keyboard as usual. <-- Arrow Left: Jump back 5 seconds, --> Arrow Right: Jump forward 5 seconds, Play/Pause with Spacebar
 * Ads from YouTube should not be displayed when run locally. Anyway, extensions like uBlock Origin work.
 * To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use synchronization/save feature (uBlock Origin needs to be off or set to website exception).
