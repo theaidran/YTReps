@@ -935,6 +935,24 @@ function initializeApp() {
     if (typeof window.checkSaveFiles === 'function') {
         window.checkSaveFiles();
     }
+
+    // Inicjalizacja trybu ciemnego
+    isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+    }
+    
+    // Ustaw prawidłową ikonę przy starcie
+    const darkModeIcon = document.querySelector('.dark-mode-icon');
+    if (darkModeIcon) {
+        darkModeIcon.textContent = isDarkMode ? '☼' : '☽';
+    }
+    
+    // Dodaj nasłuchiwanie na przycisk trybu ciemnego
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
 }
 
 // Dodaj tę funkcję, aby upewnić się, że przycisk Info jest prawidłowo dodany
@@ -2654,6 +2672,44 @@ async function handleSave() {
 // Eksportujemy funkcje
 window.sendExportToPushbullet = sendExportToPushbullet;
 window.initSyncCheck = initSyncCheck;
+
+// Dodaj na początku pliku
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+// Dodaj funkcję do przełączania trybu
+function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Zmień ikonę na czarno-białą
+    const darkModeIcon = document.querySelector('.dark-mode-icon');
+    darkModeIcon.textContent = isDarkMode ? '☼' : '☽';
+    
+    // Aktualizuj wykresy jeśli istnieją
+    if (typeof drawLearningProgressChart === 'function') {
+        drawLearningProgressChart();
+    }
+
+    // Aktualizuj style dla wszystkich wykresów
+    const charts = ['#leitnerBoxesChart', '#superMemoChart', '#superMemoIntervalsChart'];
+    charts.forEach(chartId => {
+        const chart = document.querySelector(chartId);
+        if (chart) {
+           // chart.style.backgroundColor = isDarkMode ? '#919191' : '#f8f9fa';
+          //  chart.color = isDarkMode ? '#e0e0e0;' : '#e0e0e0';
+           // chart.style.boxShadow = isDarkMode ? '#919191' : '0 4px 6px rgba(0, 0, 0, 0.1)';
+        }
+    });
+
+    updateStats();
+}
+
+
+
+// Dodaj tłumaczenia do translations.js
+translations.en.darkModeTooltip = "Toggle dark mode";
+translations.pl.darkModeTooltip = "Przełącz tryb ciemny";
 
 
 

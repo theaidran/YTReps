@@ -224,11 +224,14 @@ function updateWatchedVideosList() {
         watchedVideos[currentPlaylistId] = [];
     }
 
-    watchedVideos[currentPlaylistId].forEach(function(video, index) {
+    // Tworzymy kopię tablicy i odwracamy ją
+    const reversedVideos = [...watchedVideos[currentPlaylistId]].reverse();
+
+    reversedVideos.forEach(function(video, index) {
         var videoId = video.id;
         var title = video.title.replace(/[⏲️⏰✈️]/g, '').trim();
         var videoIndex = videoIdToIndexMap[videoId];
-        var videoNumber = videoIndex !== undefined ? videoIndex + 1 : 1; // Zmiana tutaj
+        var videoNumber = videoIndex !== undefined ? videoIndex + 1 : 1;
 
         var listItem = document.createElement('li');
         listItem.id = videoId;
@@ -238,8 +241,8 @@ function updateWatchedVideosList() {
             <span class="note-icon" onclick="toggleNoteForm('${videoId}')">${video.notes && video.notes.length > 0 ? '📝' : '➕'}</span>
             <div class="note-form" style="display: none;">
                 <div class="word-translation-pairs"></div>
-                <button onclick="addWordTranslationPair('${videoId}')">+ Dodaj słowo/frazę</button>
-                <button onclick="saveNote('${videoId}')">Zapisz notatkę</button>
+                <button onclick="addWordTranslationPair('${videoId}')">+ Add word/phrase</button>
+                <button onclick="saveNote('${videoId}')">Save note</button>
             </div>
         `;
         videoListElement.appendChild(listItem);

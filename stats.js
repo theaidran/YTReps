@@ -44,8 +44,17 @@ function drawLeitnerBoxesChart() {
     // Wyczyść canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Dodaj tytuł i całkowitą liczbę fiszek
-    ctx.fillStyle = '#333';
+    // Dodaj sprawdzenie trybu ciemnego przed ustawieniem koloru tekstu
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e0e0e0' : '#333';
+    const backgroundColor = isDarkMode ? '#2d2d2d' : '#f8f9fa';
+
+    // Ustaw tło
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+
+    // Zmień kolor tekstu dla tytułu
+    ctx.fillStyle = textColor;
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
     const total = Object.values(boxStats).reduce((a, b) => a + b, 0);
@@ -64,8 +73,8 @@ function drawLeitnerBoxesChart() {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, barWidth - 20, barHeight);
 
-        // Dodaj efekt 3D
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        // Zmień efekt 3D na cień w kolorze tła
+        ctx.fillStyle = isDarkMode ? 'rgba(45, 45, 45, 0.3)' : 'rgba(248, 249, 250, 0.3)';
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + 10, y - 10);
@@ -75,14 +84,14 @@ function drawLeitnerBoxesChart() {
         ctx.fill();
 
         // Dodaj etykietę
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor; // Zmieniony kolor tekstu
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(`Box ${label}`, x + (barWidth - 20) / 2, height - 20);
         ctx.fillText(`${interval} days`, x + (barWidth - 20) / 2, height - 5);
 
         // Dodaj liczbę fiszek
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor; // Zmieniony kolor tekstu
         ctx.font = 'bold 16px Arial';
         ctx.fillText(count, x + (barWidth - 20) / 2, y - 25);
     }
@@ -142,11 +151,20 @@ function drawSuperMemoChart() {
     // Wyczyść canvas
     ctx.clearRect(0, 0, width, height);
 
+    // Dodaj sprawdzenie trybu ciemnego przed ustawieniem koloru tekstu
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e0e0e0' : '#333';
+    const backgroundColor = isDarkMode ? '#2d2d2d' : '#f8f9fa';
+
+    // Ustaw tło
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+
     // Oblicz całkowitą liczbę fiszek
     const total = Object.values(efRanges).reduce((sum, r) => sum + r.count, 0);
 
-    // Dodaj tytuł wraz z całkowitą liczbą fiszek
-    ctx.fillStyle = '#333';
+    // Zmień kolor tekstu dla tytułu
+    ctx.fillStyle = textColor;
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(`SuperMemo Easiness Factor Distribution (Total: ${total})`, width / 2, 30);
@@ -163,8 +181,8 @@ function drawSuperMemoChart() {
         ctx.fillStyle = range.color;
         ctx.fillRect(x, y, barWidth - 20, barHeight);
 
-        // Dodaj efekt 3D
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        // Zmień efekt 3D na cień w kolorze tła
+        ctx.fillStyle = isDarkMode ? 'rgba(45, 45, 45, 0.3)' : 'rgba(248, 249, 250, 0.3)';
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + 10, y - 10);
@@ -174,14 +192,14 @@ function drawSuperMemoChart() {
         ctx.fill();
 
         // Dodaj etykietę
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor; // Zmieniony kolor tekstu
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(label, x + (barWidth - 20) / 2, height - 20);
         ctx.fillText(`EF: ${range.min}-${range.max}`, x + (barWidth - 20) / 2, height - 5);
 
         // Dodaj liczbę fiszek
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor; // Zmieniony kolor tekstu
         ctx.font = 'bold 16px Arial';
         ctx.fillText(range.count, x + (barWidth - 20) / 2, y - 25);
     }
@@ -243,11 +261,20 @@ function drawSuperMemoIntervalsChart() {
     // Wyczyść canvas
     ctx.clearRect(0, 0, width, height);
 
+    // Dodaj sprawdzenie trybu ciemnego przed ustawieniem koloru tekstu
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e0e0e0' : '#333';
+    const backgroundColor = isDarkMode ? '#2d2d2d' : '#f8f9fa';
+
+    // Ustaw tło
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+
     // Oblicz całkowitą liczbę fiszek
     const total = Object.values(intervalRanges).reduce((sum, r) => sum + r.count, 0);
 
-    // Dodaj tytuł
-    ctx.fillStyle = '#333';
+    // Zmień kolor tekstu dla tytułu
+    ctx.fillStyle = textColor;
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(`SuperMemo Review Intervals Distribution (Total: ${total})`, width / 2, 30);
@@ -263,8 +290,8 @@ function drawSuperMemoIntervalsChart() {
         ctx.fillStyle = range.color;
         ctx.fillRect(x, y, barWidth - 20, barHeight);
 
-        // Dodaj efekt 3D
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        // Zmień efekt 3D na cień w kolorze tła
+        ctx.fillStyle = isDarkMode ? 'rgba(45, 45, 45, 0.3)' : 'rgba(248, 249, 250, 0.3)';
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + 10, y - 10);
@@ -274,7 +301,7 @@ function drawSuperMemoIntervalsChart() {
         ctx.fill();
 
         // Dodaj etykietę
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor; // Zmieniony kolor tekstu
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(label, x + (barWidth - 20) / 2, height - 20);
@@ -282,7 +309,7 @@ function drawSuperMemoIntervalsChart() {
 
         // Dodaj liczbę fiszek
         if (range.count > 0) {
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = textColor; // Zmieniony kolor tekstu
             ctx.font = 'bold 16px Arial';
             ctx.fillText(range.count, x + (barWidth - 20) / 2, y - 25);
         }
@@ -465,8 +492,17 @@ function drawLearningProgressChart() {
     // Wyczyść canvas
     ctx.clearRect(0, 0, width, height);
 
+    // Dodaj sprawdzenie trybu ciemnego przed ustawieniem koloru tekstu
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const textColor = isDarkMode ? '#e0e0e0' : '#333';
+    const backgroundColor = isDarkMode ? '#2d2d2d' : '#f8f9fa';
+    
+    // Ustaw tło
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+    
     // Dodaj tytuł wykresu
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = textColor;
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(translations[currentLanguage].flashcardStatistics || 'Statystyki fiszek', width / 2, 30);
@@ -480,8 +516,8 @@ function drawLearningProgressChart() {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, barWidth - 20, barHeight);
 
-        // Dodaj efekt 3D
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        // Zmień efekt 3D na cień w kolorze tła
+        ctx.fillStyle = isDarkMode ? 'rgba(45, 45, 45, 0.3)' : 'rgba(248, 249, 250, 0.3)';
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + 10, y - 10);
@@ -491,13 +527,13 @@ function drawLearningProgressChart() {
         ctx.fill();
 
         // Dodaj etykietę
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor;
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(label, x + (barWidth - 20) / 2, height - 20);
 
         // Dodaj liczbę
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor;
         ctx.font = 'bold 16px Arial';
         ctx.fillText(count, x + (barWidth - 20) / 2, y - 25);
     }
@@ -508,7 +544,7 @@ function drawLearningProgressChart() {
         drawBar(width * 3 / 8, learningCards, '#36A2EB', translations[currentLanguage].learningFlashcards || 'Uczone');
         drawBar(width * 5 / 8, masteredCards, '#4BC0C0', translations[currentLanguage].masteredFlashcards || 'Opanowane');
     } else {
-        ctx.fillStyle = '#333';
+        ctx.fillStyle = textColor;
         ctx.font = '16px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('Brak danych do wyświetlenia', width / 2, height / 2);

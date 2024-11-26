@@ -32,11 +32,17 @@ header {
     border-radius: 4px;
 }
 
+/* Style dla głównego tytułu */
 .main-title {
     margin: 0;
-    color: black;
+    color: #333;
     font-size: 28px;
     font-weight: 700;
+}
+
+/* Style dla głównego tytułu w trybie ciemnym */
+body.dark-mode .main-title {
+    color: #e0e0e0;
 }
 
 .back-button, .center-button {
@@ -354,10 +360,12 @@ th {
 
 #learningProgressChart {
     margin-top: 2rem;
-    max-width: 100%;
-    height: auto;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    margin-bottom: 3rem;
+    max-width: 300px;
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100% !important;
@@ -1192,13 +1200,19 @@ button[title]:hover::after {
     width: 100% !important;
     height: auto !important;
     max-width: 600px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: block;
     margin-left: 0;
     margin-right: auto;
+}
+
+body.dark-mode #leitnerBoxesChart,
+body.dark-mode #superMemoChart,
+body.dark-mode #superMemoIntervalsChart {
+    border-color: #404040;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Dodaj specyficzny odstęp dla pierwszego wykresu */
@@ -1533,7 +1547,7 @@ button[title]:hover::after {
 /* Style dla przycisku MainSettings */
 .main-settings-button {
     background: rgba(0, 0, 0, 0) !important; /* Przezroczyste tło */
-    color: #333 !important;
+    color: #333;
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -2207,12 +2221,6 @@ button[title]:hover::after {
     margin-bottom: 15px;
 }
 
-/* Usuń specyficzne style dla poszczególnych opcji */
-.auto-save-option .checkbox-label,
-.export-server-option .checkbox-label,
-.sync-check-option .checkbox-label {
-    /* Usuń specyficzne style, będą dziedziczyć z .settings-group .checkbox-label */
-}
 
 /* Dodaj style dla tooltipa w ustawieniach */
 .settings-group .checkbox-label[data-tooltip] {
@@ -2247,4 +2255,658 @@ button[title]:hover::after {
 /* Resetowanie opóźnienia gdy myszka opuści element */
 .settings-group .checkbox-label[data-tooltip]:not(:hover)::before {
     transition-delay: 0s;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .container {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode header {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+}
+
+body.dark-mode .nav-button {
+    background-color: #404040;
+}
+
+body.dark-mode .nav-button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .nav-button.active {
+    background-color: #28a745;
+}
+
+body.dark-mode textarea,
+body.dark-mode input[type="text"] {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode #flashcardTable th {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode #flashcardTable td {
+    border-bottom: 1px solid #404040;
+}
+
+body.dark-mode #flashcardTable tr:hover {
+    background-color: #383838;
+}
+
+body.dark-mode .note-form {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.dark-mode .info-box {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.dark-mode .section-header {
+    border-bottom-color: #404040;
+}
+
+body.dark-mode .dark-mode-button {
+    background-color: transparent;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+}
+
+body.dark-mode .dark-mode-button:hover {
+    background-color: #404040;
+}
+
+/* Light mode button styles */
+.dark-mode-button {
+    background-color: transparent;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+}
+
+.dark-mode-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Dodatkowe style dla elementów w trybie ciemnym */
+body.dark-mode .selected-row {
+    background-color: #404040;
+}
+
+body.dark-mode .grade-button {
+    background-color: #404040;
+}
+
+body.dark-mode .grade-button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode .review-mode-card {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.dark-mode .review-mode-card:hover {
+    background-color: #404040;
+}
+
+body.dark-mode .review-mode-card.selected {
+    background-color: #28a745;
+    color: #fff;
+}
+
+body.dark-mode .card-content {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+body.dark-mode .translation {
+    background-color: #333;
+    border-color: #404040;
+}
+
+/* Dodatkowe style dla sekcji Review w trybie ciemnym */
+body.dark-mode .review-mode-selection {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .review-options {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.dark-mode .checkbox-option {
+    color: #e0e0e0;
+}
+
+body.dark-mode .checkbox-option:hover {
+    background-color: #404040;
+}
+
+body.dark-mode #customNumberInput {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode .quality-buttons button {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .quality-buttons button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .show-translation {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .show-translation:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .review-complete {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .cards-number-options {
+    color: #e0e0e0;
+}
+
+body.dark-mode .start-review-button {
+    background-color: #28a745;
+    color: #e0e0e0;
+}
+
+body.dark-mode .start-review-button:hover {
+    background-color: #218838;
+}
+
+/* Style dla tooltipów w trybie ciemnym */
+body.dark-mode [data-tooltip]::before {
+    background-color: #505050;
+    color: #e0e0e0;
+}
+
+body.dark-mode [data-tooltip]::after {
+    border-color: #505050 transparent transparent transparent;
+}
+
+/* Style dla przycisków oceny w trybie ciemnym */
+body.dark-mode .grade-button {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+}
+
+body.dark-mode .grade-button:hover {
+    background-color: #505050;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Style dla komunikatów w trybie ciemnym */
+body.dark-mode .review-complete,
+body.dark-mode .no-flashcards-message {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+/* Style dla pól tekstowych w trybie ciemnym */
+body.dark-mode .card-content pre {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #404040;
+}
+
+body.dark-mode .card-content p {
+    color: #e0e0e0;
+}
+
+body.dark-mode .card-content p strong {
+    color: #e0e0e0;
+}
+
+/* Style dla tekstu "No context provided" w trybie ciemnym */
+body.dark-mode .card-content pre:empty::before,
+body.dark-mode .card-content pre:only-child::before {
+    content: "No context provided";
+    color: #888;
+}
+
+/* Styl dla pierwszego wykresu */
+#learningProgressChart {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    max-width: 300px;
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Style dla trybu ciemnego */
+body.dark-mode #learningProgressChart {
+    border-color: #404040;
+}
+
+/* Style dla przycisków w tabeli w trybie ciemnym */
+body.dark-mode #flashcardTable button {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+body.dark-mode #flashcardTable button:hover {
+    background-color: #505050;
+}
+
+/* Specyficzne style dla przycisku Delete */
+body.dark-mode #flashcardTable button[onclick*="deleteFlashcard"] {
+    background-color: #404040;
+}
+
+body.dark-mode #flashcardTable button[onclick*="deleteFlashcard"]:hover {
+    background-color: #505050;
+}
+
+/* Specyficzne style dla przycisku Edit */
+body.dark-mode #flashcardTable button[onclick*="editFlashcard"] {
+    background-color: #404040;
+}
+
+body.dark-mode #flashcardTable button[onclick*="editFlashcard"]:hover {
+    background-color: #505050;
+}
+
+/* Style dla formularza edycji w trybie ciemnym */
+body.dark-mode .edit-form {
+    background-color: #2d2d2d;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .edit-form h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .edit-form textarea,
+body.dark-mode .edit-form input[type="text"] {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode .edit-form textarea:focus,
+body.dark-mode .edit-form input[type="text"]:focus {
+    border-color: #505050;
+    outline: none;
+}
+
+body.dark-mode .edit-form .button-group button {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .edit-form .button-group button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .edit-form .button-group .submit-button {
+    background-color: #28a745;
+}
+
+body.dark-mode .edit-form .button-group .submit-button:hover {
+    background-color: #218838;
+}
+
+body.dark-mode .edit-form .button-group .cancel-button {
+    background-color: #dc3545;
+}
+
+body.dark-mode .edit-form .button-group .cancel-button:hover {
+    background-color: #c82333;
+}
+
+/* Style dla okna ustawień głównych w trybie ciemnym */
+body.dark-mode .main-settings-dialog {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .main-settings-dialog h2 {
+    color: #e0e0e0;
+    border-bottom-color: #404040;
+}
+
+body.dark-mode .main-settings-dialog h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .settings-content {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.dark-mode .settings-description {
+    color: #bbb;
+}
+
+/* Style dla inputów i selectów w ustawieniach */
+body.dark-mode .main-settings-dialog input[type="text"],
+body.dark-mode .main-settings-dialog input[type="password"],
+body.dark-mode .main-settings-dialog select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode .main-settings-dialog input[type="text"]:focus,
+body.dark-mode .main-settings-dialog input[type="password"]:focus,
+body.dark-mode .main-settings-dialog select:focus {
+    border-color: #505050;
+    outline: none;
+}
+
+/* Style dla przycisków w ustawieniach */
+body.dark-mode .main-settings-dialog .toggle-password,
+body.dark-mode .main-settings-dialog .remove-api-key {
+    color: #e0e0e0;
+}
+
+body.dark-mode .main-settings-dialog .toggle-password:hover,
+body.dark-mode .main-settings-dialog .remove-api-key:hover {
+    color: #fff;
+}
+
+/* Style dla sekcji API key */
+body.dark-mode .api-key-info {
+    color: #bbb;
+}
+
+body.dark-mode .api-key-info a {
+    color: #66b3ff;
+}
+
+/* Style dla opcji synchronizacji */
+body.dark-mode .sync-settings {
+    border-top-color: #404040;
+}
+
+body.dark-mode .checkbox-label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .sync-interval-option select:disabled {
+    background-color: #2d2d2d;
+    color: #666;
+}
+
+/* Style dla przycisku usuwania notatek */
+body.dark-mode .delete-notes-button {
+    background-color: #404040;
+}
+
+body.dark-mode .delete-notes-button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .delete-notes-info {
+    color: #bbb;
+}
+
+/* Style dla stopki ustawień */
+body.dark-mode .settings-footer {
+    border-top-color: #404040;
+}
+
+/* Style dla tooltipów w ustawieniach */
+body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
+    background-color: #505050;
+    color: #e0e0e0;
+}
+
+/* Style dla opisu algorytmu */
+body.dark-mode .algorithm-description {
+    background-color: #333;
+    border: 1px solid #404040;
+}
+
+body.dark-mode .description-text {
+    color: #bbb;
+}
+
+/* Style dla linków "More information" */
+body.dark-mode .more-info {
+    border-top-color: #404040;
+}
+
+body.dark-mode .more-info a {
+    color: #66b3ff;
+}
+
+/* Style dla okna Review Settings w trybie ciemnym */
+body.dark-mode .settings-form {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .settings-form h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .settings-group {
+    border-color: #404040;
+}
+
+body.dark-mode .settings-group select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.dark-mode .settings-group select:focus {
+    border-color: #505050;
+    outline: none;
+}
+
+body.dark-mode .review-modes-options {
+    color: #e0e0e0;
+}
+
+body.dark-mode .algorithm-description {
+    background-color: #333;
+    border: 1px solid #404040;
+}
+
+body.dark-mode .description-text {
+    color: #bbb;
+}
+
+body.dark-mode .more-info {
+    border-top-color: #404040;
+}
+
+body.dark-mode .more-info a {
+    color: #66b3ff;
+}
+
+body.dark-mode .checkbox-label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .checkbox-option input[type="checkbox"] {
+    background-color: #333;
+    border-color: #404040;
+}
+
+/* Style dla przycisków w oknie ustawień */
+body.dark-mode .settings-form .button-group button {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .settings-form .button-group button:hover {
+    background-color: #505050;
+}
+
+body.dark-mode .settings-form .button-group .submit-button {
+    background-color: #28a745;
+}
+
+body.dark-mode .settings-form .button-group .submit-button:hover {
+    background-color: #218838;
+}
+
+body.dark-mode .settings-form .button-group .cancel-button {
+    background-color: #dc3545;
+}
+
+body.dark-mode .settings-form .button-group .cancel-button:hover {
+    background-color: #c82333;
+}
+
+/* Style dla przycisku z trzema kropkami w trybie ciemnym */
+body.dark-mode .more-options-button {
+    color: #e0e0e0;
+}
+
+body.dark-mode .more-options-button:hover {
+    color: #fff;
+}
+
+/* Tooltip dla przycisku w trybie ciemnym */
+body.dark-mode .more-options-button::before {
+    background-color: #505050;
+    color: #e0e0e0;
+}
+
+/* Style dla przycisku Main Settings (⋮) */
+.main-settings-button {
+    color: #333;
+}
+
+/* Style dla przycisku Main Settings (⋮) w trybie ciemnym */
+body.dark-mode .main-settings-button {
+    color: #e0e0e0;
+}
+
+body.dark-mode .main-settings-button:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Tooltip dla przycisku w trybie ciemnym */
+body.dark-mode .main-settings-button[data-tooltip]:hover::before {
+    background-color: #505050;
+    color: #e0e0e0;
+}
+
+body.dark-mode .main-settings-button[data-tooltip]:hover::after {
+    border-color: #505050 transparent transparent transparent;
+}
+
+/* Style dla przycisku Dictionary */
+#toggle-dictionary {
+    background-color: #777777;
+    color: white;
+}
+
+/* Style dla przycisku Dictionary w trybie ciemnym */
+body.dark-mode #toggle-dictionary {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode #toggle-dictionary:hover {
+    background-color: #505050;
+}
+
+/* Style dla ikon trybu ciemnego */
+.dark-mode-icon {
+    font-size: 22px; /* Zwiększamy rozmiar z domyślnego na 24px */
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Dodajemy padding dla lepszego wycentrowania */
+.dark-mode-button {
+    padding: 4px 12px;
+}
+
+/* Style dla zielonych przycisków w trybie ciemnym */
+body.dark-mode .nav-button.active,
+body.dark-mode .submit-button,
+body.dark-mode .settings-form .button-group .submit-button,
+body.dark-mode .main-settings-dialog .button-group .submit-button,
+body.dark-mode .edit-form .button-group .submit-button,
+body.dark-mode .start-review-button,
+body.dark-mode .review-mode-card.selected {
+    background-color: #1a7f37; /* Ciemniejszy odcień zielonego */
+}
+
+body.dark-mode .nav-button.active:hover,
+body.dark-mode .submit-button:hover,
+body.dark-mode .settings-form .button-group .submit-button:hover,
+body.dark-mode .main-settings-dialog .button-group .submit-button:hover,
+body.dark-mode .edit-form .button-group .submit-button:hover,
+body.dark-mode .start-review-button:hover {
+    background-color: #155d2a; /* Jeszcze ciemniejszy odcień przy najechaniu */
+}
+
+/* Style dla przycisku Info w trybie ciemnym */
+body.dark-mode .info-button {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .info-button:hover {
+    background-color: #505050;
 }
