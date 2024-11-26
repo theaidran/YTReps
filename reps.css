@@ -2910,3 +2910,40 @@ body.dark-mode .info-button {
 body.dark-mode .info-button:hover {
     background-color: #505050;
 }
+
+/* Style dla tooltipa przycisku trybu ciemnego */
+.dark-mode-button[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -35px; /* Zmienione z top na bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background-color: #333;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0s linear 1s;
+}
+
+/* Usuwamy strzałkę (after) */
+.dark-mode-button[data-tooltip]::after {
+    display: none;
+}
+
+.dark-mode-button[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 1s;
+}
+
+/* Resetowanie opóźnienia gdy myszka opuści przycisk */
+.dark-mode-button[data-tooltip]:not(:hover)::before {
+    opacity: 0;
+    visibility: hidden;
+    transition-delay: 0s;
+}
