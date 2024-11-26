@@ -2354,7 +2354,7 @@ body.dark-mode .dark-mode-button:hover {
     background-color: #f0f0f0;
 }
 
-/* Dodatkowe style dla elementów w trybie ciemnym */
+/* Dodatkowe style dla element��w w trybie ciemnym */
 body.dark-mode .selected-row {
     background-color: #404040;
 }
@@ -2947,3 +2947,24 @@ body.dark-mode .info-button:hover {
     visibility: hidden;
     transition-delay: 0s;
 }
+
+/* Style dla przycisku Sync w trybie ciemnym */
+body.dark-mode .sync-button {
+    background-color: #1a7f37; /* Ten sam ciemniejszy odcień zielonego co inne przyciski */
+    color: #e0e0e0;
+}
+
+body.dark-mode .sync-button:hover {
+    background-color: #155d2a; /* Ten sam ciemniejszy odcień przy najechaniu */
+}
+
+/* Style dla przycisku Start Review w trybie ciemnym */
+body.dark-mode .start-review-button {
+    background-color: #1a7f37; /* Ten sam ciemniejszy odcień zielonego co inne przyciski */
+    color: #e0e0e0;
+}
+
+body.dark-mode .start-review-button:hover {
+    background-color: #155d2a; /* Ten sam ciemniejszy odcień przy najechaniu */
+}
+
