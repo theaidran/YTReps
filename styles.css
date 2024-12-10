@@ -40,6 +40,8 @@
             height: 0;
             padding-bottom: 56.25%; /* Aspect ratio 16:9 */
             transition: all 0.5s ease;
+            border-radius: 5px; /* Dodajemy zaokrąglenie rogów */
+            overflow: hidden; /* Ważne, aby zawartość nie wystawała poza zaokrąglone rogi */
         }
 
         #player {
@@ -48,8 +50,14 @@
             left: 0;
             width: 100%;
             height: 100%;
+            border-radius: 12px; /* Dodajemy zaokrąglenie rogów również dla iframe */
         }
 
+        /* Dodajemy cień dla lepszego efektu wizualnego 
+        .player-container {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        */
         .player-resizer {
             display: none; /* Ukrywa przycisk resize */
             position: absolute;
@@ -484,20 +492,27 @@
         .main-container {
             display: flex;
             width: 100%;
+            min-height: 105vh; /* Zmniejszamy ze 120vh na 105vh */
+            padding-bottom: 5%; /* Zmniejszamy z 20% na 5% */
         }
 
         .left-column {
-            width: 45%; /* Zmieniamy z 40% na 45% */
+            width: 44%;
             padding-right: 15px;
+            min-height: 100vh; /* Zmniejszamy ze 120vh na 105vh */
         }
 
         .right-column {
-            width: calc(55% - 0px); /* Zmniejszamy szerokość o 20px */
+            width: calc(56% - 0px);
             display: flex;
             flex-direction: column;
             position: relative;
             padding-left: 20px;
-            padding-right: 10px; /* Dodajemy padding z prawej strony */
+            padding-right: 10px;
+            min-height: 85vh;
+            max-height: 131vh;
+            overflow-x: visible;
+            overflow-y: visible;
         }
 
         .right-column h3 {
@@ -514,6 +529,7 @@
             width: 100%;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: border-color 0.3s, box-shadow 0.3s;
+            
         }
 
         #dictionary-select:hover, #dictionary-select:focus {
@@ -555,24 +571,32 @@
         }
 
         .iframe-container {
-            position: absolute;
+            position: relative;
             width: 100%;
-            height: 85vh; /* Zmieniamy z calc(100vh - 100px) na 85vh */
-            top: 100px;
-            transition: top 0.3s ease;
+            height: 85vh;
             margin-top: 1px;
             border: 1px solid #ddd;
             border-top: 1px solid #ccc;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
+            background-color: #f8f9fa;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            resize: both;
+            resize: none;
+        }
+
+        .iframe-container iframe {
+            border-radius: 8px;
+            background-color: #f8f9fa;
         }
 
         #dictionary-frame {
             width: 100%;
-            height: 100%;
+            height: 85vh;
             border: none;
+        }
+
+        #iframe-resizer {
+            display: none;
         }
 
         #iframe-resizer {
@@ -635,6 +659,7 @@
         .iframe-container {
             flex-grow: 1;
             transition: height 0.3s ease;
+            height: 85vh; /* Zmniejszamy z 85vh na 75vh */
         }
 
         .right-column {
@@ -646,31 +671,39 @@
 
         .dictionary-select-container {
             position: sticky;
-            top: 0;
-            background-color: white;
+
             z-index: 100;
-            padding: 0; /* Zmieniamy padding na 0 */
+            padding: 0;
+        }
+
+        .dictionary-select-container.sticky {
+            position: sticky;
+            top: 0px;
+        }
+
+        .note-form[style*="display: block"] ~ .right-column .dictionary-select-container {
+            position: sticky;
+            
+            
         }
 
         .iframe-container {
-            position: absolute;
+            position: relative;
             width: 100%;
-            height: 85vh; /* Zmieniamy z calc(100vh - 100px) na 85vh */
-            top: 100px;
-            transition: top 0.3s ease;
+            height: 85vh; /* Zmniejszamy z 85vh na 75vh */
             margin-top: 1px;
             border: 1px solid #ddd;
             border-top: 1px solid #ccc;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
+            background-color: #f8f9fa; /* Dodajemy jasno-szare tło */
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            resize: both;
+            resize: none;
         }
 
         #separator {
             height: 130px;
             width: 100%;
-            background-color: white; /* Zmieniamy kolor na biały */
             border-bottom: 1px solid #ffffff; /* Zmieniamy kolor linii na biały */
             /* lub */
             /* box-shadow: 0 2px 4px rgba(255,255,255,0.05); */ /* Jeśli używasz cienia, zmieniamy go na biały */
@@ -1071,6 +1104,9 @@
     flex-wrap: wrap; /* Dodajemy zawijanie, gdyby było zbyt wiele zakładek */
     background-color: #f1f1f1;
     border-bottom: 1px solid #ddd;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    overflow: hidden;
 }
 
 .tab {
@@ -1150,6 +1186,8 @@
 #iframe-container iframe {
     flex: 1;
     border: none;
+    border-radius: 8px;
+    background-color: #f8f9fa;
 }
 
 /* Istniejący styl */
@@ -1385,3 +1423,368 @@
     gap: 10px;
     margin-top: 20px;
 }
+
+/* Style dla przycisku trybu ciemnego */
+#index-dark-mode {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+#index-dark-mode:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Takie samo podświetlenie jak settings */
+    border-radius: 4px; /* Zaokrąglone rogi jak w settings */
+}
+
+body.index-dark-mode #index-dark-mode:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Jaśniejsze podświetlenie w trybie ciemnym */
+}
+
+.dark-mode-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+
+/* Style dla trybu ciemnego w index.html */
+body.index-dark-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+/* Aktualizujemy wszystkie selektory */
+body.index-dark-mode .main-title {
+    color: #e0e0e0;
+}
+
+body.index-dark-mode .player-container {
+    background-color: #1a1a1a;
+}
+
+/* ... i tak dalej dla wszystkich selektorów używających .dark-mode */
+
+/* Style dla trybu ciemnego w index.html */
+body.index-dark-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.index-dark-mode .main-title {
+    color: #e0e0e0;
+}
+
+body.index-dark-mode .player-container {
+    background-color: #1a1a1a;
+}
+
+body.index-dark-mode ul li a {
+    color: #66b3ff;
+}
+
+body.index-dark-mode .word-list-button,
+body.index-dark-mode .settings-button,
+body.index-dark-mode #autoplay-btn {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.index-dark-mode #separator {
+    border-color: #404040;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #1a1a1a; /* Zmieniamy kolor linii na biały */
+}
+
+body.index-dark-mode .dictionary-select-container {
+    background-color: #1a1a1a;
+}
+
+body.index-dark-mode .dictionary-select-container h3 {
+    color: #e0e0e0;
+}
+
+body.index-dark-mode #dictionary-select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.index-dark-mode .tabs-container {
+    background-color: #1a1a1a;
+}
+
+body.index-dark-mode .tab {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.index-dark-mode .tab.active {
+    background-color: #404040;
+    border-bottom-color: #007BFF;
+}
+
+body.index-dark-mode #add-tab {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.index-dark-mode #word-list-container {
+    background-color: #1a1a1a;
+    border-color: #404040;
+}
+
+body.index-dark-mode #word-list-table th {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.index-dark-mode #word-list-table td {
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.index-dark-mode #word-list-table tr:nth-child(even) {
+    background-color: #262626;
+}
+
+body.index-dark-mode #word-list-table td:first-child,
+body.index-dark-mode #word-list-table th:first-child {
+    background-color: #333;
+}
+
+body.index-dark-mode .note-form {
+    background-color: #333;
+    border-color: #404040;
+}
+
+body.index-dark-mode .note-form textarea {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.index-dark-mode .settings-form {
+    background-color: #404040;
+    color: #e0e0e0;
+    border-color: #404040;
+}
+
+body.index-dark-mode .iframe-container {
+    border: 1px solid #404040;
+    background-color: #1a1a1a;
+}
+
+body.index-dark-mode .iframe-container iframe {
+    background-color: #1a1a1a;
+}
+
+body.index-dark-mode .iframe-container .tabs-container {
+    border-color: #404040;
+    background-color: #1a1a1a;
+}
+
+/* Podstawowy styl dla ikony */
+#index-dark-mode {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+/* Hover w trybie jasnym */
+#index-dark-mode:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+/* Kolor ikony w trybie ciemnym */
+body.index-dark-mode #index-dark-mode {
+    color: #e0e0e0; /* Jasny kolor dla ikony w trybie ciemnym */
+}
+
+/* Hover w trybie ciemnym */
+body.index-dark-mode #index-dark-mode:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dodaj te style na końcu pliku CSS */
+.column-divider-tooltip {
+    position: absolute;
+    top: 20%;
+    left: 20px; /* Zmieniamy z 50% na stałą wartość */
+    transform: translate(0, -50%); /* Zmieniamy transform, usuwamy przesunięcie w poziomie */
+    background-color: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.column-divider-tooltip::before {
+    content: '';
+    position: absolute;
+    top:50%;
+    right: 100%;
+    transform: translateY(-50%);
+    border: 8px solid transparent;
+    border-right-color: #333;
+    margin-right: 0; /* Usuwamy margines, jeśli był */
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.tooltip-close:hover {
+    color: #ff4444;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(10px, -50%); /* Dostosowujemy animację */
+    }
+    to {
+        opacity: 1;
+        transform: translate(0, -50%); /* Dostosowujemy animację */
+    }
+}
+
+/* Dodaj style dla trybu ciemnego */
+body.index-dark-mode .column-divider-tooltip {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+body.index-dark-mode .column-divider-tooltip::before {
+    border-right-color: #404040;
+}
+
+/* Dodaj nową klasę dla podświetlonego dividera */
+.column-divider.highlighted::after {
+    background-color: #007bff !important; /* Używamy !important aby nadpisać hover */
+    opacity: 0.5;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+/* Dla trybu ciemnego */
+body.index-dark-mode .column-divider.highlighted::after {
+    background-color: #4da3ff !important; /* Jaśniejszy niebieski w trybie ciemnym */
+    opacity: 0.6;
+}
+
+/* Dodaj style dla suwaka ratio */
+.ratio-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.ratio-slider {
+    flex-grow: 1;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    outline: none;
+}
+
+.ratio-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.ratio-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #007bff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.ratio-slider:hover::-webkit-slider-thumb {
+    background: #0056b3;
+}
+
+.ratio-slider:hover::-moz-range-thumb {
+    background: #0056b3;
+}
+
+/* Style dla trybu ciemnego */
+body.index-dark-mode .ratio-slider {
+    background: #404040;
+}
+
+body.index-dark-mode .ratio-slider::-webkit-slider-thumb {
+    background: #4da3ff;
+}
+
+body.index-dark-mode .ratio-slider::-moz-range-thumb {
+    background: #4da3ff;
+}
+
+body.index-dark-mode .ratio-slider:hover::-webkit-slider-thumb {
+    background: #3385ff;
+}
+
+body.index-dark-mode .ratio-slider:hover::-moz-range-thumb {
+    background: #3385ff;
+}
+
+/* Style dla etykiet w ustawieniach w trybie ciemnym */
+body.dark-mode .settings-group label {
+    color: #bbb;  /* Szary kolor dla etykiet */
+}
+
+/* Style dla nagłówków sekcji w trybie ciemnym */
+body.dark-mode .settings-section h3 {
+    color: #bbb;  /* Szary kolor dla nagłówków sekcji */
+}
+
+/* Style dla tekstu w trybie ciemnym */
+body.dark-mode .settings-group span,
+body.dark-mode .settings-description,
+body.dark-mode #ratioValue {
+    color: #bbb;  /* Szary kolor dla tekstu */
+}
+
+/* Style dla checkboxów i ich etykiet w trybie ciemnym */
+body.dark-mode .checkbox-label {
+    color: #bbb;  /* Szary kolor dla tekstu obok checkboxów */
+}
+
+/* Style dla tooltipów w trybie ciemnym */
+body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
+    color: #e0e0e0;  /* Jaśniejszy kolor dla tekstu w tooltipie */
+}
+

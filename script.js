@@ -1,3 +1,29 @@
+let isIndexDarkMode = false;
+
+// Funkcja do przełączania trybu ciemnego
+function toggleIndexDarkMode() {
+    isIndexDarkMode = !isIndexDarkMode;
+    document.body.classList.toggle('index-dark-mode', isIndexDarkMode);
+   // localStorage.setItem('indexDarkMode', isIndexDarkMode);
+    
+    // Zmień ikonę
+    const darkModeIcon = document.querySelector('#index-dark-mode .dark-mode-icon');
+    if (darkModeIcon) {
+        darkModeIcon.textContent = isIndexDarkMode ? '☼' : '☽';
+    }
+}
+
+// Inicjalizacja trybu ciemnego przy ładowaniu strony
+document.addEventListener('DOMContentLoaded', function() {
+    if (isIndexDarkMode) {
+        document.body.classList.add('index-dark-mode');
+        const darkModeIcon = document.querySelector('#index-dark-mode .dark-mode-icon');
+        if (darkModeIcon) {
+            darkModeIcon.textContent = '☼';
+        }
+    }
+});
+
 var player;
 var watchedVideos = {}; // Obiekt przechowujący obejrzane filmy dla każdej playlisty
 var currentVideoId = null;
@@ -7,6 +33,7 @@ var currentPlaylistId = '';
 
 var playlistVideoIds = [];
 var videoIdToIndexMap = {};
+var listItemVideoId = null;
 
 var playlists = [
     { id: 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt', name: '6 Minute English' },
@@ -34,7 +61,55 @@ function initializeDefaultTrimTimes() {
 // Zmień inicjalizację zmiennej globalnej
 var addToWatchedOnStart = true;
 
+// Dodaj tę funkcję na początku pliku, wraz z innymi zmiennymi globalnymi
+function showColumnDividerTooltip() {
+    // Nie pokazuj tooltipa na małych ekranach
+    if (window.innerWidth <= 768) {
+        return;
+    }
 
+    if (localStorage.getItem('columnDividerTooltipShown') !== 'true') {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'column-divider-tooltip';
+        tooltip.innerHTML = `
+            Change the width of the player / dictionary using the column handle
+            <button class="tooltip-close">×</button>
+        `;
+        
+        const columnDivider = document.querySelector('.column-divider');
+        columnDivider.appendChild(tooltip);
+        
+        // Dodaj klasę highlighted do dividera
+        columnDivider.classList.add('highlighted');
+        
+        // Obsługa zamknięcia tooltipa
+        tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+            tooltip.remove();
+            columnDivider.classList.remove('highlighted');
+            localStorage.setItem('columnDividerTooltipShown', 'true');
+        });
+        
+        // Automatyczne zamknięcie po 40 sekundach
+        setTimeout(() => {
+            if (tooltip.parentElement) {
+                tooltip.remove();
+                columnDivider.classList.remove('highlighted');
+                localStorage.setItem('columnDividerTooltipShown', 'true');
+            }
+        }, 40000);
+
+        // Dodaj nasłuchiwanie na zmianę rozmiaru okna
+        const resizeHandler = () => {
+            if (window.innerWidth <= 768 && tooltip.parentElement) {
+                tooltip.remove();
+                columnDivider.classList.remove('highlighted');
+                localStorage.setItem('columnDividerTooltipShown', 'true');
+            }
+        };
+
+        window.addEventListener('resize', resizeHandler);
+    }
+}
 
 function createPlaylistButtons() {
     var container = document.getElementById('playlist-container');
@@ -242,7 +317,7 @@ function updateWatchedVideosList() {
             <div class="note-form" style="display: none;">
                 <div class="word-translation-pairs"></div>
                 <button onclick="addWordTranslationPair('${videoId}')">+ Add word/phrase</button>
-                <button onclick="saveNote('${videoId}')">Save note</button>
+                <button onclick="saveNote2('${videoId}')">Save note</button>
             </div>
         `;
         videoListElement.appendChild(listItem);
@@ -304,6 +379,7 @@ function toggleNoteForm(videoId) {
     if (noteForm.style.display === 'none') {
         noteForm.style.display = 'block';
         noteIcon.textContent = '➖'; // Zmieniamy ikonę na minus
+        document.querySelector('.dictionary-select-container').classList.add('sticky');
         if (pairsContainer.children.length === 0) {
             addWordTranslationPair(videoId);
         } else {
@@ -325,11 +401,11 @@ function toggleNoteForm(videoId) {
         saveNote(videoId);
         noteForm.style.display = 'none';
         noteIcon.textContent = noteIcon.textContent === '➖' ? '➕' : '📝'; // Przywracamy oryginalną ikonę
-        
+        document.querySelector('.dictionary-select-container').classList.remove('sticky');
         // Przywróć oryginalną pozycję playera YouTube
         resetYouTubePlayerPosition();
     }
-    setTimeout(adjustIframeSize, 0);
+    setTimeout(() => adjustIframeSize(videoId), 0);
 }
 
 function adjustYouTubePlayerPosition(videoId, isResizing = false) {
@@ -524,15 +600,14 @@ function addWordTranslationPair(videoId, word = '', context = '', translation = 
     var saveButton = listItem.querySelector('button[onclick^="saveNote"]');
     if (addButton) addButton.textContent = '+ Add word/phrase';
     if (saveButton) saveButton.textContent = 'Save note';
-
     // Dodajemy opóźnienie, aby dać czas na renderowanie nowego pola
     setTimeout(() => {
         adjustIframeSize();
         adjustYouTubePlayerPosition(videoId, false);
 
-        // Przewiń do 1/6 strony
+        // Przewiń do 1/3 strony zamiast 1/6 (zwiększamy wartość)
         var newPairRect = pairDiv.getBoundingClientRect();
-        var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 6);
+        var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 20) + 31;
         smoothScrollTo(targetScrollPosition, 500);
     }, 100);
 	
@@ -854,7 +929,7 @@ function setTrimTime() {
     var seconds = currentTrimTime % 60;
     var currentTimeString = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 
-    var timeInput = prompt("Podaj czas w formacie MM:SS, po którym film ma przeskoczyć do końcowych 3 sekund (00:00 aby wyłączyć):", currentTimeString);
+    var timeInput = prompt("Podaj czas w formacie MM:SS, po którym film ma przeskoczyć do końcowych 3 sekund (00:00 aby wyłączy):", currentTimeString);
     if (timeInput !== null) {
         var parts = timeInput.split(':');
         var minutes = parseInt(parts[0], 10);
@@ -1062,6 +1137,12 @@ function changeDictionary() {
     } else if (selectedUrl === 'remove_dictionary') {
         removeDictionary();
     } else {
+        // Dodaj parametr dark=1 do URL jeśli tryb ciemny jest aktywny
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const urlWithDarkMode = isDarkMode ? 
+            `${selectedUrl}${selectedUrl.includes('?') ? '&' : '?'}dark=1` : 
+            selectedUrl;
+            
         addNewTab();
         // Aktualizuj stan checkboxa
         const defaultDictionary = localStorage.getItem('defaultDictionary');
@@ -1210,29 +1291,76 @@ window.addEventListener('load', function() {
     // ... inne funkcje wywoływane przy ładowaniu ...
 });
 
-function adjustIframeSize() {
+function adjustIframeSize(videoId) {
     var container = document.querySelector('.iframe-container');
     var rightColumn = document.querySelector('.right-column');
     var dictionarySelect = document.querySelector('#dictionary-select');
+    var dictionarySelectContainer = document.querySelector('.dictionary-select-container');
     var separator = document.querySelector('#separator');
     var activeNoteForm = document.querySelector('.note-form[style="display: block;"]');
     
     // Oblicz minimalną górną pozycję (tuż pod separatorem)
-    var minTop = dictionarySelect.offsetTop + dictionarySelect.offsetHeight + separator.offsetHeight;
+    var minTop = dictionarySelect.offsetTop + dictionarySelect.offsetHeight;
     
-    if (activeNoteForm) {
+    if (window.innerWidth > 768 )
+    if (activeNoteForm) { //notatka otwarta
         var lastWordPair = activeNoteForm.querySelector('.word-translation-pair:last-child');
         if (lastWordPair) {
             var lastWordPairRect = lastWordPair.getBoundingClientRect();
-            var newTop = Math.max(minTop, lastWordPairRect.bottom + window.pageYOffset - 160); // Zmieniamy offset na 160px
+            var newTop = Math.max(minTop, lastWordPairRect.bottom + window.pageYOffset - 295); // Podwyzszanie słownika
             container.style.top = newTop + 'px';
+            dictionarySelectContainer.style.position = 'relative';   //wazne! 
+            dictionarySelectContainer.style.top = newTop + 125+ 'px'; // offset
         } else {
             container.style.top = minTop + 'px';
+            dictionarySelectContainer.style.position = 'sticky';
         }
-    } else {
-        container.style.top = minTop + 'px';
+    } else {  // pozycja default słwonika na stronie, notatka zamknieta
+        container.style.top = minTop - 213 +'px';   
+        dictionarySelectContainer.style.position = 'sticky'; // powrot do sticky , zadziałalo
+        dictionarySelectContainer.style.top = 'auto';  // zadziałalo      
     }
 
+    else if (window.innerWidth <= 768 ){
+
+        if (activeNoteForm) { //notatka otwarta
+            var videoList = document.getElementById('video-list');
+            var allItems = Array.from(videoList.getElementsByTagName('li'))
+            var videoItems = videoList.getElementsByTagName('li');
+            var rowHeight = 29; // Przybliżona wysokość jednego wiersza
+
+            var lastWordPair = activeNoteForm.querySelector('.word-translation-pair:last-child');
+            if (videoId){
+            listItemVideoId = document.getElementById(videoId);
+            }
+            var clickedIndex = allItems.indexOf(listItemVideoId);
+            var listOffset = (allItems.length - (clickedIndex + 1)) * rowHeight;
+            
+            console.log('Clicked item index:', clickedIndex + 1); // +1 dla numeracji od 1
+            console.log('Total items:', allItems.length);
+
+            //if (lastWordPair) {
+                var lastWordPairRect = lastWordPair.getBoundingClientRect();
+                var newTop = Math.max(minTop, lastWordPairRect.bottom + window.pageYOffset - 295); // Podwyzszanie słownika
+                container.style.top = minTop  - 3 - listOffset + 'px';
+                dictionarySelectContainer.style.position = 'relative';   //wazne! 
+                dictionarySelectContainer.style.top = minTop + 15 + 125 - listOffset + 'px'; // offset
+           // } else {
+               // container.style.top = minTop + 'px';
+               // dictionarySelectContainer.style.position = 'sticky';
+            //}
+        } else {  // pozycja default słwonika na stronie, notatka zamknieta
+            container.style.top = minTop - 210 + 'px';   
+            dictionarySelectContainer.style.position = 'relative'; // powrot do sticky , zadziałalo
+            dictionarySelectContainer.style.top = minTop - 70 + 'px';
+        }
+        //var separator = document.querySelector('#separator');
+        //separator.style.zIndex = '1000';
+        //dictionarySelect.style.zIndex = '1000';
+        //dictionarySelectContainer.style.zIndex = '1000';
+        container.style.zIndex = '1000';
+        //container.style.background = 'none';
+    }
     // Dostosuj szerokość kontenera do szerokości dropdown menu
     container.style.width = dictionarySelect.offsetWidth + 'px';
 }
@@ -1513,6 +1641,12 @@ function addNewTab() {
     const selectedDictionary = dictionarySelect.value;
     const dictionaryName = dictionarySelect.options[dictionarySelect.selectedIndex].text;
     
+    // Usuń komunikat "No dictionary selected"
+    const iframeContainer = document.getElementById('iframe-container');
+    if (iframeContainer.innerHTML.includes('No dictionary selected')) {
+        iframeContainer.innerHTML = '';
+    }
+    
     const newTab = {
         id: Date.now(),
         name: dictionaryName,
@@ -1588,7 +1722,7 @@ function closeTab(tabId) {
     const tabIndex = tabs.findIndex(t => t.id === tabId);
     if (tabIndex === -1) return;
 
-    // Usuń zakładkę z tablicy
+    // Usu�� zakładkę z tablicy
     tabs.splice(tabIndex, 1);
 
     // Usuń odpowiadający iframe
@@ -1605,7 +1739,7 @@ function closeTab(tabId) {
         } else {
             // Jeśli nie ma więcej zakładek, możesz np. pokazać pusty kontener
             const iframeContainer = document.getElementById('iframe-container');
-            iframeContainer.innerHTML = '<p>No dictionary selected</p>';
+            iframeContainer.innerHTML = '<p></p>';
         }
     }
 
@@ -1624,6 +1758,12 @@ function changeDictionary() {
     } else if (selectedUrl === 'remove_dictionary') {
         removeDictionary();
     } else {
+        // Dodaj parametr dark=1 do URL jeśli tryb ciemny jest aktywny
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const urlWithDarkMode = isDarkMode ? 
+            `${selectedUrl}${selectedUrl.includes('?') ? '&' : '?'}dark=1` : 
+            selectedUrl;
+            
         addNewTab();
         // Aktualizuj stan checkboxa
         const defaultDictionary = localStorage.getItem('defaultDictionary');
@@ -1694,6 +1834,11 @@ function onYouTubeIframeAPIReady() {
     initializeAddToWatchedButton();
     initializeFirstTab();
     initializeColumnResizer();
+    
+    // Dodaj to wywołanie
+    const ratio = loadDefaultColumnRatio();
+    applyColumnRatio(ratio);
+    
     setTimeout(autosizePlayer, 100);
 }
 
@@ -1702,6 +1847,9 @@ function initializeColumnResizer() {
     const leftColumn = document.querySelector('.left-column');
     const rightColumn = document.querySelector('.right-column');
     let isResizing = false;
+
+    // Dodajemy wywołanie funkcji pokazującej tooltip
+    showColumnDividerTooltip();
 
     divider.addEventListener('mousedown', startResizing);
 
@@ -1751,6 +1899,12 @@ function initializeColumnResizer() {
         document.body.style.cursor = 'default';
         document.removeEventListener('mousemove', resize);
         document.removeEventListener('mouseup', stopResizing);
+        
+        // Dodaj zapisywanie aktualnego podziału
+        const containerWidth = document.querySelector('.main-container').offsetWidth;
+        const leftColumn = document.querySelector('.left-column');
+        const leftWidth = (leftColumn.offsetWidth / containerWidth) * 100;
+        saveDefaultColumnRatio(Math.round(leftWidth));
     }
 }
 
@@ -1761,7 +1915,6 @@ function openSettings() {
     let settingsForm = document.getElementById('review-settings-form');
     let overlay = document.getElementById('settings-overlay');
     
-    // Jeśli formularz jest już otwarty, zamknij go
     if (settingsForm) {
         settingsForm.remove();
         overlay.remove();
@@ -1772,8 +1925,8 @@ function openSettings() {
     overlay.className = 'settings-overlay';
     overlay.id = 'settings-overlay';
     
-    // Pobierz aktualny stan z localStorage
     const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
+    const currentRatio = loadDefaultColumnRatio();
     
     settingsForm = document.createElement('div');
     settingsForm.id = 'review-settings-form';
@@ -1789,19 +1942,78 @@ function openSettings() {
                 BBC learning English playlists
             </label>
         </div>
+        <div class="settings-group">
+            <label>Column divider ratio:</label>
+            <div class="ratio-control">
+                <input type="range" id="columnRatioSlider" 
+                    min="20" max="80" value="${currentRatio}" 
+                    class="ratio-slider">
+                <span id="ratioValue">${currentRatio}%</span>
+            </div>
+        </div>
     `;
 
     document.body.appendChild(overlay);
     document.body.appendChild(settingsForm);
     
-    // Dodaj event listener dla checkboxa
+    // Event listener dla checkboxa BBC
     const checkbox = settingsForm.querySelector('#bbcPlaylistCheckbox');
     checkbox.addEventListener('change', function() {
         localStorage.setItem('bbcPlaylistEnabled', this.checked);
         updatePlaylistVisibility();
     });
     
+    // Event listener dla suwaka
+    const slider = settingsForm.querySelector('#columnRatioSlider');
+    const ratioValue = settingsForm.querySelector('#ratioValue');
+    slider.addEventListener('input', function() {
+        ratioValue.textContent = this.value + '%';
+        saveDefaultColumnRatio(this.value);
+    });
+    
     overlay.addEventListener('click', closeSettings);
+}
+
+// Dodaj wywołanie przy inicjalizacji
+window.addEventListener('load', function() {
+    const ratio = loadDefaultColumnRatio();
+    applyColumnRatio(ratio);
+});
+
+// Dodaj funkcję do zapisywania i wczytywania domyślnego podziału
+function saveDefaultColumnRatio(ratio) {
+    localStorage.setItem('defaultColumnRatio', ratio);
+    applyColumnRatio(ratio);
+}
+
+function loadDefaultColumnRatio() {
+    return localStorage.getItem('defaultColumnRatio') || 44;
+}
+
+function applyColumnRatio(ratio) {
+    // Nie stosuj podziału dla małych ekranów
+    if (window.innerWidth <= 768) {
+        return;
+    }
+    
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+    
+    leftColumn.style.width = ratio + '%';
+    rightColumn.style.width = (100 - ratio - 0.4) + '%';
+    
+    // Dostosuj szerokość iframe'a i jego kontenera
+    const iframeContainer = document.querySelector('.iframe-container');
+    const iframes = document.querySelectorAll('iframe');
+    if (iframeContainer) {
+        iframeContainer.style.width = '100%';
+        iframes.forEach(iframe => {
+            iframe.style.width = '100%';
+        });
+    }
+    
+    // Aktualizuj rozmiar playera YouTube
+    autosizePlayer();
 }
 
 // Funkcja do aktualizacji widoczności playlist
@@ -1871,3 +2083,5 @@ function extractPlaylistId(link) {
     }
     return null;
 }
+
+

@@ -16,10 +16,10 @@
 
         #dictionary-frame {
             position: fixed;
-            top: 200px; /* Zmieniamy z 150px na 200px, aby obniżyć słownik o kolejne 50px */
+            top: 200px;
             right: -33.33%;
             width: 33.33%;
-            height: calc(100% - 200px); /* Dostosowujemy wysokość */
+            height: calc(100% - 200px);
             border: none;
             transition: right 0.3s ease-in-out;
             z-index: 1000;
@@ -51,10 +51,23 @@
 
         @media (max-width: 768px) {
             #dictionary-frame {
-                top: 160px;
+                position: static;
+                top: auto;
+                right: auto;
                 width: 100%;
-                right: -100%;
-                height: calc(100% - 160px);
+                height: 0;
+                margin-top: 20px;
+                transition: height 0.3s ease-in-out;
+                overflow: hidden;
+            }
+
+            #dictionary-frame.show {
+                height: 500px;
+                border: 1px solid #ddd;
+            }
+
+            .container {
+                padding-bottom: 20px;
             }
         }
 
@@ -177,6 +190,7 @@
                     <button id="dark-mode-toggle" class="dark-mode-button" data-tooltip="darkModeTooltip">
                         <span class="dark-mode-icon">☽</span>
                     </button>
+                    <button id="main-settings" class="nav-button main-settings-button" data-tooltip="Settings">⋮</button>
                     <div id="save-link" class="save-link"></div>
                 </div>
                 <div class="language-select">
@@ -197,7 +211,6 @@
             <button onclick="exportFlashcards()" class="nav-button" data-translate="exportToFile">Export to File</button>
             <button onclick="importFlashcards()" class="nav-button" data-translate="importFromFile">Import from File</button>
             <button id="toggle-dictionary" class="nav-button" data-translate="dictionary">Dictionary</button>
-            <button id="main-settings" class="nav-button main-settings-button" data-tooltip="Settings">⋮</button>
         </nav>
   
         <div class="container">
@@ -266,7 +279,7 @@
             </section>
         </div>
     </main>
-    <iframe id="dictionary-frame" src="dictionary.html" frameborder="0"></iframe>
+    <iframe id="dictionary-frame" frameborder="0" hidden></iframe>
 
     <script>
         // Kod JavaScript do obsługi słownika

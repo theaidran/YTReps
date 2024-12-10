@@ -203,6 +203,7 @@ function showReviewModeSelection() {
     const showNewToday = localStorage.getItem('show_new_today') !== 'false';
     const showHardCards = localStorage.getItem('show_hard_cards') !== 'false';
     const showRandom = localStorage.getItem('show_random') !== 'false';
+    const showCardsNumber = localStorage.getItem('show_cards_number') === 'true';
 
     let reviewModesHTML = `
         <div class="review-mode-card" onclick="selectReviewMode('dueToday')">
@@ -243,7 +244,7 @@ function showReviewModeSelection() {
                 ${reviewModesHTML}
             </div>
             <div class="review-options">
-                <div class="cards-number-options">
+                <div class="cards-number-options" style="${!showCardsNumber ? 'display: none;' : ''}">
                     <label data-translate="numberOfCards">Number of cards:</label>
                     <div class="checkbox-group">
                         <label class="checkbox-option">
@@ -346,11 +347,7 @@ function startSelectedReview() {
         case 'new':
             switch (algorithm) {
                 case 'supermemo':
-                    flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
-                    break;
                 case 'leitner':
-                    flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
-                    break;
                 default:
                     flashcardsToReview = flashcards.filter(f => !f.lastReviewed);
             }
@@ -937,7 +934,7 @@ function initializeApp() {
     }
 
     // Inicjalizacja trybu ciemnego
-    isDarkMode = localStorage.getItem('darkMode') === 'true';
+    //isDarkMode = localStorage.getItem('darkMode') === 'true';
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
     }
@@ -953,6 +950,120 @@ function initializeApp() {
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', toggleDarkMode);
     }
+    const testDate = new Date('2024-12-21'); // ustaw dowolną datę
+    // Dodaj tę linię na początku funkcji
+    addNewCardsForToday();
+
+    // Dodaj obsługę słownika
+    const toggleDictionaryBtn = document.getElementById('toggle-dictionary');
+    const dictionaryFrame = document.getElementById('dictionary-frame');
+    
+    if (toggleDictionaryBtn && dictionaryFrame) {
+        toggleDictionaryBtn.addEventListener('click', () => {
+            const isMobileScreen = window.matchMedia('(max-width: 768px)').matches;
+            
+            // Najpierw usuń istniejący kontener lub iframe jeśli istnieje
+            const existingContainer = document.getElementById('dictionary-container');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            
+            // Dla obu wersji (mobile i desktop) tworzymy nowy kontener
+            const dictionaryContainer = document.createElement('div');
+            dictionaryContainer.className = 'reps-dictionary-container'; // Usuwamy starą klasę 'dictionary-container'
+            dictionaryContainer.id = 'dictionary-container';
+            
+            // Pobierz aktualny domyślny słownik i niestandardowe słowniki
+            const defaultDictionary = localStorage.getItem('defaultDictionary');
+            const customDictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
+            
+            // Przygotuj opcje dla selecta, włączając niestandardowe słowniki
+            const dictionaryOptions = [
+                { url: 'https://www.onelook.com/', name: 'onelook.com' },
+                { url: 'https://www.diki.pl/', name: 'diki.pl' },
+                { url: 'https://dict.com/angielsko-polski', name: 'dict.com' },
+                { url: 'https://ling.pl/', name: 'ling.pl' },
+                ...customDictionaries
+            ].map(dict => `
+                <option value="${dict.url}" ${defaultDictionary === dict.url ? 'selected' : ''}>
+                    ${dict.name}
+                </option>
+            `).join('');
+
+            dictionaryContainer.innerHTML = `
+                <div class="reps-dictionary-header">
+                    <span class="reps-back-arrow" onclick="hideDictionary()">&#8594;</span>
+                    <div class="reps-dictionary-select-container">
+                        <select id="reps-dictionary-select" class="reps-dictionary-select" onchange="repsChangeDictionary()">
+                            ${dictionaryOptions}
+                            <option value="add_new">Add new</option>
+                            <option value="remove_dictionary">Remove dictionary</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="reps-default-checkbox-container">
+                    <input type="checkbox" id="reps-dictionary-default-checkbox" 
+                           ${defaultDictionary ? 'checked' : ''} 
+                           onchange="setDefaultDictionary()">
+                    <label for="reps-dictionary-default-checkbox" title="Set as default dictionary">
+                        Set as Default
+                        <span class="reps-default-indicator">${defaultDictionary ? '(Current default)' : ''}</span>
+                    </label>
+                </div>
+                
+                <div class="reps-iframe-container">
+                    <iframe class="reps-dictionary-frame-mobile" src="${defaultDictionary || 'https://www.onelook.com/'}"></iframe>
+                </div>`;
+            
+            // Wstawiamy nowy kontener w miejsce iframe'a
+            dictionaryFrame.parentNode.insertBefore(dictionaryContainer, dictionaryFrame);
+            dictionaryContainer.classList.add('show');
+            
+            // Ukrywamy oryginalny iframe
+            dictionaryFrame.style.display = 'none';
+        });
+    }
+}
+
+// Dodaj tę funkcję do sprawdzania i dodawania nowych kart na początku dnia
+function addNewCardsForToday(testDate = null) {
+    const now = testDate || new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lastAddDate = localStorage.getItem('last_new_cards_add_date');
+    
+    // Sprawdź czy już dodano karty dzisiaj - porównaj pełne daty
+    if (lastAddDate) {
+        const lastDate = new Date(lastAddDate);
+        if (lastDate.getFullYear() === today.getFullYear() &&
+            lastDate.getMonth() === today.getMonth() &&
+            lastDate.getDate() === today.getDate()) {
+            return; // Już dodano karty dzisiaj
+        }
+    }
+
+    // Pobierz liczbę nowych kart do dodania
+    const newCardsPerDay = parseInt(localStorage.getItem('new_cards_per_day')) || 0; // Zmieniono z 5 na 0
+    if (newCardsPerDay <= 0) return; // Jeśli ustawiono 0, nie dodawaj kart
+
+    // Znajdź wszystkie karty, które nigdy nie były przeglądane
+    const newCards = flashcards.filter(f => !f.lastReviewed);
+    
+    // Wybierz określoną liczbę kart
+    const cardsToAdd = newCards.slice(0, newCardsPerDay);
+    
+    // Oznacz wybrane karty jako dodane dzisiaj i due today
+    cardsToAdd.forEach(card => {
+        card.firstReviewDate = today.toISOString();
+        card.nextReview = today.toISOString();
+        card.lastReviewed = today.toISOString(); // Zmienione z null na today.toISOString()
+    });
+
+    // Zapisz datę dodania kart
+    localStorage.setItem('last_new_cards_add_date', today.toISOString());
+    
+    // Zapisz zaktualizowane fiszki
+    saveFlashcards();
 }
 
 // Dodaj tę funkcję, aby upewnić się, że przycisk Info jest prawidłowo dodany
@@ -1435,6 +1546,7 @@ function openReviewSettings() {
     // Zmiana domyślnych wartości
     const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'supermemo';
     const currentButtonMode = localStorage.getItem('gradeButtonMode') || 'four';
+    const currentNewCardsPerDay = localStorage.getItem('new_cards_per_day') || '5';
     
     const overlay = document.createElement('div');
     overlay.className = 'settings-overlay';
@@ -1446,7 +1558,37 @@ function openReviewSettings() {
     settingsForm.innerHTML = `
         <h3 data-translate="reviewSettings">Review Settings</h3>
         <div class="settings-group">
-   
+            <!-- Zmieniony tekst labela -->
+            <div class="new-cards-settings">
+                <label data-translate="automaticNewCards">Add automatically number of new cards every day:</label>
+                <div class="radio-group horizontal">  <!-- Dodano klasę horizontal -->
+                    <label class="radio-option">
+                        <input type="radio" name="newCardsPerDay" value="0" 
+                            ${currentNewCardsPerDay === '0' ? 'checked' : ''}>
+                        <span class="radio-label">0</span>  <!-- Dodano klasę radio-label -->
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="newCardsPerDay" value="5" 
+                            ${currentNewCardsPerDay === '5' ? 'checked' : ''}>
+                        <span class="radio-label">5</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="newCardsPerDay" value="10" 
+                            ${currentNewCardsPerDay === '10' ? 'checked' : ''}>
+                        <span class="radio-label">10</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="newCardsPerDay" value="custom" 
+                            ${!['0', '5', '10'].includes(currentNewCardsPerDay) ? 'checked' : ''}>
+                        <span class="radio-label" data-translate="custom">Custom</span>
+                        <input type="number" id="customNewCards" 
+                            value="${!['0', '5', '10'].includes(currentNewCardsPerDay) ? currentNewCardsPerDay : '15'}"
+                            min="1" max="100" 
+                            class="${!['0', '5', '10'].includes(currentNewCardsPerDay) ? '' : 'hidden'}"
+                            onclick="event.stopPropagation()">
+                    </label>
+                </div>
+            </div>
         </div>
 
         <div class="settings-group review-modes-options">
@@ -1467,6 +1609,13 @@ function openReviewSettings() {
                 <label class="checkbox-label">
                     <input type="checkbox" id="show-random" ${localStorage.getItem('show_random') !== 'false' ? 'checked' : ''}>
                     <span data-translate="randomFlashcards">Random Selection</span>
+                </label>
+            </div>
+            <!-- Dodaj nową opcję -->
+            <div class="checkbox-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-cards-number" ${localStorage.getItem('show_cards_number') === 'true' ? 'checked' : ''}>
+                    <span data-translate="showCardsNumber">Show Number of cards limit</span>
                 </label>
             </div>
         </div>
@@ -1517,13 +1666,20 @@ function openReviewSettings() {
         document.getElementById('algorithmInfo').textContent = getAlgorithmDescription(e.target.value);
     });
 
-   //overlay.addEventListener('click', closeReviewSettings);
-    changeLanguage();
-
     // Zmiana obsługi kliknięcia na overlay
     overlay.addEventListener('click', () => {
         saveAlgorithmSettings();
     });
+
+    // Dodaj obsługę radio buttonów dla nowych kart
+    settingsForm.querySelectorAll('input[name="newCardsPerDay"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const customInput = document.getElementById('customNewCards');
+            customInput.classList.toggle('hidden', this.value !== 'custom');
+        });
+    });
+
+    changeLanguage();
 }
 
 // Dodaj funkcję pomocniczą do pobierania opisu algorytmu
@@ -1564,21 +1720,26 @@ function saveAlgorithmSettings() {
     const showNewToday = document.getElementById('show-new-today').checked;
     const showHardCards = document.getElementById('show-hard-cards').checked;
     const showRandom = document.getElementById('show-random').checked;
+    const showCardsNumber = document.getElementById('show-cards-number').checked;
+    
+    // Dodaj zapisywanie liczby nowych kart
+    const selectedNewCards = document.querySelector('input[name="newCardsPerDay"]:checked');
+    let newCardsPerDay = selectedNewCards.value;
+    if (newCardsPerDay === 'custom') {
+        newCardsPerDay = document.getElementById('customNewCards').value;
+    }
     
     localStorage.setItem('reviewAlgorithm', algorithm);
     localStorage.setItem('gradeButtonMode', buttonMode);
     localStorage.setItem('show_new_today', showNewToday);
     localStorage.setItem('show_hard_cards', showHardCards);
     localStorage.setItem('show_random', showRandom);
+    localStorage.setItem('new_cards_per_day', newCardsPerDay); // Dodaj tę linię
+    localStorage.setItem('show_cards_number', showCardsNumber);
     
-     updateStats();
-    // updateCardCounts();
-     drawLearningProgressChart();
-   // updateFlashcardTable();
-    
+    updateStats();
+    drawLearningProgressChart();
     closeReviewSettings();
-    
-    // Odśwież sekcję review
     showReviewModeSelection();
 }
 
@@ -2033,11 +2194,15 @@ function showNextFlashcard() {
         if (enableSyncAfterReview) {
             setTimeout(async () => {
                 try {
-                    await handleSync();
+                    // Usuń wyświetlanie okna dialogowego - po prostu wykonaj synchronizację
+                    const apiKey = localStorage.getItem('pushbullet_api_key');
+                    if (apiKey) {
+                        await handleSync();
+                    }
                 } catch (error) {
                     console.error('Auto sync after review failed:', error);
                 }
-            }, 1); // Małe opóźnienie przed synchronizacją
+            }, 1);
         }
         
         setTimeout(() => {
@@ -2674,13 +2839,13 @@ window.sendExportToPushbullet = sendExportToPushbullet;
 window.initSyncCheck = initSyncCheck;
 
 // Dodaj na początku pliku
-let isDarkMode = localStorage.getItem('darkMode') === 'true';
+let isDarkMode = false;
 
 // Dodaj funkcję do przełączania trybu
 function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark-mode', isDarkMode);
-    localStorage.setItem('darkMode', isDarkMode);
+    //localStorage.setItem('darkMode', isDarkMode);
     
     // Zmień ikonę na czarno-białą
     const darkModeIcon = document.querySelector('.dark-mode-icon');
@@ -2711,10 +2876,191 @@ function toggleDarkMode() {
 translations.en.darkModeTooltip = "Toggle dark mode";
 translations.pl.darkModeTooltip = "Przełącz tryb ciemny";
 
+// W sekcji tłumaczeń
+translations.en.noDictionaryAvailable = "No dictionary available";
+translations.pl.noDictionaryAvailable = "Słownik nie jest dostępny";
 
+// Dodaj funkcje pomocnicze
+function hideDictionary() {
+    const dictionaryFrame = document.getElementById('dictionary-frame');
+    if (dictionaryFrame) {
+        dictionaryFrame.classList.remove('show');
+    }
+}
 
+// Modyfikacja funkcji changeDictionary
+function repsChangeDictionary() {
+    const repsSelect = document.getElementById('reps-dictionary-select');
+    const repsIframe = document.querySelector('.reps-dictionary-frame-mobile');
+    const repsCheckbox = document.getElementById('reps-dictionary-default-checkbox');
+    const repsIndicator = repsCheckbox.parentElement.querySelector('.reps-default-indicator');
+    
+    if (repsSelect.value === 'add_new') {
+        addNewDictionary();
+    } else if (repsSelect.value === 'remove_dictionary') {
+        removeDictionary();
+    } else if (repsSelect && repsIframe) {
+        repsIframe.src = repsSelect.value;
+        
+        const defaultDictionary = localStorage.getItem('defaultDictionary');
+        repsCheckbox.checked = (defaultDictionary === repsSelect.value);
+        
+        if (repsIndicator) {
+            repsIndicator.textContent = (defaultDictionary === repsSelect.value) ? '(Current default)' : '';
+        }
+    }
+}
 
+function setDefaultDictionary() {
+    const repsCheckbox = document.getElementById('reps-dictionary-default-checkbox');
+    const repsSelect = document.getElementById('reps-dictionary-select');
+    const repsIndicator = repsCheckbox.parentElement.querySelector('.reps-default-indicator');
+    
+    if (repsCheckbox && repsSelect) {
+        if (repsCheckbox.checked) {
+            localStorage.setItem('defaultDictionary', repsSelect.value);
+            if (repsIndicator) {
+                repsIndicator.textContent = '(Current default)';
+            }
+        } else {
+            localStorage.removeItem('defaultDictionary');
+            if (repsIndicator) {
+                repsIndicator.textContent = '';
+            }
+        }
+    }
+}
 
+// Modyfikujemy funkcję hideDictionary
+function hideDictionary() {
+    const dictionaryFrame = document.getElementById('dictionary-frame');
+    const dictionaryContainer = document.getElementById('dictionary-container');
+    
+    if (dictionaryContainer) {
+        dictionaryContainer.classList.remove('show');
+    } else if (dictionaryFrame) {
+        dictionaryFrame.classList.remove('show');
+    }
+}
+
+// Dodaj funkcje do obsługi dodawania i usuwania słowników
+function addNewDictionary() {
+    // Tworzymy okno dialogowe
+    const dialog = document.createElement('dialog');
+    dialog.innerHTML = `
+        <h3>Add new dictionary</h3>
+        <div>
+            <label for="reps-dictionary-name">Dictionary name:</label>
+            <input type="text" id="reps-dictionary-name" placeholder="Enter dictionary name">
+        </div>
+        <div>
+            <label for="reps-dictionary-url">Dictionary URL:</label>
+            <input type="text" id="reps-dictionary-url" placeholder="Enter URL (without https://)">
+        </div>
+        <div>
+            <button id="reps-add-confirm">Add</button>
+            <button id="reps-add-cancel">Cancel</button>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    dialog.showModal();
+
+    dialog.querySelector('#reps-add-confirm').addEventListener('click', () => {
+        const name = dialog.querySelector('#reps-dictionary-name').value;
+        let url = dialog.querySelector('#reps-dictionary-url').value;
+        
+        if (name && url) {
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            const repsSelect = document.getElementById('reps-dictionary-select');
+            const option = document.createElement('option');
+            option.value = url;
+            option.textContent = name;
+            
+            const addNewOption = repsSelect.querySelector('option[value="add_new"]');
+            repsSelect.insertBefore(option, addNewOption);
+            
+            repsSelect.value = url;
+            repsChangeDictionary();
+            
+            const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
+            dictionaries.push({ name, url });
+            localStorage.setItem('customDictionaries', JSON.stringify(dictionaries));
+        }
+        
+        dialog.close();
+        dialog.remove();
+    });
+
+    dialog.querySelector('#reps-add-cancel').addEventListener('click', () => {
+        dialog.close();
+        dialog.remove();
+    });
+
+    const repsSelect = document.getElementById('reps-dictionary-select');
+    if (repsSelect.value === 'add_new') {
+        repsSelect.value = repsSelect.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
+    }
+    repsChangeDictionary();
+}
+
+function removeDictionary() {
+    const repsSelect = document.getElementById('reps-dictionary-select');
+    
+    // Tworzymy okno dialogowe
+    const dialog = document.createElement('dialog');
+    dialog.innerHTML = `
+        <h3>Select a dictionary to remove</h3>
+        <select id="reps-dictionary-to-remove">
+            ${Array.from(repsSelect.options)
+                .filter(option => !['add_new', 'remove_dictionary'].includes(option.value))
+                .map(option => `<option value="${option.value}">${option.text}</option>`)
+                .join('')}
+        </select>
+        <div>
+            <button id="reps-confirm-remove">Remove</button>
+            <button id="reps-cancel-remove">Cancel</button>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    dialog.showModal();
+
+    dialog.querySelector('#reps-confirm-remove').addEventListener('click', () => {
+        const selectToRemove = dialog.querySelector('#reps-dictionary-to-remove');
+        const dictionaryToRemove = selectToRemove.options[selectToRemove.selectedIndex].text;
+        const optionToRemove = Array.from(repsSelect.options).find(option => option.text === dictionaryToRemove);
+        
+        if (optionToRemove) {
+            repsSelect.removeChild(optionToRemove);
+            
+            const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
+            const updatedDictionaries = dictionaries.filter(dict => dict.name !== dictionaryToRemove);
+            localStorage.setItem('customDictionaries', JSON.stringify(updatedDictionaries));
+            
+            if (localStorage.getItem('defaultDictionary') === optionToRemove.value) {
+                localStorage.removeItem('defaultDictionary');
+                document.getElementById('reps-dictionary-default-checkbox').checked = false;
+            }
+            
+            alert(`Dictionary "${dictionaryToRemove}" has been removed.`);
+        }
+        
+        dialog.close();
+        dialog.remove();
+    });
+
+    dialog.querySelector('#reps-cancel-remove').addEventListener('click', () => {
+        dialog.close();
+        dialog.remove();
+    });
+
+    repsSelect.value = repsSelect.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
+    repsChangeDictionary();
+}
 
 
 
