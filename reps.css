@@ -161,6 +161,7 @@ nav {
     padding: 2rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+
 }
 
 .section-header {
@@ -3027,6 +3028,8 @@ body.dark-mode .start-review-button:hover {
         height: 40px;
         margin: 0 5px;
     }
+
+
 }
 
 /* Istniejące style dla header-right */
@@ -3183,11 +3186,15 @@ body.dark-mode .start-review-button:hover {
         position: static;
         width: 90%;
         height: 0;
-        margin: 20px auto;
+        margin: 20px auto; 
+        margin-right: 40px; /* Dodany margines z prawej strony */
+        margin-left: 30px; /* Wyrównany margines z lewej strony */
         transition: height 0.3s ease-in-out;
         overflow: hidden;
         box-shadow: none;
+        
     }
+
 
     .reps-dictionary-container.show {
         height: 80vh;

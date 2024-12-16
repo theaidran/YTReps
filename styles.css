@@ -704,7 +704,7 @@
         #separator {
             height: 130px;
             width: 100%;
-            border-bottom: 1px solid #ffffff; /* Zmieniamy kolor linii na biały */
+           /*        border-bottom: 1px solid #ffffff; /* Zmieniamy kolor linii na biały */
             /* lub */
             /* box-shadow: 0 2px 4px rgba(255,255,255,0.05); */ /* Jeśli używasz cienia, zmieniamy go na biały */
         }
@@ -1052,13 +1052,49 @@
             transform: rotate(180deg);
         }
 
-@media (max-width: 768px) {
+        
+@media (max-width: 920px) and (orientation: landscape) {
+
+    .right-column { /* kolumna słownika */
+        width: 100%;
+        padding-right: 5px;   /* odstep od prawej */
+        min-height: 250vh;
+       /* max-height: auto;*/
+    }
+
+    .left-column {
+        width: 100%;
+    }
+
+    #dictionary-select {
+        margin-bottom: 10px;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s, box-shadow 0.3s;
+        
+    }
+}
+
+@media (max-width: 520px)  {
     .main-container {
         flex-direction: column;
     }
 
-    .left-column, .right-column {
-        width: 100%;
+
+    .right-column { /* kolumna słownika */
+        width: 105%;
+        padding-right: 85px;   /* odstep od prawej */
+    }
+
+    .left-column { /* kolumna palyera */
+        width: 115%;
+        padding-right: 40px; /* nie dziala */
+        padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
+        margin-right: 10px;
     }
 
     .column-resizer {
@@ -1078,6 +1114,7 @@
 
     .expanded .left-column {
         display: none;
+        
     }
 
     .expanded .right-column {
@@ -1086,12 +1123,12 @@
     }
 
     .mobile-view .left-column {
+        
         display: block;
     }
 
     .mobile-view .right-column {
         display: block;
-        
     }
 }
 
@@ -1786,5 +1823,19 @@ body.dark-mode .checkbox-label {
 /* Style dla tooltipów w trybie ciemnym */
 body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
     color: #e0e0e0;  /* Jaśniejszy kolor dla tekstu w tooltipie */
+}
+
+/* Style dla różnych orientacji na urządzeniach mobilnych */
+@media (max-width: 520px) {
+
+
+    /* Style dla trybu ciemnego */
+    body.index-dark-mode.portrait-mode {
+        background-color: #1a1a1a;
+    }
+
+    body.index-dark-mode.landscape-mode {
+        background-color: #222222;
+    }
 }
 

@@ -1,4 +1,6 @@
 let isIndexDarkMode = false;
+var isPortrait = window.innerHeight > window.innerWidth ;
+var isLandscape = window.innerWidth  > window.innerHeight;
 
 // Funkcja do przełączania trybu ciemnego
 function toggleIndexDarkMode() {
@@ -64,7 +66,7 @@ var addToWatchedOnStart = true;
 // Dodaj tę funkcję na początku pliku, wraz z innymi zmiennymi globalnymi
 function showColumnDividerTooltip() {
     // Nie pokazuj tooltipa na małych ekranach
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth  <= 915) {
         return;
     }
 
@@ -100,7 +102,7 @@ function showColumnDividerTooltip() {
 
         // Dodaj nasłuchiwanie na zmianę rozmiaru okna
         const resizeHandler = () => {
-            if (window.innerWidth <= 768 && tooltip.parentElement) {
+            if (window.innerWidth  <= 520 && tooltip.parentElement) {
                 tooltip.remove();
                 columnDivider.classList.remove('highlighted');
                 localStorage.setItem('columnDividerTooltipShown', 'true');
@@ -392,8 +394,9 @@ function toggleNoteForm(videoId) {
             const offset = noteFormRect.top + window.pageYOffset - (window.innerHeight / 2) + (noteFormRect.height / 2);
             
             // Użyj animacji do przewijania
+            if (window.innerWidth  > 915) { //nie mobile, wacz przewijanie
             smoothScrollTo(offset, 1000); // 1000ms (1 sekunda) na animację
-            
+            }
             // Dostosuj pozycję playera YouTube
             adjustYouTubePlayerPosition(videoId, true);
         }, 100); // Dajemy trochę czasu na renderowanie formularza
@@ -430,10 +433,14 @@ function adjustYouTubePlayerPosition(videoId, isResizing = false) {
         autosizePlayer();
         
         // Jeśli to nie jest zmiana rozmiaru, przewiń do formularza
+        
         if (!isResizing) {
             var scrollTarget = noteFormRect.top + window.pageYOffset - 50; // 50px offset
-            smoothScrollTo(scrollTarget, 500);
+            if (window.innerWidth  > 915) { //wlacz tylko dla desktop
+                smoothScrollTo(scrollTarget, 500);
+            }
         }
+        
     } else {
         resetYouTubePlayerPosition();
     }
@@ -604,11 +611,19 @@ function addWordTranslationPair(videoId, word = '', context = '', translation = 
     setTimeout(() => {
         adjustIframeSize();
         adjustYouTubePlayerPosition(videoId, false);
+        if (window.innerWidth  > 915 ) { //wlacz tylko dla desktop
+            // Przewiń do 1/3 strony zamiast 1/6 (zwiększamy wartość)
+            var newPairRect = pairDiv.getBoundingClientRect();
+            var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 20) + 31;
+            smoothScrollTo(targetScrollPosition, 500);
+        }
+        else if (isPortrait) { // 1/4 strony dla mobile 1/3.65
+            var newPairRect = pairDiv.getBoundingClientRect();
+            var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 3.65) ;
+         smoothScrollTo(targetScrollPosition, 500);
+        }
+     // Dla wszytkicj mniejszych niz 915px w trybie landscape, wyłacz przewijanie
 
-        // Przewiń do 1/3 strony zamiast 1/6 (zwiększamy wartość)
-        var newPairRect = pairDiv.getBoundingClientRect();
-        var targetScrollPosition = newPairRect.top + window.pageYOffset - (window.innerHeight / 20) + 31;
-        smoothScrollTo(targetScrollPosition, 500);
     }, 100);
 	
     //Zapisz aktualny stan notki
@@ -1302,8 +1317,8 @@ function adjustIframeSize(videoId) {
     // Oblicz minimalną górną pozycję (tuż pod separatorem)
     var minTop = dictionarySelect.offsetTop + dictionarySelect.offsetHeight;
     
-    if (window.innerWidth > 768 )
-    if (activeNoteForm) { //notatka otwarta
+    if (window.innerWidth  > 520 ) { // tryb desktop, na mobile
+        if (activeNoteForm) { //notatka otwarta
         var lastWordPair = activeNoteForm.querySelector('.word-translation-pair:last-child');
         if (lastWordPair) {
             var lastWordPairRect = lastWordPair.getBoundingClientRect();
@@ -1315,40 +1330,49 @@ function adjustIframeSize(videoId) {
             container.style.top = minTop + 'px';
             dictionarySelectContainer.style.position = 'sticky';
         }
-    } else {  // pozycja default słwonika na stronie, notatka zamknieta
-        container.style.top = minTop - 213 +'px';   
-        dictionarySelectContainer.style.position = 'sticky'; // powrot do sticky , zadziałalo
-        dictionarySelectContainer.style.top = 'auto';  // zadziałalo      
+    }   else {  // pozycja default słwonika na stronie, notatka zamknieta
+            container.style.top = minTop - 213 +'px';   
+            dictionarySelectContainer.style.position = 'sticky'; // powrot do sticky , zadziałalo
+            dictionarySelectContainer.style.top = 'auto';  // zadziałalo      
+        }
+
     }
 
-    else if (window.innerWidth <= 768 ){
+    else { //mobile
 
         if (activeNoteForm) { //notatka otwarta
             var videoList = document.getElementById('video-list');
             var allItems = Array.from(videoList.getElementsByTagName('li'))
             var videoItems = videoList.getElementsByTagName('li');
-            var rowHeight = 29; // Przybliżona wysokość jednego wiersza
+            var rowHeight = 30; // Przybliżona wysokość jednego wiersza
 
             var lastWordPair = activeNoteForm.querySelector('.word-translation-pair:last-child');
+            var clickedIndex = 0;
+            var listOffset = 0;
             if (videoId){
             listItemVideoId = document.getElementById(videoId);
+            clickedIndex = allItems.indexOf(listItemVideoId);
+            listOffset = (allItems.length - (clickedIndex + 1)) * rowHeight;
             }
-            var clickedIndex = allItems.indexOf(listItemVideoId);
-            var listOffset = (allItems.length - (clickedIndex + 1)) * rowHeight;
+            else{
+                console.log('No videoID');
+                listOffset = 0;
+            }
             
+        
             console.log('Clicked item index:', clickedIndex + 1); // +1 dla numeracji od 1
             console.log('Total items:', allItems.length);
 
-            //if (lastWordPair) {
+            if (lastWordPair) {
                 var lastWordPairRect = lastWordPair.getBoundingClientRect();
                 var newTop = Math.max(minTop, lastWordPairRect.bottom + window.pageYOffset - 295); // Podwyzszanie słownika
-                container.style.top = minTop  - 3 - listOffset + 'px';
+                container.style.top = minTop  + 22 - listOffset + 'px';
                 dictionarySelectContainer.style.position = 'relative';   //wazne! 
-                dictionarySelectContainer.style.top = minTop + 15 + 125 - listOffset + 'px'; // offset
-           // } else {
-               // container.style.top = minTop + 'px';
-               // dictionarySelectContainer.style.position = 'sticky';
-            //}
+                dictionarySelectContainer.style.top = minTop + 40 + 125 - listOffset + 'px'; // offset
+            } else {
+                container.style.top = minTop + 'px';
+                dictionarySelectContainer.style.position = 'sticky';
+            }
         } else {  // pozycja default słwonika na stronie, notatka zamknieta
             container.style.top = minTop - 210 + 'px';   
             dictionarySelectContainer.style.position = 'relative'; // powrot do sticky , zadziałalo
@@ -1372,7 +1396,7 @@ function calculateNoteFormHeight() {
     }
     return 0;
 }
-
+/*
 function addNoteIconHoverListeners() {
     var noteIcons = document.querySelectorAll('.note-icon');
     noteIcons.forEach(function(icon) {
@@ -1380,19 +1404,22 @@ function addNoteIconHoverListeners() {
         icon.addEventListener('mouseleave', adjustIframeSize);
     });
 }
+*/
 
 // Dodaj wywołanie funkcji adjustIframeSize przy adowaniu strony i zmianie rozmiaru okna
 window.addEventListener('load', adjustIframeSize);
 window.addEventListener('resize', adjustIframeSize);
 
 // Dodaj wywołanie funkcji adjustIframeSize po każdej zmianie w notatkach
+
 function addNoteIconHoverListeners() {
-    var noteIcons = document.querySelectorAll('.note-icon');
-    noteIcons.forEach(function(icon) {
-        icon.addEventListener('mouseenter', adjustIframeSize);
-        icon.addEventListener('mouseleave', adjustIframeSize);
-    });
+   // var noteIcons = document.querySelectorAll('.note-icon');
+  //  noteIcons.forEach(function(icon) {
+ //       icon.addEventListener('mouseenter', adjustIframeSize);
+ //       icon.addEventListener('mouseleave', adjustIframeSize);
+ //   });
 }
+
 
 // Wywołaj addNoteIconHoverListeners po zaadowaniu strony i po każdej aktualizacji listy notatek
 window.addEventListener('load', addNoteIconHoverListeners);
@@ -1596,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContainer = document.querySelector('.main-container');
 
     function adjustLayoutForMobile() {
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth  <= 520) {
             mainContainer.classList.add('mobile-view');
         } else {
             mainContainer.classList.remove('mobile-view');
@@ -1992,7 +2019,7 @@ function loadDefaultColumnRatio() {
 
 function applyColumnRatio(ratio) {
     // Nie stosuj podziału dla małych ekranów
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth  <= 520) {
         return;
     }
     
@@ -2084,4 +2111,69 @@ function extractPlaylistId(link) {
     return null;
 }
 
+// Zmodyfikowana funkcja debounce
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func.apply(this, args);
+        }, wait);
+    };
+}
 
+// Zmodyfikowana funkcja sprawdzająca orientację
+function checkOrientation() {
+    console.log('checkOrientation wywołane'); // Dodajemy log do debugowania
+    
+    if (isPortrait) {
+        console.log('Orientacja pionowa');
+        //document.body.classList.add('index-dark-mode');
+    } else if (isLandscape) {
+        console.log('Orientacja pozioma');
+      //  document.body.classList.remove('index-dark-mode');
+    }
+}
+
+
+// Tworzymy zdebounce'owaną wersję funkcji
+const debouncedCheckOrientation = debounce(checkOrientation, 250);
+
+// Dodajemy bezpośrednie nasłuchiwanie na zdarzenie resize
+window.addEventListener('resize', function() {
+    console.log('Zdarzenie resize wywołane'); // Dodajemy log do debugowania
+    debouncedCheckOrientation();
+});
+
+// Sprawdzamy orientację przy załadowaniu strony
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded wywołane'); // Dodajemy log do debugowania
+    checkOrientation();
+});
+
+// Dodatkowe sprawdzenie po pełnym załadowaniu strony
+window.addEventListener('load', function() {
+    console.log('Load wywołane'); // Dodajemy log do debugowania
+    checkOrientation();
+});
+/*
+// Alternatywne podejście - użycie matchMedia
+const mediaQuery = window.matchMedia("(orientation: portrait)");
+
+function handleOrientationChange(e) {
+    console.log('Zmiana orientacji wykryta');
+    if (e.matches) {
+        console.log('Orientacja pionowa');
+        document.body.classList.add('index-dark-mode');
+    } else {
+        console.log('Orientacja pozioma');
+        document.body.classList.remove('index-dark-mode');
+    }
+}
+
+// Dodaj nasłuchiwanie na zmiany orientacji
+mediaQuery.addListener(handleOrientationChange);
+
+// Sprawdź orientację przy starcie
+handleOrientationChange(mediaQuery);
+*/
