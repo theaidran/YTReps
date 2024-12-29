@@ -2156,6 +2156,7 @@ function showNextFlashcard() {
 
         document.getElementById('reviewCard').innerHTML = `
             <div class="card-content">
+                <button class="review-edit-button" onclick="editFlashcardDuringReview(${flashcard.id})" data-translate="edit">Edit</button>
                 ${algorithm === 'leitner' ? leitnerInfo : ''}
                 <p><strong data-translate="wordPhrase">Word / Phrase:</strong></p>
                 <pre>${flashcard.word}</pre>
@@ -3060,6 +3061,83 @@ function removeDictionary() {
 
     repsSelect.value = repsSelect.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
     repsChangeDictionary();
+}
+
+// Dodaj nową funkcję do edycji fiszki podczas powtórki
+function editFlashcardDuringReview(id) {
+    const flashcard = flashcards.find(f => f.id === id);
+    if (flashcard) {
+        const editForm = document.createElement('div');
+        editForm.className = 'section edit-form';
+        editForm.id = 'edit';
+        editForm.innerHTML = `
+            <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+            <form id="editFlashcardForm">
+                <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
+                <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+                <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+                <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
+                <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
+                <div class="button-group">
+                    <button type="submit" class="submit-button" data-translate="save">Save</button>
+                    <button type="button" class="cancel-button" onclick="cancelEditDuringReview()" data-translate="cancel">Cancel</button>
+                </div>
+            </form>
+        `;
+
+        editForm.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            updateFlashcardDuringReview(id, {
+                word: document.getElementById('editWord').value,
+                context: document.getElementById('editContext').value,
+                translation: document.getElementById('editTranslation').value,
+                mediaUrl: document.getElementById('editMediaUrl').value,
+                audioUrl: document.getElementById('editAudioUrl').value
+            });
+        });
+
+        const container = document.querySelector('.container');
+        const existingEditForm = document.getElementById('edit');
+        if (existingEditForm) {
+            container.removeChild(existingEditForm);
+        }
+        container.appendChild(editForm);
+        showSection('edit');
+
+        // Dostosuj wysokość pól tekstowych
+        adjustTextareaHeight('editWord', flashcard.word);
+        adjustTextareaHeight('editContext', flashcard.context);
+        adjustTextareaHeight('editTranslation', flashcard.translation);
+
+        changeLanguage();
+    }
+}
+
+// Funkcja do aktualizacji fiszki podczas powtórki
+function updateFlashcardDuringReview(id, updatedData) {
+    const index = flashcards.findIndex(f => f.id === id);
+    if (index !== -1) {
+        updatedData.lastModified = new Date().toISOString();
+        flashcards[index] = { ...flashcards[index], ...updatedData };
+        saveFlashcards();
+        
+        // Aktualizuj również fiszkę w tablicy flashcardsToReview
+        const reviewIndex = flashcardsToReview.findIndex(f => f.id === id);
+        if (reviewIndex !== -1) {
+            flashcardsToReview[reviewIndex] = { ...flashcardsToReview[reviewIndex], ...updatedData };
+        }
+
+        showSection('review');
+        showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+        changeLanguage();
+    }
+}
+
+// Funkcja do anulowania edycji podczas powtórki
+function cancelEditDuringReview() {
+    showSection('review');
+    showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+    changeLanguage();
 }
 
 

@@ -5142,6 +5142,86 @@ body.dark-mode .card-content pre {
     border-color: #404040;
 }
 
+/* Dodaj style dla scrolla w formularzu ustawień */
+.settings-form {
+    max-height: 80vh; /* Maksymalna wysokość to 80% wysokości okna */
+    overflow-y: auto; /* Dodaj scroll pionowy gdy zawartość przekracza wysokość */
+    scrollbar-width: thin; /* Cienki scrollbar dla Firefox */
+    scrollbar-color: #888 #f1f1f1; /* Kolor scrollbara dla Firefox */
+}
+
+/* Style dla scrollbara w Chrome/Safari/Edge */
+.settings-form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.settings-form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.settings-form::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.settings-form::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Style dla trybu ciemnego */
+body.dark-mode .settings-form::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+body.dark-mode .settings-form::-webkit-scrollbar-thumb {
+    background: #666;
+}
+
+body.dark-mode .settings-form::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+body.dark-mode .settings-form {
+    scrollbar-color: #666 #2d2d2d;
+}
+
+/* Style dla przycisku Edit w sekcji Review */
+.review-edit-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent; /* Przezroczyste tło */
+    color: #777777; /* Kolor tekstu taki jak poprzedni kolor tła */
+    border: none;
+    border-radius: 4px;
+    padding: 5px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.review-edit-button:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Lekko przyciemnione tło przy najechaniu */
+    color: #5f5f5f;
+}
+
+/* Dla trybu ciemnego */
+body.dark-mode .review-edit-button {
+    background-color: transparent;
+    color: #e0e0e0;
+}
+
+body.dark-mode .review-edit-button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Lekko rozjaśnione tło przy najechaniu w trybie ciemnym */
+    color: #ffffff;
+}
+
+/* Dodaj pozycjonowanie względne dla kontenera karty */
+.card-content {
+    position: relative;
+}
+
                         
                     </style>
 
@@ -11858,6 +11938,7 @@ function showNextFlashcard() {
 
         document.getElementById('reviewCard').innerHTML = `
             <div class="card-content">
+                <button class="review-edit-button" onclick="editFlashcardDuringReview(${flashcard.id})" data-translate="edit">Edit</button>
                 ${algorithm === 'leitner' ? leitnerInfo : ''}
                 <p><strong data-translate="wordPhrase">Word / Phrase:</strong></p>
                 <pre>${flashcard.word}</pre>
@@ -12762,6 +12843,83 @@ function removeDictionary() {
 
     repsSelect.value = repsSelect.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
     repsChangeDictionary();
+}
+
+// Dodaj nową funkcję do edycji fiszki podczas powtórki
+function editFlashcardDuringReview(id) {
+    const flashcard = flashcards.find(f => f.id === id);
+    if (flashcard) {
+        const editForm = document.createElement('div');
+        editForm.className = 'section edit-form';
+        editForm.id = 'edit';
+        editForm.innerHTML = `
+            <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+            <form id="editFlashcardForm">
+                <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
+                <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+                <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+                <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
+                <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
+                <div class="button-group">
+                    <button type="submit" class="submit-button" data-translate="save">Save</button>
+                    <button type="button" class="cancel-button" onclick="cancelEditDuringReview()" data-translate="cancel">Cancel</button>
+                </div>
+            </form>
+        `;
+
+        editForm.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            updateFlashcardDuringReview(id, {
+                word: document.getElementById('editWord').value,
+                context: document.getElementById('editContext').value,
+                translation: document.getElementById('editTranslation').value,
+                mediaUrl: document.getElementById('editMediaUrl').value,
+                audioUrl: document.getElementById('editAudioUrl').value
+            });
+        });
+
+        const container = document.querySelector('.container');
+        const existingEditForm = document.getElementById('edit');
+        if (existingEditForm) {
+            container.removeChild(existingEditForm);
+        }
+        container.appendChild(editForm);
+        showSection('edit');
+
+        // Dostosuj wysokość pól tekstowych
+        adjustTextareaHeight('editWord', flashcard.word);
+        adjustTextareaHeight('editContext', flashcard.context);
+        adjustTextareaHeight('editTranslation', flashcard.translation);
+
+        changeLanguage();
+    }
+}
+
+// Funkcja do aktualizacji fiszki podczas powtórki
+function updateFlashcardDuringReview(id, updatedData) {
+    const index = flashcards.findIndex(f => f.id === id);
+    if (index !== -1) {
+        updatedData.lastModified = new Date().toISOString();
+        flashcards[index] = { ...flashcards[index], ...updatedData };
+        saveFlashcards();
+        
+        // Aktualizuj również fiszkę w tablicy flashcardsToReview
+        const reviewIndex = flashcardsToReview.findIndex(f => f.id === id);
+        if (reviewIndex !== -1) {
+            flashcardsToReview[reviewIndex] = { ...flashcardsToReview[reviewIndex], ...updatedData };
+        }
+
+        showSection('review');
+        showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+        changeLanguage();
+    }
+}
+
+// Funkcja do anulowania edycji podczas powtórki
+function cancelEditDuringReview() {
+    showSection('review');
+    showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+    changeLanguage();
 }
 
 
