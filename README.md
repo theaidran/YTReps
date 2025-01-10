@@ -25,6 +25,6 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 
 ## Mobile
 *  It is not fully designed to be used on smartphones. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable unnecessary review modes in settings.
-*  If you use the standalone app YoutubeReps.html, you should open this file with a local manager, e.g., "My files" and select a browser to open that file. Due to some compatibility issues, install from Play: Microsoft Edge or Samsung Internet Browser.
+*  If you use the standalone app YoutubeReps.html, you should open this file with a local manager, e.g., "My files" and select a browser to open that file. Due to some compatibility, policy issues, install from Play: Microsoft Edge or Samsung Internet Browser.
 
 
