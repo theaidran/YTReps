@@ -3325,3 +3325,234 @@ body.dark-mode .review-edit-button:hover {
 .card-content {
     position: relative;
 }
+
+/* Style dla przycisku Buy Me a Coffee */
+.bmc-button {
+    margin-left: 10px !important;
+    height: 28px !important; /* Taka sama wysokość jak przycisk My Playlists */
+    line-height: 28px !important;
+    min-width: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .bmc-button {
+        margin-left: 0 !important;
+        margin-top: 5px !important;
+        width: 100% !important;
+        height: 40px !important; /* Taka sama wysokość jak inne przyciski na mobile */
+        line-height: 40px !important;
+    }
+}
+
+
+
+.show-examples-button small {
+    font-size: 14px;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-top: -1px;
+}
+
+.show-examples-button:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    color: #5f5f5f !important;
+}
+
+/* Dla trybu ciemnego */
+body.dark-mode .show-examples-button {
+    background-color: transparent !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .show-examples-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Dodajemy style dla textarea w formularzu edycji */
+#editFlashcardForm textarea {
+    margin-bottom: 5px; /* Zmniejszamy margines dolny dla wszystkich textarea */
+}
+
+#editFlashcardForm #editContext {
+    margin-bottom: 2px; /* Zmniejszamy z 8px na 2px */
+    position: relative;  /* Dodajemy pozycjonowanie względne */
+}
+
+#editFlashcardForm #editTranslation {
+    margin-top: 0; /* Usuwamy górny margines */
+}
+
+.examples-button-container {
+    position: relative;  /* Dodajemy pozycjonowanie względne dla kontenera */
+    margin-bottom: 5px;
+}
+
+.show-examples-button {
+    width: auto;
+    padding: 2px 8px;
+    margin: 0;
+    background-color: transparent !important;
+    color: #777777 !important;
+    border: none !important;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.3s, background-color 0.3s;
+    text-decoration: none;
+    outline: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    white-space: nowrap;
+    position: absolute;
+    top: -16px;
+    left: 50%;                    /* Ustawiamy na środek */
+    transform: translateX(-50%);  /* Przesuwamy o połowę szerokości w lewo */
+}
+
+/* Usuwamy position: relative z #editContext, bo teraz jest w kontenerze */
+#editFlashcardForm #editContext {
+    margin-bottom: 2px;
+    width: 100%;
+}
+
+/* Style dla formularza edycji */
+#editFlashcardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;  /* Zwiększamy gap dla lepszej czytelności */
+}
+
+#editFlashcardForm textarea,
+#editFlashcardForm input[type="text"] {
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    min-height: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.examples-button-container {
+    position: relative;
+    margin: 0;
+}
+
+#editFlashcardForm .button-group {
+    margin-top: 10px;
+}
+
+/* Usuń gap z formularza */
+#editFlashcardForm {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dodaj indywidualne marginesy */
+#editFlashcardForm #editWord {
+    margin-bottom: 12px;
+}
+
+#editFlashcardForm #editContext {
+    margin-bottom: 8px;
+}
+
+#editFlashcardForm #editTranslation {
+    margin-bottom: 12px;
+}
+
+#editFlashcardForm input[type="text"] {
+    margin-bottom: 12px;
+}
+
+/* Zachowaj podstawowe style dla pól */
+#editFlashcardForm textarea,
+#editFlashcardForm input[type="text"] {
+    padding: 10px;
+    width: 100%;
+    min-height: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Ostatni input nie potrzebuje dolnego marginesu */
+#editFlashcardForm input[type="text"]:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Grupa przycisków na końcu formularza */
+#editFlashcardForm .button-group {
+    margin-top: 10px;
+}
+
+/* Dodaj margines dla pola audio URL używając poprawnego ID */
+#editFlashcardForm #editAudioUrl {
+    margin-bottom: 10px;
+}
+
+.examples-text {
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    color: #777777;
+    height: 14px;           /* Dodajemy stałą wysokość */
+    line-height: 16px;      /* Wyrównujemy line-height do wysokości */
+    overflow: hidden;       /* Ukrywamy tekst, który nie mieści się w polu */
+}
+
+/* Style dla textarea w formularzu dodawania fiszek */
+#addForm textarea {
+    min-height: 10px;  /* Zwiększamy minimalną wysokość */
+    resize: vertical;  /* Pozwalamy na ręczne rozciąganie w pionie */
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Możemy też ustawić różne wysokości dla różnych pól */
+#addForm #word {
+    min-height: 16px;  /* Mniejsza wysokość dla pola word */
+}
+
+#addForm #context {
+    min-height: 16px;  /* Większa wysokość dla pola context */
+}
+
+#addForm #translation {
+    min-height: 16px;  /* Standardowa wysokość dla pola translation */
+}
+
+/* Style dla textarea w formularzu ustawień */
+#exampleButtonPrompt {
+    min-height: 120px;  /* Minimalna wysokość */
+    height: auto;      /* Wysokość automatyczna */
+    resize: vertical;  /* Pozwalamy na ręczne rozciąganie w pionie */
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: inherit;
+    margin-bottom: 4px;
+}
+
+/* Style dla opisu pod textarea */
+#exampleButtonPrompt + small {
+    color: #667;
+    font-size: 12px;
+    display: block;
+    margin-top: 4px;
+}
+
+

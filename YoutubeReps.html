@@ -1893,6 +1893,43 @@ body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
     }
 }
 
+/* Style dla przycisku Buy Me a Coffee */
+.bmc-button {
+    margin: 0 !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    min-width: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transform: scale(0.9) !important;
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .bmc-button {
+        margin-left: 0 !important;
+        margin-top: 5px !important;
+        width: 100% !important;
+        height: 36px !important;
+        line-height: 36px !important;
+    }
+}
+
+/* Style dla kontenera przycisku Buy Me a Coffee */
+.bmc-button-container {
+    display :none;  /* ukryj */
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    transform: scale(0.6);
+    z-index: 100;
+}
+
+/* Dodajemy pozycjonowanie względne dla kontenera nadrzędnego */
+.right-column {
+    position: relative;
+}
+
 
                         body {
     font-family: 'Roboto', Arial, sans-serif;
@@ -5222,6 +5259,238 @@ body.dark-mode .review-edit-button:hover {
     position: relative;
 }
 
+/* Style dla przycisku Buy Me a Coffee */
+.bmc-button {
+    margin-left: 10px !important;
+    height: 28px !important; /* Taka sama wysokość jak przycisk My Playlists */
+    line-height: 28px !important;
+    min-width: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .bmc-button {
+        margin-left: 0 !important;
+        margin-top: 5px !important;
+        width: 100% !important;
+        height: 40px !important; /* Taka sama wysokość jak inne przyciski na mobile */
+        line-height: 40px !important;
+    }
+}
+
+
+
+.show-examples-button small {
+    font-size: 14px;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-top: -1px;
+}
+
+.show-examples-button:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    color: #5f5f5f !important;
+}
+
+/* Dla trybu ciemnego */
+body.dark-mode .show-examples-button {
+    background-color: transparent !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .show-examples-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Dodajemy style dla textarea w formularzu edycji */
+#editFlashcardForm textarea {
+    margin-bottom: 5px; /* Zmniejszamy margines dolny dla wszystkich textarea */
+}
+
+#editFlashcardForm #editContext {
+    margin-bottom: 2px; /* Zmniejszamy z 8px na 2px */
+    position: relative;  /* Dodajemy pozycjonowanie względne */
+}
+
+#editFlashcardForm #editTranslation {
+    margin-top: 0; /* Usuwamy górny margines */
+}
+
+.examples-button-container {
+    position: relative;  /* Dodajemy pozycjonowanie względne dla kontenera */
+    margin-bottom: 5px;
+}
+
+.show-examples-button {
+    width: auto;
+    padding: 2px 8px;
+    margin: 0;
+    background-color: transparent !important;
+    color: #777777 !important;
+    border: none !important;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.3s, background-color 0.3s;
+    text-decoration: none;
+    outline: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    white-space: nowrap;
+    position: absolute;
+    top: -16px;
+    left: 50%;                    /* Ustawiamy na środek */
+    transform: translateX(-50%);  /* Przesuwamy o połowę szerokości w lewo */
+}
+
+/* Usuwamy position: relative z #editContext, bo teraz jest w kontenerze */
+#editFlashcardForm #editContext {
+    margin-bottom: 2px;
+    width: 100%;
+}
+
+/* Style dla formularza edycji */
+#editFlashcardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;  /* Zwiększamy gap dla lepszej czytelności */
+}
+
+#editFlashcardForm textarea,
+#editFlashcardForm input[type="text"] {
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    min-height: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.examples-button-container {
+    position: relative;
+    margin: 0;
+}
+
+#editFlashcardForm .button-group {
+    margin-top: 10px;
+}
+
+/* Usuń gap z formularza */
+#editFlashcardForm {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dodaj indywidualne marginesy */
+#editFlashcardForm #editWord {
+    margin-bottom: 12px;
+}
+
+#editFlashcardForm #editContext {
+    margin-bottom: 8px;
+}
+
+#editFlashcardForm #editTranslation {
+    margin-bottom: 12px;
+}
+
+#editFlashcardForm input[type="text"] {
+    margin-bottom: 12px;
+}
+
+/* Zachowaj podstawowe style dla pól */
+#editFlashcardForm textarea,
+#editFlashcardForm input[type="text"] {
+    padding: 10px;
+    width: 100%;
+    min-height: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Ostatni input nie potrzebuje dolnego marginesu */
+#editFlashcardForm input[type="text"]:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Grupa przycisków na końcu formularza */
+#editFlashcardForm .button-group {
+    margin-top: 10px;
+}
+
+/* Dodaj margines dla pola audio URL używając poprawnego ID */
+#editFlashcardForm #editAudioUrl {
+    margin-bottom: 10px;
+}
+
+.examples-text {
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    color: #777777;
+    height: 14px;           /* Dodajemy stałą wysokość */
+    line-height: 16px;      /* Wyrównujemy line-height do wysokości */
+    overflow: hidden;       /* Ukrywamy tekst, który nie mieści się w polu */
+}
+
+/* Style dla textarea w formularzu dodawania fiszek */
+#addForm textarea {
+    min-height: 10px;  /* Zwiększamy minimalną wysokość */
+    resize: vertical;  /* Pozwalamy na ręczne rozciąganie w pionie */
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Możemy też ustawić różne wysokości dla różnych pól */
+#addForm #word {
+    min-height: 16px;  /* Mniejsza wysokość dla pola word */
+}
+
+#addForm #context {
+    min-height: 16px;  /* Większa wysokość dla pola context */
+}
+
+#addForm #translation {
+    min-height: 16px;  /* Standardowa wysokość dla pola translation */
+}
+
+/* Style dla textarea w formularzu ustawień */
+#exampleButtonPrompt {
+    min-height: 120px;  /* Minimalna wysokość */
+    height: auto;      /* Wysokość automatyczna */
+    resize: vertical;  /* Pozwalamy na ręczne rozciąganie w pionie */
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: inherit;
+    margin-bottom: 4px;
+}
+
+/* Style dla opisu pod textarea */
+#exampleButtonPrompt + small {
+    color: #667;
+    font-size: 12px;
+    display: block;
+    margin-top: 4px;
+}
+
+
+
+
                         
                     </style>
 
@@ -5453,6 +5722,7 @@ body.dark-mode .review-edit-button:hover {
                         <option value="https://www.diki.pl/">diki.pl</option>
                         <option value="https://dict.com/angielsko-polski">dict.com</option>
                         <option value="https://ling.pl/">ling.pl</option>
+                
                         <option value="add_new">Add new</option>
                         <option value="remove_dictionary">Remove dictionary</option>
                     </select>
@@ -5469,6 +5739,23 @@ body.dark-mode .review-edit-button:hover {
                 </div>
                 <div id="iframe-container"></div>
                 <div id="iframe-resizer"></div>
+            </div>
+            
+            <!-- Kontener dla przycisku Buy Me a Coffee -->
+            <div class="bmc-button-container">
+                <script 
+                    type="text/javascript" 
+                    src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
+                    data-name="bmc-button" 
+                    data-slug="IuodipUQmJ" 
+                    data-color="#007BFF"
+                    data-emoji="🚗" 
+                    data-font="Cookie" 
+                    data-text="Get that App" 
+                    data-outline-color="#000000" 
+                    data-font-color="#ffffff" 
+                    data-coffee-color="#FFDD00" >
+                </script>
             </div>
         </div>
     </div>
@@ -5551,8 +5838,16 @@ body.dark-mode .review-edit-button:hover {
                 <h2 data-translate="addNewFlashcard">Add New Flashcard</h2>
                 <form id="addForm">
                     <textarea id="word" data-placeholder="wordPhrase" required></textarea>
+                    <p id="examples-output" class="examples-text"></p>
                     <textarea id="context" data-placeholder="contextExample"></textarea>
+                    <div class="examples-button-container">
+                        <button type="button" class="show-examples-button" onclick="showExamples(document.getElementById('word').value)">
+                            <small data-translate="showExamples">Show examples</small>
+                        </button>
+                    </div>
+                    <p id="examples-output" class="examples-text"></p>
                     <textarea id="translation" data-placeholder="translation" required></textarea>
+                    <p id="examples-output" class="examples-text"></p>
                     <input type="text" id="mediaUrl" data-placeholder="imageLink">
                     <input type="text" id="audioUrl" data-placeholder="audioLink">
                     <button type="submit" class="submit-button" data-translate="addFlashcardButton">Add Flashcard</button>
@@ -6947,9 +7242,11 @@ function loadCustomDictionaries() {
     // Dodaj domyślne słowniki
     const defaultDictionaries = [
         { name: 'onelook.com', url: 'https://www.onelook.com/' },
+        { name: 'you.com (ai)', url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.') + '&tbm=youchat&chatMode=default' },
         { name: 'diki.pl', url: 'https://www.diki.pl/' },
         { name: 'dict.com', url: 'https://dict.com/angielsko-polski' },
         { name: 'ling.pl', url: 'https://ling.pl/' }
+       
     ];
     
     // Dodaj domyślne i niestandardowe słowniki
@@ -8567,6 +8864,7 @@ const translations = {
         enableSyncAfterReview: "Enable Sync after Review",
         numberOfNewCards: "Number of new cards:",
         reviewModesVisibility: "Show review modes:",
+        showExamples: "Show examples",
     },
     pl: {
         review: "Powtórki",
@@ -8726,6 +9024,7 @@ const translations = {
         enableSyncAfterReview: "Włącz synchronizację po zakończeniu powtórki",
         numberOfNewCards: "Liczba nowych fiszek:",
         reviewModesVisibility: "Pokazuj tryby powtórek:",
+        showExamples: "Pokaż przykłady",
     }
 };
 </script>
@@ -10287,15 +10586,21 @@ function editFlashcard(id) {
         editForm.className = 'section edit-form';
         editForm.id = 'edit';
         editForm.innerHTML = `
-            <h2 data-translate="editFlashcard">Edit Flashcard</h2>
-            <form id="editFlashcardForm">
-                <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
-                <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
-                <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
-                <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
-                <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
-                <div class="button-group">
-                    <button type="submit" class="submit-button" data-translate="save">Save</button>
+           <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+           <form id="editFlashcardForm">
+               <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
+               <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+               <div class="examples-button-container">
+                    
+                   <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                       <small data-translate="showExamples">Show examples</small>
+                   </button>
+               </div>
+               <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+               <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
+               <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
+               <div class="button-group">
+                   <button type="submit" class="submit-button" data-translate="save">Save</button>
                     <button type="button" class="cancel-button" onclick="cancelEdit()" data-translate="cancel">Cancel</button>
                 </div>
             </form>
@@ -10762,6 +11067,7 @@ function initializeApp() {
             // Przygotuj opcje dla selecta, włączając niestandardowe słowniki
             const dictionaryOptions = [
                 { url: 'https://www.onelook.com/', name: 'onelook.com' },
+                { url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.') + '&tbm=youchat&chatMode=default', name: 'you.com (ai)' },
                 { url: 'https://www.diki.pl/', name: 'diki.pl' },
                 { url: 'https://dict.com/angielsko-polski', name: 'dict.com' },
                 { url: 'https://ling.pl/', name: 'ling.pl' },
@@ -10790,7 +11096,7 @@ function initializeApp() {
                            onchange="setDefaultDictionary()">
                     <label for="reps-dictionary-default-checkbox" title="Set as default dictionary">
                         Set as Default
-                        <span class="reps-default-indicator">${defaultDictionary ? '(Current default)' : ''}</span>
+                        <span class="reps-default-indicator">${defaultDictionary ? '' : ''}</span>
                     </label>
                 </div>
                 
@@ -12229,10 +12535,19 @@ function openMainSettings() {
     
     const settingsDialog = document.createElement('div');
     settingsDialog.className = 'main-settings-dialog';
+    
+    // Pobierz zapisany prompt lub użyj domyślnego
+    const savedPrompt = localStorage.getItem('exampleButtonPrompt') || 'give me 3 sentences with word {word}';
     settingsDialog.innerHTML = `
         <h2 data-translate="mainSettings">Main Settings</h2>
-        
+
         <div class="settings-section">
+          <h3>Flashcard Context "Show Examples" - Prompt</h3>
+            <div class="form-group">
+                <textarea id="exampleButtonPrompt" rows="2" style="width: 100%;">${savedPrompt}</textarea>
+                <small>Use {word} as placeholder for the current word</small>
+            </div>
+
             <h3 data-translate="syncSettings">Synchronization Settings</h3>
             <p class="settings-description" data-translate="syncDescription">Synchronization allows you to study on two devices.</p>
             <div class="settings-content">
@@ -12400,6 +12715,10 @@ function openMainSettings() {
         localStorage.setItem('export_to_server', newExportToServer);
         localStorage.setItem('enable_auto_save', newEnableAutoSave);
         localStorage.setItem('enable_sync_after_review', newEnableSyncAfterReview);
+
+            // Zapisz template promptu
+        const promptTemplate = document.getElementById('exampleButtonPrompt').value;
+        localStorage.setItem('exampleButtonPrompt', promptTemplate);
 
         if (newAutoSync) {
             setupAutomaticSync(parseInt(newSyncInterval) * 60 * 1000);
@@ -12689,7 +13008,7 @@ function repsChangeDictionary() {
         repsCheckbox.checked = (defaultDictionary === repsSelect.value);
         
         if (repsIndicator) {
-            repsIndicator.textContent = (defaultDictionary === repsSelect.value) ? '(Current default)' : '';
+            repsIndicator.textContent = (defaultDictionary === repsSelect.value) ? '' : '';
         }
     }
 }
@@ -12703,7 +13022,7 @@ function setDefaultDictionary() {
         if (repsCheckbox.checked) {
             localStorage.setItem('defaultDictionary', repsSelect.value);
             if (repsIndicator) {
-                repsIndicator.textContent = '(Current default)';
+                repsIndicator.textContent = '';
             }
         } else {
             localStorage.removeItem('defaultDictionary');
@@ -12857,6 +13176,12 @@ function editFlashcardDuringReview(id) {
             <form id="editFlashcardForm">
                 <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
                 <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+                <div class="examples-button-container">
+                    
+                    <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                        <small data-translate="showExamples">Show examples</small>
+                    </button>
+                </div>
                 <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
                 <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
                 <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
@@ -12920,6 +13245,29 @@ function cancelEditDuringReview() {
     showSection('review');
     showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
     changeLanguage();
+}
+
+// Dodaj nową funkcję do obsługi przycisku Show me examples
+function showExamples(word) {
+    // Najpierw wywołujemy funkcjonalność przycisku Dictionary
+    const toggleDictionaryBtn = document.getElementById('toggle-dictionary');
+    if (toggleDictionaryBtn) {
+        toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
+    }
+
+    // Następnie ustawiamy URL dla you.com
+    // Pobierz zapisany prompt lub użyj domyślnego
+    const promptTemplate = localStorage.getItem('exampleButtonPrompt');    
+    const prompt = promptTemplate.replace('{word}', word);
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = `https://you.com/search?q=${encodedPrompt}&tbm=youchat&chatMode=default`;
+    
+    // Znajdź ramkę słownika i ustaw URL
+    const dictionaryFrame = document.querySelector('.reps-dictionary-frame-mobile');
+    if (dictionaryFrame) {
+        dictionaryFrame.src = url;
+        dictionaryFrame.removeAttribute('hidden');
+    }
 }
 
 

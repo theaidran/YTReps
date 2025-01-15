@@ -505,15 +505,21 @@ function editFlashcard(id) {
         editForm.className = 'section edit-form';
         editForm.id = 'edit';
         editForm.innerHTML = `
-            <h2 data-translate="editFlashcard">Edit Flashcard</h2>
-            <form id="editFlashcardForm">
-                <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
-                <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
-                <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
-                <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
-                <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
-                <div class="button-group">
-                    <button type="submit" class="submit-button" data-translate="save">Save</button>
+           <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+           <form id="editFlashcardForm">
+               <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
+               <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+               <div class="examples-button-container">
+                    
+                   <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                       <small data-translate="showExamples">Show examples</small>
+                   </button>
+               </div>
+               <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+               <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
+               <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
+               <div class="button-group">
+                   <button type="submit" class="submit-button" data-translate="save">Save</button>
                     <button type="button" class="cancel-button" onclick="cancelEdit()" data-translate="cancel">Cancel</button>
                 </div>
             </form>
@@ -980,6 +986,7 @@ function initializeApp() {
             // Przygotuj opcje dla selecta, włączając niestandardowe słowniki
             const dictionaryOptions = [
                 { url: 'https://www.onelook.com/', name: 'onelook.com' },
+                { url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.') + '&tbm=youchat&chatMode=default', name: 'you.com (ai)' },
                 { url: 'https://www.diki.pl/', name: 'diki.pl' },
                 { url: 'https://dict.com/angielsko-polski', name: 'dict.com' },
                 { url: 'https://ling.pl/', name: 'ling.pl' },
@@ -1008,7 +1015,7 @@ function initializeApp() {
                            onchange="setDefaultDictionary()">
                     <label for="reps-dictionary-default-checkbox" title="Set as default dictionary">
                         Set as Default
-                        <span class="reps-default-indicator">${defaultDictionary ? '(Current default)' : ''}</span>
+                        <span class="reps-default-indicator">${defaultDictionary ? '' : ''}</span>
                     </label>
                 </div>
                 
@@ -2447,10 +2454,19 @@ function openMainSettings() {
     
     const settingsDialog = document.createElement('div');
     settingsDialog.className = 'main-settings-dialog';
+    
+    // Pobierz zapisany prompt lub użyj domyślnego
+    const savedPrompt = localStorage.getItem('exampleButtonPrompt') || 'give me 3 sentences with word {word}';
     settingsDialog.innerHTML = `
         <h2 data-translate="mainSettings">Main Settings</h2>
-        
+
         <div class="settings-section">
+          <h3>Flashcard Context "Show Examples" - Prompt</h3>
+            <div class="form-group">
+                <textarea id="exampleButtonPrompt" rows="2" style="width: 100%;">${savedPrompt}</textarea>
+                <small>Use {word} as placeholder for the current word</small>
+            </div>
+
             <h3 data-translate="syncSettings">Synchronization Settings</h3>
             <p class="settings-description" data-translate="syncDescription">Synchronization allows you to study on two devices.</p>
             <div class="settings-content">
@@ -2618,6 +2634,10 @@ function openMainSettings() {
         localStorage.setItem('export_to_server', newExportToServer);
         localStorage.setItem('enable_auto_save', newEnableAutoSave);
         localStorage.setItem('enable_sync_after_review', newEnableSyncAfterReview);
+
+            // Zapisz template promptu
+        const promptTemplate = document.getElementById('exampleButtonPrompt').value;
+        localStorage.setItem('exampleButtonPrompt', promptTemplate);
 
         if (newAutoSync) {
             setupAutomaticSync(parseInt(newSyncInterval) * 60 * 1000);
@@ -2907,7 +2927,7 @@ function repsChangeDictionary() {
         repsCheckbox.checked = (defaultDictionary === repsSelect.value);
         
         if (repsIndicator) {
-            repsIndicator.textContent = (defaultDictionary === repsSelect.value) ? '(Current default)' : '';
+            repsIndicator.textContent = (defaultDictionary === repsSelect.value) ? '' : '';
         }
     }
 }
@@ -2921,7 +2941,7 @@ function setDefaultDictionary() {
         if (repsCheckbox.checked) {
             localStorage.setItem('defaultDictionary', repsSelect.value);
             if (repsIndicator) {
-                repsIndicator.textContent = '(Current default)';
+                repsIndicator.textContent = '';
             }
         } else {
             localStorage.removeItem('defaultDictionary');
@@ -3075,6 +3095,12 @@ function editFlashcardDuringReview(id) {
             <form id="editFlashcardForm">
                 <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
                 <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
+                <div class="examples-button-container">
+                    
+                    <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                        <small data-translate="showExamples">Show examples</small>
+                    </button>
+                </div>
                 <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
                 <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
                 <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
@@ -3138,6 +3164,29 @@ function cancelEditDuringReview() {
     showSection('review');
     showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
     changeLanguage();
+}
+
+// Dodaj nową funkcję do obsługi przycisku Show me examples
+function showExamples(word) {
+    // Najpierw wywołujemy funkcjonalność przycisku Dictionary
+    const toggleDictionaryBtn = document.getElementById('toggle-dictionary');
+    if (toggleDictionaryBtn) {
+        toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
+    }
+
+    // Następnie ustawiamy URL dla you.com
+    // Pobierz zapisany prompt lub użyj domyślnego
+    const promptTemplate = localStorage.getItem('exampleButtonPrompt');    
+    const prompt = promptTemplate.replace('{word}', word);
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = `https://you.com/search?q=${encodedPrompt}&tbm=youchat&chatMode=default`;
+    
+    // Znajdź ramkę słownika i ustaw URL
+    const dictionaryFrame = document.querySelector('.reps-dictionary-frame-mobile');
+    if (dictionaryFrame) {
+        dictionaryFrame.src = url;
+        dictionaryFrame.removeAttribute('hidden');
+    }
 }
 
 

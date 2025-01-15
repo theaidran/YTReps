@@ -1839,3 +1839,40 @@ body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
     }
 }
 
+/* Style dla przycisku Buy Me a Coffee */
+.bmc-button {
+    margin: 0 !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    min-width: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transform: scale(0.9) !important;
+}
+
+/* Dostosowanie dla małych ekranów */
+@media (max-width: 768px) {
+    .bmc-button {
+        margin-left: 0 !important;
+        margin-top: 5px !important;
+        width: 100% !important;
+        height: 36px !important;
+        line-height: 36px !important;
+    }
+}
+
+/* Style dla kontenera przycisku Buy Me a Coffee */
+.bmc-button-container {
+    display :none;  /* ukryj */
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    transform: scale(0.6);
+    z-index: 100;
+}
+
+/* Dodajemy pozycjonowanie względne dla kontenera nadrzędnego */
+.right-column {
+    position: relative;
+}
+

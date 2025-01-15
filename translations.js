@@ -158,6 +158,7 @@ const translations = {
         enableSyncAfterReview: "Enable Sync after Review",
         numberOfNewCards: "Number of new cards:",
         reviewModesVisibility: "Show review modes:",
+        showExamples: "Show examples",
     },
     pl: {
         review: "Powtórki",
@@ -317,5 +318,6 @@ const translations = {
         enableSyncAfterReview: "Włącz synchronizację po zakończeniu powtórki",
         numberOfNewCards: "Liczba nowych fiszek:",
         reviewModesVisibility: "Pokazuj tryby powtórek:",
+        showExamples: "Pokaż przykłady",
     }
 };

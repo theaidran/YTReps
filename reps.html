@@ -218,8 +218,16 @@
                 <h2 data-translate="addNewFlashcard">Add New Flashcard</h2>
                 <form id="addForm">
                     <textarea id="word" data-placeholder="wordPhrase" required></textarea>
+                    <p id="examples-output" class="examples-text"></p>
                     <textarea id="context" data-placeholder="contextExample"></textarea>
+                    <div class="examples-button-container">
+                        <button type="button" class="show-examples-button" onclick="showExamples(document.getElementById('word').value)">
+                            <small data-translate="showExamples">Show examples</small>
+                        </button>
+                    </div>
+                    <p id="examples-output" class="examples-text"></p>
                     <textarea id="translation" data-placeholder="translation" required></textarea>
+                    <p id="examples-output" class="examples-text"></p>
                     <input type="text" id="mediaUrl" data-placeholder="imageLink">
                     <input type="text" id="audioUrl" data-placeholder="audioLink">
                     <button type="submit" class="submit-button" data-translate="addFlashcardButton">Add Flashcard</button>

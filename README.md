@@ -13,7 +13,7 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 
 ## How It Works
 1. Select an built-in BBC playlist or add your own video/playlist.
-2. Add new words or phrases while watching and check them with one of the chosen dictionaries.
+2. Add new words or phrases while watching and check them with one of the chosen dictionaries or ai.
 3. Review notes/flashcards based on a spaced repetition system (Supermemo, Leitner).
 4. Track progress through statistics.
 
@@ -24,7 +24,7 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 * To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use bult-in synchronization/save feature (uBlock Origin needs to be off or set to website exception).
 
 ## Mobile
-*  It is not fully designed to be used on smartphones. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable unnecessary review modes in settings.
-*  If you use the standalone app YoutubeReps.html, you should open this file with a local manager, e.g., "My files" and select a browser to open that file. Due to some compatibility, policy issues, install from Play: Microsoft Edge or Samsung Internet Browser.
+*  It is designed to be used on desktops. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable unnecessary review modes in settings.
+*  If you use the standalone app YoutubeReps.html for offline experience, you should open this file with a local manager, e.g., "My files" and select a browser to open that file. Due to some compatibility, policy issues, install from Play: Microsoft Edge or Samsung Internet Browser.
 
 
