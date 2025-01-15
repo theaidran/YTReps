@@ -10900,6 +10900,9 @@ function initializeApp() {
     if (!localStorage.getItem('gradeButtonMode')) {
         localStorage.setItem('gradeButtonMode', 'four');
     }
+    if (!localStorage.getItem('exampleButtonPrompt')) {
+        localStorage.setItem('exampleButtonPrompt', 'You are an English teacher. Give me 6 sentences with the word {word}. 3 sentences and 3 questions. Use 3 different tenses. Do not inform me about tenses. Use real-world examples. \n\n After that, give me an example of a very short story, maximum 6 sentences, easy to understand. Later explain this word in the story with different words.');
+    }
 
     // Najpierw próbujemy załadować fiszki z localStorage
     const savedFlashcards = localStorage.getItem('fiszki');
@@ -12537,7 +12540,7 @@ function openMainSettings() {
     settingsDialog.className = 'main-settings-dialog';
     
     // Pobierz zapisany prompt lub użyj domyślnego
-    const savedPrompt = localStorage.getItem('exampleButtonPrompt') || 'give me 3 sentences with word {word}';
+    const savedPrompt = localStorage.getItem('exampleButtonPrompt') ;
     settingsDialog.innerHTML = `
         <h2 data-translate="mainSettings">Main Settings</h2>
 
