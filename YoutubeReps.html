@@ -1917,7 +1917,7 @@ body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
 
 /* Style dla kontenera przycisku Buy Me a Coffee */
 .bmc-button-container {
-    display :none;  /* ukryj */
+    /*   display :none;  /ukryj */
     position: absolute;
     top: -10px;
     right: -10px;
@@ -5719,6 +5719,7 @@ body.dark-mode .show-examples-button:hover {
                 <div class="dictionary-select-row">
                     <select id="dictionary-select" onchange="changeDictionary()">
                         <option value="https://www.onelook.com/">onelook.com</option>
+                        <option value="https://www.you.com/">you.com (ai)</option>
                         <option value="https://www.diki.pl/">diki.pl</option>
                         <option value="https://dict.com/angielsko-polski">dict.com</option>
                         <option value="https://ling.pl/">ling.pl</option>
@@ -13256,6 +13257,19 @@ function showExamples(word) {
     const toggleDictionaryBtn = document.getElementById('toggle-dictionary');
     if (toggleDictionaryBtn) {
         toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
+        
+        // Wybieramy you.com z listy słowników
+        const dictionarySelect = document.querySelector('.reps-dictionary-select');
+        if (dictionarySelect) {
+            // Znajdujemy i wybieramy opcję z you.com
+            const options = Array.from(dictionarySelect.options);
+            const youcomOption = options[1]; // Druga opcja na liście
+            if (youcomOption) {
+                dictionarySelect.value = youcomOption.value;
+                // Wywołujemy event change aby zaktualizować słownik
+                dictionarySelect.dispatchEvent(new Event('change'));
+            }
+        }
     }
 
     // Następnie ustawiamy URL dla you.com

@@ -3175,6 +3175,19 @@ function showExamples(word) {
     const toggleDictionaryBtn = document.getElementById('toggle-dictionary');
     if (toggleDictionaryBtn) {
         toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
+        
+        // Wybieramy you.com z listy słowników
+        const dictionarySelect = document.querySelector('.reps-dictionary-select');
+        if (dictionarySelect) {
+            // Znajdujemy i wybieramy opcję z you.com
+            const options = Array.from(dictionarySelect.options);
+            const youcomOption = options[1]; // Druga opcja na liście
+            if (youcomOption) {
+                dictionarySelect.value = youcomOption.value;
+                // Wywołujemy event change aby zaktualizować słownik
+                dictionarySelect.dispatchEvent(new Event('change'));
+            }
+        }
     }
 
     // Następnie ustawiamy URL dla you.com
