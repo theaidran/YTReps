@@ -1079,15 +1079,16 @@
     }
 }
 
-@media (max-width: 520px)  {
+@media (max-width: 520px) and (orientation: portrait)     {
     .main-container {
         flex-direction: column;
     }
 
-
     .right-column { /* kolumna słownika */
         width: 105%;
         padding-right: 85px;   /* odstep od prawej */
+        min-height: 110vh;
+        max-height: none;
     }
 
     .left-column { /* kolumna palyera */
@@ -1095,6 +1096,10 @@
         padding-right: 40px; /* nie dziala */
         padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
         margin-right: 10px;
+    }
+
+    .iframe-container {
+        height: 110vh;
     }
 
     .column-resizer {

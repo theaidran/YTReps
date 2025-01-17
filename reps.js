@@ -505,25 +505,56 @@ function editFlashcard(id) {
         editForm.className = 'section edit-form';
         editForm.id = 'edit';
         editForm.innerHTML = `
-           <h2 data-translate="editFlashcard">Edit Flashcard</h2>
-           <form id="editFlashcardForm">
-               <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
-               <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
-               <div class="examples-button-container">
-                    
-                   <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
-                       <small data-translate="showExamples">Show examples</small>
-                   </button>
-               </div>
-               <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
-               <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
-               <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
+        <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+        <form id="editFlashcardForm" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="word-container" style="display: flex; align-items: flex-start; gap: 0px; width: 100%;">
+                <textarea id="editWord" data-placeholder="wordPhrase" required style="flex: 1;">${flashcard.word}</textarea>
+                <button type="button" class="speaker-button" onclick="speakWord('editWord')" style="background: none; border: none; cursor: pointer; padding: 8px 0 0 0; margin-right: -12px;">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="context-container" style="display: flex; align-items: flex-start; gap: 0px; width: 100%;">
+                <textarea id="editContext" data-placeholder="contextExample" style="flex: 1;">${flashcard.context || ''}</textarea>
+                <button type="button" class="speaker-button" onclick="speakWord('editContext')" style="background: none; border: none; cursor: pointer; padding: 8px 0 0 0; margin-right: -12px;">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="examples-button-container">
+                <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                    <small data-translate="showExamples">Show examples</small>
+                </button>
+            </div>
+            <div class="context-container2" style="display: flex; align-items: flex-start; gap: 0px;  margin-right: 15px;">
+            <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+            </div>
+            <div class="url-inputs" style="display: flex; flex-direction: column; gap: 0px;margin-right: 35px;">
+                <input type="text" id="editMediaUrl" data-placeholder="imageLink" value="${flashcard.mediaUrl || ''}" style="width: 100%;">
+                <input type="text" id="editAudioUrl" data-placeholder="audioLink" value="${flashcard.audioUrl || ''}" style="width: 100%;">
+            </div>
                <div class="button-group">
                    <button type="submit" class="submit-button" data-translate="save">Save</button>
                     <button type="button" class="cancel-button" onclick="cancelEdit()" data-translate="cancel">Cancel</button>
                 </div>
             </form>
         `;
+
+    // Funkcja do odtwarzania tekstu
+    window.speakWord = function(textareaId) {
+        const TtsLang = localStorage.getItem('ttsLanguage') || 'en';
+        const text = document.getElementById(textareaId).value;
+        const encodedText = encodeURIComponent(text);
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${TtsLang}&client=tw-ob`;
+        
+        const audio = new Audio(url);
+        audio.play().catch(error => {
+            console.error('Error playing audio:', error);
+        });
+    };  
+        
         editForm.querySelector('form').addEventListener('submit', (e) => {
             e.preventDefault();
             updateFlashcard(id, {
@@ -2457,6 +2488,8 @@ function openMainSettings() {
     
     const settingsDialog = document.createElement('div');
     settingsDialog.className = 'main-settings-dialog';
+
+    const savedTtsLang = localStorage.getItem('ttsLanguage') || 'en'; //defalut
     
     // Pobierz zapisany prompt lub użyj domyślnego
     const savedPrompt = localStorage.getItem('exampleButtonPrompt') ;
@@ -2469,6 +2502,108 @@ function openMainSettings() {
                 <textarea id="exampleButtonPrompt" rows="2" style="width: 100%;">${savedPrompt}</textarea>
                 <small>Use {word} as placeholder for the current word</small>
             </div>
+
+                        <!-- Dodajemy sekcję języka TTS -->
+            <div class="settings-section">
+                <h3>Text to Speech Language</h3>
+                <div class="form-group">
+                    <select id="ttsLanguage" style="width: 100%; padding: 8px; margin-bottom: 4px;">
+                         <option value="af" ${savedTtsLang === 'af' ? 'selected' : ''}>Afrikaans</option>
+                         <option value="sq" ${savedTtsLang === 'sq' ? 'selected' : ''}>Albanian</option>
+                         <option value="am" ${savedTtsLang === 'am' ? 'selected' : ''}>Amharic</option>
+                         <option value="ar" ${savedTtsLang === 'ar' ? 'selected' : ''}>Arabic</option>
+                         <option value="hy" ${savedTtsLang === 'hy' ? 'selected' : ''}>Armenian</option>
+                         <option value="az" ${savedTtsLang === 'az' ? 'selected' : ''}>Azerbaijani</option>
+                         <option value="eu" ${savedTtsLang === 'eu' ? 'selected' : ''}>Basque</option>
+                         <option value="be" ${savedTtsLang === 'be' ? 'selected' : ''}>Belarusian</option>
+                         <option value="bn" ${savedTtsLang === 'bn' ? 'selected' : ''}>Bengali</option>
+                         <option value="bs" ${savedTtsLang === 'bs' ? 'selected' : ''}>Bosnian</option>
+                         <option value="bg" ${savedTtsLang === 'bg' ? 'selected' : ''}>Bulgarian</option>
+                         <option value="ca" ${savedTtsLang === 'ca' ? 'selected' : ''}>Catalan</option>
+                         <option value="ceb" ${savedTtsLang === 'ceb' ? 'selected' : ''}>Cebuano</option>
+                         <option value="zh-CN" ${savedTtsLang === 'zh-CN' ? 'selected' : ''}>Chinese (Simplified)</option>
+                         <option value="zh-TW" ${savedTtsLang === 'zh-TW' ? 'selected' : ''}>Chinese (Traditional)</option>
+                         <option value="co" ${savedTtsLang === 'co' ? 'selected' : ''}>Corsican</option>
+                         <option value="hr" ${savedTtsLang === 'hr' ? 'selected' : ''}>Croatian</option>
+                         <option value="cs" ${savedTtsLang === 'cs' ? 'selected' : ''}>Czech</option>
+                         <option value="da" ${savedTtsLang === 'da' ? 'selected' : ''}>Danish</option>
+                         <option value="nl" ${savedTtsLang === 'nl' ? 'selected' : ''}>Dutch</option>
+                         <option value="en" ${savedTtsLang === 'en' ? 'selected' : ''}>English</option>
+                         <option value="eo" ${savedTtsLang === 'eo' ? 'selected' : ''}>Esperanto</option>
+                         <option value="et" ${savedTtsLang === 'et' ? 'selected' : ''}>Estonian</option>
+                         <option value="fi" ${savedTtsLang === 'fi' ? 'selected' : ''}>Finnish</option>
+                         <option value="fr" ${savedTtsLang === 'fr' ? 'selected' : ''}>French</option>
+                         <option value="fy" ${savedTtsLang === 'fy' ? 'selected' : ''}>Frisian</option>
+                         <option value="gl" ${savedTtsLang === 'gl' ? 'selected' : ''}>Galician</option>
+                         <option value="ka" ${savedTtsLang === 'ka' ? 'selected' : ''}>Georgian</option>
+                         <option value="de" ${savedTtsLang === 'de' ? 'selected' : ''}>German</option>
+                         <option value="el" ${savedTtsLang === 'el' ? 'selected' : ''}>Greek</option>
+                         <option value="gu" ${savedTtsLang === 'gu' ? 'selected' : ''}>Gujarati</option>
+                         <option value="ht" ${savedTtsLang === 'ht' ? 'selected' : ''}>Haitian Creole</option>
+                         <option value="ha" ${savedTtsLang === 'ha' ? 'selected' : ''}>Hausa</option>
+                         <option value="iw" ${savedTtsLang === 'iw' ? 'selected' : ''}>Hebrew</option>
+                         <option value="hi" ${savedTtsLang === 'hi' ? 'selected' : ''}>Hindi</option>
+                         <option value="hmn" ${savedTtsLang === 'hmn' ? 'selected' : ''}>Hmong</option>
+                         <option value="hu" ${savedTtsLang === 'hu' ? 'selected' : ''}>Hungarian</option>
+                         <option value="is" ${savedTtsLang === 'is' ? 'selected' : ''}>Icelandic</option>
+                         <option value="ig" ${savedTtsLang === 'ig' ? 'selected' : ''}>Igbo</option>
+                         <option value="id" ${savedTtsLang === 'id' ? 'selected' : ''}>Indonesian</option>
+                         <option value="ga" ${savedTtsLang === 'ga' ? 'selected' : ''}>Irish</option>
+                         <option value="it" ${savedTtsLang === 'it' ? 'selected' : ''}>Italian</option>
+                         <option value="ja" ${savedTtsLang === 'ja' ? 'selected' : ''}>Japanese</option>
+                         <option value="jw" ${savedTtsLang === 'jw' ? 'selected' : ''}>Javanese</option>
+                         <option value="kn" ${savedTtsLang === 'kn' ? 'selected' : ''}>Kannada</option>
+                         <option value="kk" ${savedTtsLang === 'kk' ? 'selected' : ''}>Kazakh</option>
+                         <option value="km" ${savedTtsLang === 'km' ? 'selected' : ''}>Khmer</option>
+                         <option value="ko" ${savedTtsLang === 'ko' ? 'selected' : ''}>Korean</option>
+                         <option value="ku" ${savedTtsLang === 'ku' ? 'selected' : ''}>Kurdish</option>
+                         <option value="ky" ${savedTtsLang === 'ky' ? 'selected' : ''}>Kyrgyz</option>
+                         <option value="lo" ${savedTtsLang === 'lo' ? 'selected' : ''}>Lao</option>
+                         <option value="la" ${savedTtsLang === 'la' ? 'selected' : ''}>Latin</option>
+                         <option value="lv" ${savedTtsLang === 'lv' ? 'selected' : ''}>Latvian</option>
+                         <option value="lt" ${savedTtsLang === 'lt' ? 'selected' : ''}>Lithuanian</option>
+                         <option value="lb" ${savedTtsLang === 'lb' ? 'selected' : ''}>Luxembourgish</option>
+                         <option value="mk" ${savedTtsLang === 'mk' ? 'selected' : ''}>Macedonian</option>
+                         <option value="mg" ${savedTtsLang === 'mg' ? 'selected' : ''}>Malagasy</option>
+                         <option value="ms" ${savedTtsLang === 'ms' ? 'selected' : ''}>Malay</option>
+                         <option value="ml" ${savedTtsLang === 'ml' ? 'selected' : ''}>Malayalam</option>
+                         <option value="mt" ${savedTtsLang === 'mt' ? 'selected' : ''}>Maltese</option>
+                         <option value="mi" ${savedTtsLang === 'mi' ? 'selected' : ''}>Maori</option>
+                         <option value="mr" ${savedTtsLang === 'mr' ? 'selected' : ''}>Marathi</option>
+                         <option value="mn" ${savedTtsLang === 'mn' ? 'selected' : ''}>Mongolian</option>
+                         <option value="ne" ${savedTtsLang === 'ne' ? 'selected' : ''}>Nepali</option>
+                         <option value="no" ${savedTtsLang === 'no' ? 'selected' : ''}>Norwegian</option>
+                         <option value="or" ${savedTtsLang === 'or' ? 'selected' : ''}>Odia (Oriya)</option>
+                         <option value="pl" ${savedTtsLang === 'pl' ? 'selected' : ''}>Polish</option>
+                         <option value="pt" ${savedTtsLang === 'pt' ? 'selected' : ''}>Portuguese</option>
+                         <option value="ro" ${savedTtsLang === 'ro' ? 'selected' : ''}>Romanian</option>
+                         <option value="ru" ${savedTtsLang === 'ru' ? 'selected' : ''}>Russian</option>
+                         <option value="sr" ${savedTtsLang === 'sr' ? 'selected' : ''}>Serbian</option>
+                         <option value="si" ${savedTtsLang === 'si' ? 'selected' : ''}>Sinhala</option>
+                         <option value="sk" ${savedTtsLang === 'sk' ? 'selected' : ''}>Slovak</option>
+                         <option value="sl" ${savedTtsLang === 'sl' ? 'selected' : ''}>Slovenian</option>
+                         <option value="es" ${savedTtsLang === 'es' ? 'selected' : ''}>Spanish</option>
+                         <option value="su" ${savedTtsLang === 'su' ? 'selected' : ''}>Sundanese</option>
+                         <option value="sw" ${savedTtsLang === 'sw' ? 'selected' : ''}>Swahili</option>
+                         <option value="sv" ${savedTtsLang === 'sv' ? 'selected' : ''}>Swedish</option>
+                         <option value="tg" ${savedTtsLang === 'tg' ? 'selected' : ''}>Tajik</option>
+                         <option value="ta" ${savedTtsLang === 'ta' ? 'selected' : ''}>Tamil</option>
+                         <option value="te" ${savedTtsLang === 'te' ? 'selected' : ''}>Telugu</option>
+                         <option value="th" ${savedTtsLang === 'th' ? 'selected' : ''}>Thai</option>
+                         <option value="tr" ${savedTtsLang === 'tr' ? 'selected' : ''}>Turkish</option>
+                         <option value="uk" ${savedTtsLang === 'uk' ? 'selected' : ''}>Ukrainian</option>
+                         <option value="ur" ${savedTtsLang === 'ur' ? 'selected' : ''}>Urdu</option>
+                         <option value="uz" ${savedTtsLang === 'uz' ? 'selected' : ''}>Uzbek</option>
+                         <option value="vi" ${savedTtsLang === 'vi' ? 'selected' : ''}>Vietnamese</option>
+                         <option value="cy" ${savedTtsLang === 'cy' ? 'selected' : ''}>Welsh</option>
+                         <option value="xh" ${savedTtsLang === 'xh' ? 'selected' : ''}>Xhosa</option>
+                         <option value="yi" ${savedTtsLang === 'yi' ? 'selected' : ''}>Yiddish</option>
+                         <option value="yo" ${savedTtsLang === 'yo' ? 'selected' : ''}>Yoruba</option>
+                         <option value="zu" ${savedTtsLang === 'zu' ? 'selected' : ''}>Zulu</option>                 
+                        </select>
+                    <small>Language used for text to speech pronunciation</small>
+                </div>
+            
 
             <h3 data-translate="syncSettings">Synchronization Settings</h3>
             <p class="settings-description" data-translate="syncDescription">Synchronization allows you to study on two devices.</p>
@@ -2641,6 +2776,11 @@ function openMainSettings() {
             // Zapisz template promptu
         const promptTemplate = document.getElementById('exampleButtonPrompt').value;
         localStorage.setItem('exampleButtonPrompt', promptTemplate);
+
+
+        const ttsLangValue = document.getElementById('ttsLanguage').value;
+    
+        localStorage.setItem('ttsLanguage', ttsLangValue);
 
         if (newAutoSync) {
             setupAutomaticSync(parseInt(newSyncInterval) * 60 * 1000);
@@ -3090,55 +3230,87 @@ function removeDictionary() {
 function editFlashcardDuringReview(id) {
     const flashcard = flashcards.find(f => f.id === id);
     if (flashcard) {
-        const editForm = document.createElement('div');
-        editForm.className = 'section edit-form';
-        editForm.id = 'edit';
-        editForm.innerHTML = `
-            <h2 data-translate="editFlashcard">Edit Flashcard</h2>
-            <form id="editFlashcardForm">
-                <textarea id="editWord" data-placeholder="wordPhrase" required>${flashcard.word}</textarea>
-                <textarea id="editContext" data-placeholder="contextExample">${flashcard.context || ''}</textarea>
-                <div class="examples-button-container">
-                    
-                    <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
-                        <small data-translate="showExamples">Show examples</small>
-                    </button>
-                </div>
-                <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
-                <input type="text" id="editMediaUrl" value="${flashcard.mediaUrl || ''}" data-placeholder="imageLink">
-                <input type="text" id="editAudioUrl" value="${flashcard.audioUrl || ''}" data-placeholder="audioLink">
-                <div class="button-group">
-                    <button type="submit" class="submit-button" data-translate="save">Save</button>
-                    <button type="button" class="cancel-button" onclick="cancelEditDuringReview()" data-translate="cancel">Cancel</button>
-                </div>
-            </form>
-        `;
 
-        editForm.querySelector('form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            updateFlashcardDuringReview(id, {
-                word: document.getElementById('editWord').value,
-                context: document.getElementById('editContext').value,
-                translation: document.getElementById('editTranslation').value,
-                mediaUrl: document.getElementById('editMediaUrl').value,
-                audioUrl: document.getElementById('editAudioUrl').value
-            });
+    const editForm = document.createElement('div');
+    editForm.className = 'section edit-form';
+
+    editForm.id = 'edit';
+    editForm.innerHTML = `
+        <h2 data-translate="editFlashcard">Edit Flashcard</h2>
+        <form id="editFlashcardForm" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="word-container" style="display: flex; align-items: flex-start; gap: 0px; width: 100%;">
+                <textarea id="editWord" data-placeholder="wordPhrase" required style="flex: 1;">${flashcard.word}</textarea>
+                <button type="button" class="speaker-button" onclick="speakWord('editWord')" style="background: none; border: none; cursor: pointer; padding: 8px 0 0 0; margin-right: -12px;">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="context-container" style="display: flex; align-items: flex-start; gap: 0px; width: 100%;">
+                <textarea id="editContext" data-placeholder="contextExample" style="flex: 1;">${flashcard.context || ''}</textarea>
+                <button type="button" class="speaker-button" onclick="speakWord('editContext')" style="background: none; border: none; cursor: pointer; padding: 8px 0 0 0; margin-right: -12px;">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="examples-button-container">
+                <button type="button" class="show-examples-button" onclick="showExamples('${flashcard.word}')">
+                    <small data-translate="showExamples">Show examples</small>
+                </button>
+            </div>
+            <div class="context-container2" style="display: flex; align-items: flex-start; gap: 0px;  margin-right: 15px;">
+            <textarea id="editTranslation" data-placeholder="translation" required>${flashcard.translation}</textarea>
+            </div>
+            <div class="url-inputs" style="display: flex; flex-direction: column; gap: 0px;margin-right: 35px;">
+                <input type="text" id="editMediaUrl" data-placeholder="imageLink" value="${flashcard.mediaUrl || ''}" style="width: 100%;">
+                <input type="text" id="editAudioUrl" data-placeholder="audioLink" value="${flashcard.audioUrl || ''}" style="width: 100%;">
+            </div>
+            <div class="button-group">
+                <button type="button" onclick="cancelEditDuringReview()" data-translate="cancel">Cancel</button>
+                <button type="submit" data-translate="save">Save</button>
+            </div>
+        </form>
+    `;
+
+    // Funkcja do odtwarzania tekstu
+    window.speakWord = function(textareaId) {
+        const TtsLang = localStorage.getItem('ttsLanguage') || 'en';
+        const text = document.getElementById(textareaId).value;
+        const encodedText = encodeURIComponent(text);
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${TtsLang}&client=tw-ob`;
+        
+        const audio = new Audio(url);
+        audio.play().catch(error => {
+            console.error('Error playing audio:', error);
         });
+    };
 
-        const container = document.querySelector('.container');
-        const existingEditForm = document.getElementById('edit');
-        if (existingEditForm) {
-            container.removeChild(existingEditForm);
-        }
-        container.appendChild(editForm);
-        showSection('edit');
+    // Reszta kodu pozostaje bez zmian...
+    editForm.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        updateFlashcardDuringReview(id, {
+            word: document.getElementById('editWord').value,
+            context: document.getElementById('editContext').value,
+            translation: document.getElementById('editTranslation').value,
+            mediaUrl: document.getElementById('editMediaUrl').value,
+            audioUrl: document.getElementById('editAudioUrl').value
+        });
+    });
 
-        // Dostosuj wysokość pól tekstowych
-        adjustTextareaHeight('editWord', flashcard.word);
-        adjustTextareaHeight('editContext', flashcard.context);
-        adjustTextareaHeight('editTranslation', flashcard.translation);
+    const container = document.querySelector('.container');
+    const existingEditForm = document.getElementById('edit');
+    if (existingEditForm) {
+        container.removeChild(existingEditForm);
+    }
+    container.appendChild(editForm);
+    showSection('edit');
 
-        changeLanguage();
+    adjustTextareaHeight('editWord', flashcard.word);
+    adjustTextareaHeight('editContext', flashcard.context);
+    adjustTextareaHeight('editTranslation', flashcard.translation);
+
+    changeLanguage();
     }
 }
 

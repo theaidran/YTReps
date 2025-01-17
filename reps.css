@@ -3187,18 +3187,24 @@ body.dark-mode .start-review-button:hover {
         width: 90%;
         height: 0;
         margin: 20px auto; 
-        margin-right: 40px; /* Dodany margines z prawej strony */
-        margin-left: 30px; /* Wyrównany margines z lewej strony */
+        margin-right: 40px;
+        margin-left: 30px;
         transition: height 0.3s ease-in-out;
         overflow: hidden;
         box-shadow: none;
-        
     }
 
-
     .reps-dictionary-container.show {
-        height: 80vh;
-        max-height: 800px;
+        height: 110vh;
+        max-height: none;
+    }
+}
+
+/* Dodajemy specjalne style dla orientacji portrait */
+@media (max-width: 768px) and (orientation: landscape) {
+    .reps-dictionary-container.show {
+        height: 300vh; /* Zwiększona wysokość dla orientacji portrait */
+        max-height: none;
     }
 }
 
