@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Playlists</title>
+    
+    <!-- Dodajemy meta tagi i linki dla PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ELA">
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+    
+    <!-- Istniejące linki -->
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api" defer></script>
@@ -122,6 +132,21 @@
         <button onclick="addWordTranslationPair('${videoId}')">+ Add word/phrase</button>
         <button onclick="saveNote('${videoId}')">Save note</button>
     </div>
+
+    <!-- Dodajemy rejestrację Service Workera przed zamknięciem body -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
 

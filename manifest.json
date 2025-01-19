@@ -1,0 +1,34 @@
+{
+  "name": "English Learning Assistant",
+  "short_name": "ELA",
+  "description": "Application for learning English with YouTube videos and flashcards",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "screenshots": [
+    {
+      "src": "./screenshots/desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Main screen with YouTube player and dictionary"
+    },
+    {
+      "src": "./screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile view of the application"
+    }
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+} 
