@@ -1,7 +1,7 @@
 {
-  "name": "English Learning Assistant",
-  "short_name": "ELA",
-  "description": "Application for learning English with YouTube videos and flashcards",
+  "name": "Youtube Reps",
+  "short_name": "YtReps",
+  "description": "Application for learning English from YouTube videos and flashcards",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -9,14 +9,14 @@
   "theme_color": "#007bff",
   "screenshots": [
     {
-      "src": "./screenshots/desktop.png",
+      "src": "./desktop.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Main screen with YouTube player and dictionary"
     },
     {
-      "src": "./screenshots/mobile.png",
+      "src": "./mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
@@ -25,7 +25,7 @@
   ],
   "icons": [
     {
-      "src": "./icons/icon.svg",
+      "src": "./icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
