@@ -1,0 +1,15 @@
+<svg width="144" height="144" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#007bff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0056b3;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <rect width="144" height="144" rx="20" fill="url(#grad)"/>
+    <text x="72" y="65" font-family="Arial" font-size="32" fill="white" text-anchor="middle">
+        YouTube
+    </text>
+    <text x="72" y="105" font-family="Arial" font-size="32" fill="white" text-anchor="middle">
+        Reps
+    </text>
+</svg> 
