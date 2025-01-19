@@ -9,14 +9,14 @@
   "theme_color": "#007bff",
   "screenshots": [
     {
-      "src": "./desktop.png",
+      "src": "desktop.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Main screen with YouTube player and dictionary"
     },
     {
-      "src": "./mobile.png",
+      "src": "mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
@@ -25,9 +25,9 @@
   ],
   "icons": [
     {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon.png",
+      "sizes": "144x144",
+      "type": "image/png",
       "purpose": "any"
     }
   ]

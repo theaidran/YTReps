@@ -11,6 +11,7 @@ const urlsToCache = [
   '/translations.js',
   '/algorithms.js',
   '/synchronization.js',
+  '/icon.png',
   '/icons/icon-72x72.png',
   '/icons/icon-96x96.png',
   '/icons/icon-128x128.png',
@@ -19,8 +20,8 @@ const urlsToCache = [
   '/icons/icon-192x192.png',
   '/icons/icon-384x384.png',
   '/icons/icon-512x512.png',
-  '/screenshots/desktop.svg',
-  '/screenshots/mobile.svg'
+  '/desktop.png',
+  '/mobile.png'
 ];
 
 // Instalacja Service Workera
