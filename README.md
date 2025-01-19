@@ -25,6 +25,6 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 
 ## Mobile
 *  It is designed to be used on desktops. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable unnecessary review modes in settings.
-*  If you use the standalone app YoutubeReps.html for offline experience, you should open this file with a local manager, e.g., "My files" and select a browser to open that file. Due to some compatibility, policy issues, install from Play: Microsoft Edge or Samsung Internet Browser.
+*  You can install it as an app on a desktop or smartphone. On a desktop browser, click Install in the right side of the address bar. On a smartphone, in a mobile browser, click settings (three dots icon) and choose "Add to Home screen," then choose install. 
 
 
