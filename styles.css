@@ -1,14 +1,6 @@
         /* Style CSS */
         body {
             font-family: 'Roboto', sans-serif;
-            touch-action: manipulation; /* Umożliwia zoomowanie */
-            overflow-x: hidden;  /* Dodajmy to */
-        }
-        html {
-            width: 100%;         /* Dodajmy to */
-            overflow-x: hidden;  /* Dodajmy to */
-            margin: 0;
-            padding: 0;
         }
 
         .main-title {
@@ -1065,8 +1057,7 @@
 
     .right-column { /* kolumna słownika */
         width: 100%;
-        padding-right: 25px;   /* odstep od prawej */
-        
+        padding-right: 5px;   /* odstep od prawej */
         min-height: 250vh;
        /* max-height: auto;*/
     }
@@ -1094,17 +1085,17 @@
     }
 
     .right-column { /* kolumna słownika */
-        width: 90%;
-        padding-right: 25px;    /* odstep od prawej */
+        width: 105%;
+        padding-right: 85px;   /* odstep od prawej */
         min-height: 110vh;
         max-height: none;
     }
 
     .left-column { /* kolumna palyera */
-        width: 100%;
-        /*  padding-right: 40px;   */
-         padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
-         margin-right: 10px;
+        width: 115%;
+        padding-right: 40px; /* nie dziala */
+        padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
+        margin-right: 10px;
     }
 
     .iframe-container {
@@ -1127,22 +1118,22 @@
     }
 
     .expanded .left-column {
-      /*  display: none;*/
+        display: none;
         
     }
 
     .expanded .right-column {
-       /* display: block;*/
+        display: block;
         width: 100%;
     }
 
     .mobile-view .left-column {
         
-     /*   display: block;*/
+        display: block;
     }
 
     .mobile-view .right-column {
-   /*     display: block;*/
+        display: block;
     }
 }
 
