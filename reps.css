@@ -5,6 +5,13 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;  /* Dodajmy to */
+}
+html {
+    width: 100%;         /* Dodajmy to */
+    overflow-x: hidden;  /* Dodajmy to */
+    margin: 0;
+    padding: 0;
 }
 
 header {
@@ -3184,7 +3191,7 @@ body.dark-mode .start-review-button:hover {
 @media (max-width: 768px) {
     .reps-dictionary-container {
         position: static;
-        width: 90%;
+        width: 85%;
         height: 0;
         margin: 20px auto; 
         margin-right: 40px;

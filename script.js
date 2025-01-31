@@ -1553,12 +1553,20 @@ function exportWordList() {
         });
     });
 
+    // Funkcja do przygotowania tekstu do CSV
+    const prepareText = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/\n/g, '<br>') // zamień znaki nowej linii na <br>
+            .replace(/;/g, ',');     // zamień średniki na przecinki
+    };
+
     // Export as CSV
     var csvContent = "front;back;context;;;Video Title\n";
     allWords.forEach(note => {
-        csvContent += `${escapeCSV(note.front)};`;
-        csvContent += `${escapeCSV(note.back)};`;
-        csvContent += `${escapeCSV(note.context)};`;
+        csvContent += `${escapeCSV(prepareText(note.front))};`;
+        csvContent += `${escapeCSV(prepareText(note.back))};`;
+        csvContent += `${escapeCSV(prepareText(note.context))};`;
         csvContent += `;;`;
         csvContent += `${escapeCSV(note.videoTitle)}\n`;
     });
@@ -1583,10 +1591,8 @@ function downloadFile(content, fileName, mimeType) {
 
 function escapeCSV(str) {
     if (str == null) return '';
-    return '"' + str.replace(/"/g, '""').replace(/\n/g, ' ') + '"';
+    return '"' + str.replace(/"/g, '""') + '"';  // Usunięto zamianę \n na spację
 }
-
-// Dodaj te funkcje na końcu pliku
 
 function setDefaultDictionary() {
     const select = document.getElementById('dictionary-select');
@@ -2179,3 +2185,101 @@ mediaQuery.addListener(handleOrientationChange);
 // Sprawdź orientację przy starcie
 handleOrientationChange(mediaQuery);
 */
+
+/*
+// Dodaj na początku pliku
+document.addEventListener('DOMContentLoaded', function() {
+    // Ustaw początkową szerokość kolumn
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer) {
+        mainContainer.style.display = 'flex';
+        mainContainer.style.width = '100%';
+        mainContainer.style.maxWidth = '100%';
+        mainContainer.style.overflow = 'hidden';
+    }
+
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+
+    if (leftColumn && rightColumn) {
+        // Sprawdź czy jest to urządzenie mobilne
+        if (window.innerWidth <= 520) {
+            leftColumn.style.width = '100%';
+            rightColumn.style.width = '100%';
+        } else {
+            leftColumn.style.width = '65%';
+            rightColumn.style.width = '35%';
+        }
+    }
+});
+
+// Dodaj obsługę zmiany rozmiaru okna
+window.addEventListener('resize', function() {
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+    
+    if (leftColumn && rightColumn) {
+        if (window.innerWidth <= 520) {
+            leftColumn.style.width = '100%';
+            rightColumn.style.width = '100%';
+        } else {
+            // Przywróć standardowe proporcje dla większych ekranów
+            if (!document.body.classList.contains('expanded')) {
+                leftColumn.style.width = '65%';
+                rightColumn.style.width = '35%';
+            }
+        }
+    }
+});
+*/
+
+// Dodaj na początku pliku lub w sekcji inicjalizacji
+let previousOrientation = window.orientation;
+
+// Funkcja do obsługi zmiany orientacji
+function handleOrientationChange() {
+    const currentOrientation = window.orientation;
+    
+    // Przywróć układ po zmianie orientacji
+    if (previousOrientation !== currentOrientation) {
+        // Poczekaj na zakończenie animacji zmiany orientacji
+        setTimeout(() => {
+            const mainContainer = document.querySelector('.main-container');
+            const leftColumn = document.querySelector('.left-column');
+            const rightColumn = document.querySelector('.right-column');
+            
+            // Resetuj style
+            mainContainer.style.flexDirection = '';
+            leftColumn.style.width = '';
+            leftColumn.style.paddingRight = '';
+            leftColumn.style.paddingLeft = '';
+            rightColumn.style.width = '';
+            rightColumn.style.paddingRight = '';
+            rightColumn.style.minHeight = '';
+            
+            // Pozwól na ponowne zastosowanie stylów z CSS
+            if (window.innerWidth <= 520 && currentOrientation === 0) { // Portrait
+                mainContainer.style.flexDirection = 'column';
+                leftColumn.style.width = '100%'; //'115%';
+               // leftColumn.style.paddingRight = '40px';
+                leftColumn.style.paddingLeft = '20px';
+                rightColumn.style.width = '100%'; //'105%';
+                rightColumn.style.paddingRight = '25px';
+                rightColumn.style.minHeight = '110vh';
+            } else if (window.innerWidth <= 920 && (currentOrientation === 90 || currentOrientation === -90)) { // Landscape
+                leftColumn.style.width = '100%';
+                rightColumn.style.width = '100%';
+                rightColumn.style.paddingRight = '25px';
+                rightColumn.style.minHeight = '250vh';
+            }
+        }, 300); // Opóźnienie 300ms na zakończenie animacji
+        
+        previousOrientation = currentOrientation;
+    }
+}
+
+// Dodaj nasłuchiwanie zmiany orientacji
+//window.addEventListener('orientationchange', handleOrientationChange);
+
+// Wywołaj funkcję przy starcie
+handleOrientationChange();

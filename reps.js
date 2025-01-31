@@ -622,11 +622,19 @@ function createExportBlob() {
   
   const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
   flashcards.forEach(card => {
+      // Funkcja do przygotowania tekstu do CSV - zamienia znaki nowej linii na <br> i escapuje średniki
+      const prepareText = (text) => {
+          if (!text) return '';
+          return text
+              .replace(/\n/g, '<br>') // zamień znaki nowej linii na <br>
+              .replace(/;/g, ',');     // zamień średniki na przecinki
+      };
+
       const row = [
-          // Podstawowe pola (zachowane oryginalne nazwy)
-          card.word.replace(/;/g, ','),          // front
-          card.translation.replace(/;/g, ','),   // back
-          card.context ? card.context.replace(/;/g, ',') : '', // context
+          // Podstawowe pola z przygotowaniem tekstu
+          prepareText(card.word),
+          prepareText(card.translation),
+          prepareText(card.context),
           
           // Pozostałe pola
           card.mediaUrl || '',
@@ -702,85 +710,101 @@ function importFlashcards() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const content = e.target.result;
-            const lines = content.split('\n');
+            // Dzielimy na wiersze, ale zachowujemy <br> wewnątrz pól
+            const lines = content.split(/\r?\n/).filter(line => line.trim());
             let importedCount = 0;
             let duplicateCount = 0;
             let updatedCount = 0;
 
+            // Funkcja do przywracania oryginalnego tekstu z CSV
+            const restoreText = (text) => {
+                if (!text) return '';
+                return text
+                    .replace(/<br>/g, '\n')  // zamień <br> z powrotem na znaki nowej linii
+                    .replace(/\\n/g, '\n');   // obsłuż escapowane znaki nowej linii
+            };
+
             // Pomijamy pierwszy wiersz (nagłówki)
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
-                if (line) {
-                    const [
-                        front, 
-                        back, 
-                        context, 
-                        mediaUrl, 
-                        audioUrl,
-                        algorithm,
-                        firstReviewDate,
-                        lastReviewed,
-                        nextReview,
-                        difficulty,
-                        streak,
-                        easinessFactor,
-                        interval,
-                        repetitions,
-                        leitnerBox
-                    ] = line.split(';').map(item => item.replace(/^"|"$/g, '').trim());
+                if (!line) continue;
 
-                    if (front && back) {
-                        // Sprawdź czy fiszka już istnieje
-                        const existingFlashcard = flashcards.find(f => 
-                            f.word === front && 
-                            f.translation === back && 
-                            f.context === (context || '')
-                        );
+                // Prosty podział po średnikach
+                const values = line.split(';');
 
-                        if (existingFlashcard) {
-                            // Aktualizuj istniejącą fiszkę, jeśli nowa ma nowsze dane
-                            const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
-                            const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+                const [
+                    front, 
+                    back, 
+                    context, 
+                    mediaUrl, 
+                    audioUrl,
+                    algorithm,
+                    firstReviewDate,
+                    lastReviewed,
+                    nextReview,
+                    difficulty,
+                    streak,
+                    easinessFactor,
+                    interval,
+                    repetitions,
+                    leitnerBox
+                ] = values;
 
-                            if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
-                                // Aktualizuj tylko pola związane z postępem nauki
-                                existingFlashcard.firstReviewDate = firstReviewDate || existingFlashcard.firstReviewDate;
-                                existingFlashcard.lastReviewed = lastReviewed || existingFlashcard.lastReviewed;
-                                existingFlashcard.nextReview = nextReview || existingFlashcard.nextReview;
-                                existingFlashcard.difficulty = difficulty || existingFlashcard.difficulty;
-                                existingFlashcard.streak = parseInt(streak) || existingFlashcard.streak;
-                                existingFlashcard.easinessFactor = parseFloat(easinessFactor) || existingFlashcard.easinessFactor;
-                                existingFlashcard.interval = parseInt(interval) || existingFlashcard.interval;
-                                existingFlashcard.repetitions = parseInt(repetitions) || existingFlashcard.repetitions;
-                                existingFlashcard.leitnerBox = parseInt(leitnerBox) || existingFlashcard.leitnerBox;
-                                updatedCount++;
-                            } else {
-                                duplicateCount++;
-                            }
+                if (front && back) {
+                    // Przywróć oryginalne formatowanie tekstu
+                    const restoredFront = restoreText(front);
+                    const restoredBack = restoreText(back);
+                    const restoredContext = restoreText(context);
+
+                    // Sprawdź czy fiszka już istnieje
+                    const existingFlashcard = flashcards.find(f => 
+                        f.word === restoredFront && 
+                        f.translation === restoredBack && 
+                        f.context === (restoredContext || '')
+                    );
+
+                    if (existingFlashcard) {
+                        // Aktualizuj istniejącą fiszkę
+                        const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
+                        const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+
+                        if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
+                            Object.assign(existingFlashcard, {
+                                firstReviewDate: firstReviewDate || existingFlashcard.firstReviewDate,
+                                lastReviewed: lastReviewed || existingFlashcard.lastReviewed,
+                                nextReview: nextReview || existingFlashcard.nextReview,
+                                difficulty: difficulty || existingFlashcard.difficulty,
+                                streak: parseInt(streak) || existingFlashcard.streak,
+                                easinessFactor: parseFloat(easinessFactor) || existingFlashcard.easinessFactor,
+                                interval: parseInt(interval) || existingFlashcard.interval,
+                                repetitions: parseInt(repetitions) || existingFlashcard.repetitions,
+                                leitnerBox: parseInt(leitnerBox) || existingFlashcard.leitnerBox
+                            });
+                            updatedCount++;
                         } else {
-                            // Dodaj nową fiszkę
-                            const newFlashcard = {
-                                id: Date.now() + Math.random(),
-                                word: front,
-                                translation: back,
-                                context: context || '',
-                                mediaUrl: mediaUrl || '',
-                                audioUrl: audioUrl || '',
-                                firstReviewDate: firstReviewDate || null,
-                                lastReviewed: lastReviewed || null,
-                                nextReview: nextReview || null,
-                                difficulty: difficulty || 'medium',
-                                streak: parseInt(streak) || 0,
-                                easinessFactor: parseFloat(easinessFactor) || 2.5,
-                                interval: parseInt(interval) || 0,
-                                repetitions: parseInt(repetitions) || 0,
-                                leitnerBox: parseInt(leitnerBox) || 1,
-                                createdAt: new Date().toISOString()
-                            };
-                            
-                            flashcards.push(newFlashcard);
-                            importedCount++;
+                            duplicateCount++;
                         }
+                    } else {
+                        // Dodaj nową fiszkę
+                        flashcards.push({
+                            id: Date.now() + Math.random(),
+                            word: restoredFront,
+                            translation: restoredBack,
+                            context: restoredContext || '',
+                            mediaUrl: mediaUrl || '',
+                            audioUrl: audioUrl || '',
+                            firstReviewDate: firstReviewDate || null,
+                            lastReviewed: lastReviewed || null,
+                            nextReview: nextReview || null,
+                            difficulty: difficulty || 'medium',
+                            streak: parseInt(streak) || 0,
+                            easinessFactor: parseFloat(easinessFactor) || 2.5,
+                            interval: parseInt(interval) || 0,
+                            repetitions: parseInt(repetitions) || 0,
+                            leitnerBox: parseInt(leitnerBox) || 1,
+                            createdAt: new Date().toISOString()
+                        });
+                        importedCount++;
                     }
                 }
             }
