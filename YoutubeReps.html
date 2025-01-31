@@ -60,6 +60,14 @@
                                 /* Style CSS */
         body {
             font-family: 'Roboto', sans-serif;
+            touch-action: manipulation; /* Umożliwia zoomowanie */
+            overflow-x: hidden;  /* Dodajmy to */
+        }
+        html {
+            width: 100%;         /* Dodajmy to */
+            overflow-x: hidden;  /* Dodajmy to */
+            margin: 0;
+            padding: 0;
         }
 
         .main-title {
@@ -1116,7 +1124,8 @@
 
     .right-column { /* kolumna słownika */
         width: 100%;
-        padding-right: 5px;   /* odstep od prawej */
+        padding-right: 25px;   /* odstep od prawej */
+        
         min-height: 250vh;
        /* max-height: auto;*/
     }
@@ -1144,17 +1153,17 @@
     }
 
     .right-column { /* kolumna słownika */
-        width: 105%;
-        padding-right: 85px;   /* odstep od prawej */
+        width: 90%;
+        padding-right: 25px;    /* odstep od prawej */
         min-height: 110vh;
         max-height: none;
     }
 
     .left-column { /* kolumna palyera */
-        width: 115%;
-        padding-right: 40px; /* nie dziala */
-        padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
-        margin-right: 10px;
+        width: 100%;
+        /*  padding-right: 40px;   */
+         padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
+         margin-right: 10px;
     }
 
     .iframe-container {
@@ -1177,22 +1186,22 @@
     }
 
     .expanded .left-column {
-        display: none;
+      /*  display: none;*/
         
     }
 
     .expanded .right-column {
-        display: block;
+       /* display: block;*/
         width: 100%;
     }
 
     .mobile-view .left-column {
         
-        display: block;
+     /*   display: block;*/
     }
 
     .mobile-view .right-column {
-        display: block;
+   /*     display: block;*/
     }
 }
 
@@ -1946,6 +1955,13 @@ body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
     line-height: 1.6;
     color: #333;
     background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;  /* Dodajmy to */
+}
+html {
+    width: 100%;         /* Dodajmy to */
+    overflow-x: hidden;  /* Dodajmy to */
     margin: 0;
     padding: 0;
 }
@@ -5127,7 +5143,7 @@ body.dark-mode .start-review-button:hover {
 @media (max-width: 768px) {
     .reps-dictionary-container {
         position: static;
-        width: 90%;
+        width: 85%;
         height: 0;
         margin: 20px auto; 
         margin-right: 40px;
@@ -5511,8 +5527,19 @@ body.dark-mode .show-examples-button:hover {
                     </style>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
     <title>My Playlists</title>
+    
+    <!-- Dodajemy meta tagi i linki dla PWA -->
+    <link rel="manifest" href="manifest.json" type="application/json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ELA">
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Istniejące linki -->
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api" defer></script>
@@ -5804,6 +5831,21 @@ body.dark-mode .show-examples-button:hover {
         <button onclick="addWordTranslationPair('${videoId}')">+ Add word/phrase</button>
         <button onclick="saveNote('${videoId}')">Save note</button>
     </div>
+
+    <!-- Dodajemy rejestrację Service Workera przed zamknięciem body -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 
     </div>
     <div id="repsView" class="view">
@@ -7538,12 +7580,20 @@ function exportWordList() {
         });
     });
 
+    // Funkcja do przygotowania tekstu do CSV
+    const prepareText = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/\n/g, '<br>') // zamień znaki nowej linii na <br>
+            .replace(/;/g, ',');     // zamień średniki na przecinki
+    };
+
     // Export as CSV
     var csvContent = "front;back;context;;;Video Title\n";
     allWords.forEach(note => {
-        csvContent += `${escapeCSV(note.front)};`;
-        csvContent += `${escapeCSV(note.back)};`;
-        csvContent += `${escapeCSV(note.context)};`;
+        csvContent += `${escapeCSV(prepareText(note.front))};`;
+        csvContent += `${escapeCSV(prepareText(note.back))};`;
+        csvContent += `${escapeCSV(prepareText(note.context))};`;
         csvContent += `;;`;
         csvContent += `${escapeCSV(note.videoTitle)}\n`;
     });
@@ -7568,10 +7618,8 @@ function downloadFile(content, fileName, mimeType) {
 
 function escapeCSV(str) {
     if (str == null) return '';
-    return '"' + str.replace(/"/g, '""').replace(/\n/g, ' ') + '"';
+    return '"' + str.replace(/"/g, '""') + '"';  // Usunięto zamianę \n na spację
 }
-
-// Dodaj te funkcje na końcu pliku
 
 function setDefaultDictionary() {
     const select = document.getElementById('dictionary-select');
@@ -8164,6 +8212,183 @@ mediaQuery.addListener(handleOrientationChange);
 // Sprawdź orientację przy starcie
 handleOrientationChange(mediaQuery);
 */
+
+/*
+// Dodaj na początku pliku
+document.addEventListener('DOMContentLoaded', function() {
+    // Ustaw początkową szerokość kolumn
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer) {
+        mainContainer.style.display = 'flex';
+        mainContainer.style.width = '100%';
+        mainContainer.style.maxWidth = '100%';
+        mainContainer.style.overflow = 'hidden';
+    }
+
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+
+    if (leftColumn && rightColumn) {
+        // Sprawdź czy jest to urządzenie mobilne
+        if (window.innerWidth <= 520) {
+            leftColumn.style.width = '100%';
+            rightColumn.style.width = '100%';
+        } else {
+            leftColumn.style.width = '65%';
+            rightColumn.style.width = '35%';
+        }
+    }
+});
+
+// Dodaj obsługę zmiany rozmiaru okna
+window.addEventListener('resize', function() {
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+    
+    if (leftColumn && rightColumn) {
+        if (window.innerWidth <= 520) {
+            leftColumn.style.width = '100%';
+            rightColumn.style.width = '100%';
+        } else {
+            // Przywróć standardowe proporcje dla większych ekranów
+            if (!document.body.classList.contains('expanded')) {
+                leftColumn.style.width = '65%';
+                rightColumn.style.width = '35%';
+            }
+        }
+    }
+});
+*/
+
+// Dodaj na początku pliku lub w sekcji inicjalizacji
+let previousOrientation = window.orientation;
+
+// Funkcja do obsługi zmiany orientacji
+function handleOrientationChange() {
+    const currentOrientation = window.orientation;
+    
+    // Przywróć układ po zmianie orientacji
+    if (previousOrientation !== currentOrientation) {
+        // Poczekaj na zakończenie animacji zmiany orientacji
+        setTimeout(() => {
+            const mainContainer = document.querySelector('.main-container');
+            const leftColumn = document.querySelector('.left-column');
+            const rightColumn = document.querySelector('.right-column');
+            
+            // Resetuj style
+            mainContainer.style.flexDirection = '';
+            leftColumn.style.width = '';
+            leftColumn.style.paddingRight = '';
+            leftColumn.style.paddingLeft = '';
+            rightColumn.style.width = '';
+            rightColumn.style.paddingRight = '';
+            rightColumn.style.minHeight = '';
+            
+            // Pozwól na ponowne zastosowanie stylów z CSS
+            if (window.innerWidth <= 520 && currentOrientation === 0) { // Portrait
+                mainContainer.style.flexDirection = 'column';
+                leftColumn.style.width = '100%'; //'115%';
+               // leftColumn.style.paddingRight = '40px';
+                leftColumn.style.paddingLeft = '20px';
+                rightColumn.style.width = '100%'; //'105%';
+                rightColumn.style.paddingRight = '25px';
+                rightColumn.style.minHeight = '110vh';
+            } else if (window.innerWidth <= 920 && (currentOrientation === 90 || currentOrientation === -90)) { // Landscape
+                leftColumn.style.width = '100%';
+                rightColumn.style.width = '100%';
+                rightColumn.style.paddingRight = '25px';
+                rightColumn.style.minHeight = '250vh';
+            }
+        }, 300); // Opóźnienie 300ms na zakończenie animacji
+        
+        previousOrientation = currentOrientation;
+    }
+}
+
+// Dodaj nasłuchiwanie zmiany orientacji
+//window.addEventListener('orientationchange', handleOrientationChange);
+
+// Wywołaj funkcję przy starcie
+handleOrientationChange();</script>
+<script>const CACHE_NAME = 'ela-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/reps.html',
+  '/styles.css',
+  '/reps.css',
+  '/script.js',
+  '/reps.js',
+  '/stats.js',
+  '/translations.js',
+  '/algorithms.js',
+  '/synchronization.js',
+  '/icon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/desktop.png',
+  '/mobile.png'
+];
+
+// Instalacja Service Workera
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+// Obsługa żądań
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      // match the request to our cache
+      const cachedResponse = await cache.match(event.request);
+
+      // check if we got a valid response
+      if (cachedResponse !== undefined) {
+          // Cache hit, return the resource
+          return cachedResponse;
+      } else {
+        // Otherwise, go to the network
+          return fetch(event.request)
+      };
+  });
+});
+
+// Aktualizacja Service Workera
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+}); 
+
 </script>
 <script>// Funkcja do rysowania wykresu dla systemu Leitnera
 function drawLeitnerBoxesChart() {
@@ -10720,11 +10945,19 @@ function createExportBlob() {
   
   const currentAlgorithm = localStorage.getItem('reviewAlgorithm') || 'standard';
   flashcards.forEach(card => {
+      // Funkcja do przygotowania tekstu do CSV - zamienia znaki nowej linii na <br> i escapuje średniki
+      const prepareText = (text) => {
+          if (!text) return '';
+          return text
+              .replace(/\n/g, '<br>') // zamień znaki nowej linii na <br>
+              .replace(/;/g, ',');     // zamień średniki na przecinki
+      };
+
       const row = [
-          // Podstawowe pola (zachowane oryginalne nazwy)
-          card.word.replace(/;/g, ','),          // front
-          card.translation.replace(/;/g, ','),   // back
-          card.context ? card.context.replace(/;/g, ',') : '', // context
+          // Podstawowe pola z przygotowaniem tekstu
+          prepareText(card.word),
+          prepareText(card.translation),
+          prepareText(card.context),
           
           // Pozostałe pola
           card.mediaUrl || '',
@@ -10800,85 +11033,101 @@ function importFlashcards() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const content = e.target.result;
-            const lines = content.split('\n');
+            // Dzielimy na wiersze, ale zachowujemy <br> wewnątrz pól
+            const lines = content.split(/\r?\n/).filter(line => line.trim());
             let importedCount = 0;
             let duplicateCount = 0;
             let updatedCount = 0;
 
+            // Funkcja do przywracania oryginalnego tekstu z CSV
+            const restoreText = (text) => {
+                if (!text) return '';
+                return text
+                    .replace(/<br>/g, '\n')  // zamień <br> z powrotem na znaki nowej linii
+                    .replace(/\\n/g, '\n');   // obsłuż escapowane znaki nowej linii
+            };
+
             // Pomijamy pierwszy wiersz (nagłówki)
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
-                if (line) {
-                    const [
-                        front, 
-                        back, 
-                        context, 
-                        mediaUrl, 
-                        audioUrl,
-                        algorithm,
-                        firstReviewDate,
-                        lastReviewed,
-                        nextReview,
-                        difficulty,
-                        streak,
-                        easinessFactor,
-                        interval,
-                        repetitions,
-                        leitnerBox
-                    ] = line.split(';').map(item => item.replace(/^"|"$/g, '').trim());
+                if (!line) continue;
 
-                    if (front && back) {
-                        // Sprawdź czy fiszka już istnieje
-                        const existingFlashcard = flashcards.find(f => 
-                            f.word === front && 
-                            f.translation === back && 
-                            f.context === (context || '')
-                        );
+                // Prosty podział po średnikach
+                const values = line.split(';');
 
-                        if (existingFlashcard) {
-                            // Aktualizuj istniejącą fiszkę, jeśli nowa ma nowsze dane
-                            const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
-                            const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+                const [
+                    front, 
+                    back, 
+                    context, 
+                    mediaUrl, 
+                    audioUrl,
+                    algorithm,
+                    firstReviewDate,
+                    lastReviewed,
+                    nextReview,
+                    difficulty,
+                    streak,
+                    easinessFactor,
+                    interval,
+                    repetitions,
+                    leitnerBox
+                ] = values;
 
-                            if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
-                                // Aktualizuj tylko pola związane z postępem nauki
-                                existingFlashcard.firstReviewDate = firstReviewDate || existingFlashcard.firstReviewDate;
-                                existingFlashcard.lastReviewed = lastReviewed || existingFlashcard.lastReviewed;
-                                existingFlashcard.nextReview = nextReview || existingFlashcard.nextReview;
-                                existingFlashcard.difficulty = difficulty || existingFlashcard.difficulty;
-                                existingFlashcard.streak = parseInt(streak) || existingFlashcard.streak;
-                                existingFlashcard.easinessFactor = parseFloat(easinessFactor) || existingFlashcard.easinessFactor;
-                                existingFlashcard.interval = parseInt(interval) || existingFlashcard.interval;
-                                existingFlashcard.repetitions = parseInt(repetitions) || existingFlashcard.repetitions;
-                                existingFlashcard.leitnerBox = parseInt(leitnerBox) || existingFlashcard.leitnerBox;
-                                updatedCount++;
-                            } else {
-                                duplicateCount++;
-                            }
+                if (front && back) {
+                    // Przywróć oryginalne formatowanie tekstu
+                    const restoredFront = restoreText(front);
+                    const restoredBack = restoreText(back);
+                    const restoredContext = restoreText(context);
+
+                    // Sprawdź czy fiszka już istnieje
+                    const existingFlashcard = flashcards.find(f => 
+                        f.word === restoredFront && 
+                        f.translation === restoredBack && 
+                        f.context === (restoredContext || '')
+                    );
+
+                    if (existingFlashcard) {
+                        // Aktualizuj istniejącą fiszkę
+                        const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
+                        const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+
+                        if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
+                            Object.assign(existingFlashcard, {
+                                firstReviewDate: firstReviewDate || existingFlashcard.firstReviewDate,
+                                lastReviewed: lastReviewed || existingFlashcard.lastReviewed,
+                                nextReview: nextReview || existingFlashcard.nextReview,
+                                difficulty: difficulty || existingFlashcard.difficulty,
+                                streak: parseInt(streak) || existingFlashcard.streak,
+                                easinessFactor: parseFloat(easinessFactor) || existingFlashcard.easinessFactor,
+                                interval: parseInt(interval) || existingFlashcard.interval,
+                                repetitions: parseInt(repetitions) || existingFlashcard.repetitions,
+                                leitnerBox: parseInt(leitnerBox) || existingFlashcard.leitnerBox
+                            });
+                            updatedCount++;
                         } else {
-                            // Dodaj nową fiszkę
-                            const newFlashcard = {
-                                id: Date.now() + Math.random(),
-                                word: front,
-                                translation: back,
-                                context: context || '',
-                                mediaUrl: mediaUrl || '',
-                                audioUrl: audioUrl || '',
-                                firstReviewDate: firstReviewDate || null,
-                                lastReviewed: lastReviewed || null,
-                                nextReview: nextReview || null,
-                                difficulty: difficulty || 'medium',
-                                streak: parseInt(streak) || 0,
-                                easinessFactor: parseFloat(easinessFactor) || 2.5,
-                                interval: parseInt(interval) || 0,
-                                repetitions: parseInt(repetitions) || 0,
-                                leitnerBox: parseInt(leitnerBox) || 1,
-                                createdAt: new Date().toISOString()
-                            };
-                            
-                            flashcards.push(newFlashcard);
-                            importedCount++;
+                            duplicateCount++;
                         }
+                    } else {
+                        // Dodaj nową fiszkę
+                        flashcards.push({
+                            id: Date.now() + Math.random(),
+                            word: restoredFront,
+                            translation: restoredBack,
+                            context: restoredContext || '',
+                            mediaUrl: mediaUrl || '',
+                            audioUrl: audioUrl || '',
+                            firstReviewDate: firstReviewDate || null,
+                            lastReviewed: lastReviewed || null,
+                            nextReview: nextReview || null,
+                            difficulty: difficulty || 'medium',
+                            streak: parseInt(streak) || 0,
+                            easinessFactor: parseFloat(easinessFactor) || 2.5,
+                            interval: parseInt(interval) || 0,
+                            repetitions: parseInt(repetitions) || 0,
+                            leitnerBox: parseInt(leitnerBox) || 1,
+                            createdAt: new Date().toISOString()
+                        });
+                        importedCount++;
                     }
                 }
             }
