@@ -875,7 +875,7 @@ function initializeApp() {
         localStorage.setItem('gradeButtonMode', 'four');
     }
     if (!localStorage.getItem('exampleButtonPrompt')) {
-        localStorage.setItem('exampleButtonPrompt', 'You are an English teacher. Give me 6 sentences with the word {word}. 3 sentences and 3 questions. Use 3 different tenses. Do not inform me about tenses. Use real-world examples. \n\n After that, give me an example of a very short story, maximum 6 sentences, easy to understand. Later explain this word in the story with different words.');
+        localStorage.setItem('exampleButtonPrompt', 'You are an English teacher. Give me 6 short and simple sentences with the word {word}. 3 sentences and 3 questions. Use 3 different tenses. Do not inform me about tenses. Use real-world examples. \n\n After that, give me an example of a very short story, maximum 6 sentences, easy to understand. Later explain this word in the story with different words.');
     }
 
     // Najpierw próbujemy załadować fiszki z localStorage
