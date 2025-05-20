@@ -1274,7 +1274,7 @@ function loadCustomDictionaries() {
     // Dodaj domyślne słowniki
     const defaultDictionaries = [
         { name: 'onelook.com', url: 'https://www.onelook.com/' },
-        { name: 'you.com (ai)', url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.') + '&tbm=youchat&chatMode=default' },
+        { name: 'you.com (ai)', url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 short and simple example sentences with this word.') + '&tbm=youchat&chatMode=default' },
         { name: 'diki.pl', url: 'https://www.diki.pl/' },
         { name: 'dict.com', url: 'https://dict.com/angielsko-polski' },
         { name: 'ling.pl', url: 'https://ling.pl/' }
