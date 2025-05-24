@@ -5,7 +5,11 @@ Link to the web app:  https://youtubereps.com or https://theaidran.github.io/You
 https://github.com/user-attachments/assets/f9cb1e82-96e7-40bb-81fb-712b24d35e8c
 
 
-https://github.com/user-attachments/assets/56270985-7e43-42a1-bc88-c9d8f86ecd54
+
+https://github.com/user-attachments/assets/24d119a5-38a4-4c34-8680-bbb118b5b169
+
+
+
 
 
 
