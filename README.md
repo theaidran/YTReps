@@ -4,6 +4,11 @@ Link to the web app:  https://youtubereps.com or https://theaidran.github.io/You
 
 https://github.com/user-attachments/assets/f9cb1e82-96e7-40bb-81fb-712b24d35e8c
 
+
+https://github.com/user-attachments/assets/56270985-7e43-42a1-bc88-c9d8f86ecd54
+
+
+
 ## Overview
 A simple web application to enhance English language learning through watching videos and repeating them with a flashcard system. 
 The main goal here was to create an app as a simple HTML file, which you can run straight from your desktop, no servers, no frameworks, no API required.
