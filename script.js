@@ -2,6 +2,21 @@ let isIndexDarkMode = false;
 var isPortrait = window.innerHeight > window.innerWidth ;
 var isLandscape = window.innerWidth  > window.innerHeight;
 
+// Set BBC playlists to disabled by default
+//localStorage.setItem('bbcPlaylistEnabled', 'true');
+
+// Domyślne playlisty BBC
+const defaultPlaylists = [
+    { id: 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt', name: '6 Minute English' },
+    { id: 'PLcetZ6gSk96_Fprtuj6gKN9upPjaDrARH', name: 'English In A Minute' },
+    { id: 'PLcetZ6gSk96_sototkO7HFkGA8zL8H0lq', name: 'The English We Speak' },
+    { id: 'PLcetZ6gSk96--2ELXoJeyafP6wg4n53uh', name: 'Phrasal Verbs' },
+    { id: 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ', name: '6 Minute Grammar' }
+];
+
+// Inicjalizacja pustej tablicy playlist
+var playlists = [];
+
 // Funkcja do przełączania trybu ciemnego
 function toggleIndexDarkMode() {
     isIndexDarkMode = !isIndexDarkMode;
@@ -17,6 +32,23 @@ function toggleIndexDarkMode() {
 
 // Inicjalizacja trybu ciemnego przy ładowaniu strony
 document.addEventListener('DOMContentLoaded', function() {
+    // Sprawdź czy ma się automatycznie otworzyć reps.html
+    const openRepsAfterStart = localStorage.getItem('openRepsAfterStart') === 'true';
+    const cameFromReps = document.referrer.includes('reps.html');
+    
+    // Dodaj flagę w sessionStorage, żeby zapobiec przekierowaniu po powrocie z reps.html
+    const justReturnedFromReps = sessionStorage.getItem('returnedFromReps') === 'true';
+    
+    if (openRepsAfterStart && !cameFromReps && !justReturnedFromReps) {
+        // Ustaw flagę przed przekierowaniem
+        sessionStorage.setItem('goingToReps', 'true');
+        window.location.href = 'reps.html';
+        return;
+    }
+    
+    // Wyczyść flagę jeśli użytkownik został na index.html
+    sessionStorage.removeItem('returnedFromReps');
+    
     if (isIndexDarkMode) {
         document.body.classList.add('index-dark-mode');
         const darkModeIcon = document.querySelector('#index-dark-mode .dark-mode-icon');
@@ -36,14 +68,6 @@ var currentPlaylistId = '';
 var playlistVideoIds = [];
 var videoIdToIndexMap = {};
 var listItemVideoId = null;
-
-var playlists = [
-    { id: 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt', name: '6 Minute English' },
-    { id: 'PLcetZ6gSk96_Fprtuj6gKN9upPjaDrARH', name: 'English In A Minute' },
-    { id: 'PLcetZ6gSk96_sototkO7HFkGA8zL8H0lq', name: 'The English We Speak' },
-    { id: 'PLcetZ6gSk96--2ELXoJeyafP6wg4n53uh', name: 'Phrasal Verbs' },
-    { id: 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ', name: '6 Minute Grammar' } // Dodana nowa playlista
-];
 
 var trimTimes = {};
 
@@ -147,6 +171,14 @@ function createPlaylistButtons() {
     toggleButton.className = 'toggle-input-button';
     toggleButton.onclick = toggleCustomPlaylistInput;
     container.appendChild(toggleButton);
+
+    // Add example text that shows only when playlist is empty
+    if (playlists.length === 0) {
+        var exampleText = document.createElement('span');
+        exampleText.className = 'example-text';
+        exampleText.innerHTML = 'eg. offical BBC playlist <a href="#" onclick="fillBBCPlaylist(); return false;">BBC 6 Minute English</a> https://www.youtube.com/playlist?list=PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt';
+        container.appendChild(exampleText);
+    }
 
     // Dodaj input i przycisk do dodawania nowej playlisty
     var customContainer = document.createElement('div');
@@ -793,7 +825,11 @@ function addCustomPlaylist(playlistLink) {
     var playlistId = extractPlaylistId(playlistLink);
     
     if (playlistId) {
-        var playlistName = prompt("Enter a name for this playlist:");
+        // Automatically set name for BBC playlist
+        var playlistName = playlistId === 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt' ? 
+            'BBC 6 Minute English' : 
+            prompt("Enter a name for this playlist:");
+            
         if (playlistName) {
             playlists.push({ id: playlistId, name: playlistName, custom: true });
             trimTimes[playlistId] = 0;
@@ -880,15 +916,6 @@ function savePlaylistsToLocalStorage() {
     localStorage.setItem('customPlaylists', JSON.stringify(playlists));
 }
 
-    // Domyślne playlisty BBC
-    const defaultPlaylists = [
-        { id: 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt', name: '6 Minute English' },
-        { id: 'PLcetZ6gSk96_Fprtuj6gKN9upPjaDrARH', name: 'English In A Minute' },
-        { id: 'PLcetZ6gSk96_sototkO7HFkGA8zL8H0lq', name: 'The English We Speak' },
-        { id: 'PLcetZ6gSk96--2ELXoJeyafP6wg4n53uh', name: 'Phrasal Verbs' },
-        { id: 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ', name: '6 Minute Grammar' }
-    ];
-
 function loadPlaylistsFromLocalStorage() {
     var storedPlaylists = localStorage.getItem('customPlaylists');
     if (storedPlaylists) {
@@ -898,8 +925,6 @@ function loadPlaylistsFromLocalStorage() {
     // Sprawdź ustawienie BBC playlist
     const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
     
-
-
     // Dodaj domyślne playlisty tylko jeśli BBC jest włączone
     if (bbcPlaylistEnabled) {
         defaultPlaylists.forEach(function(defaultPlaylist) {
@@ -1272,13 +1297,12 @@ function loadCustomDictionaries() {
     }
     
     // Dodaj domyślne słowniki
+    const dictAiPrompt = localStorage.getItem('dictAiPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.';
     const defaultDictionaries = [
-        { name: 'onelook.com', url: 'https://www.onelook.com/' },
-        { name: 'you.com (ai)', url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 short and simple example sentences with this word.') + '&tbm=youchat&chatMode=default' },
-        { name: 'diki.pl', url: 'https://www.diki.pl/' },
-        { name: 'dict.com', url: 'https://dict.com/angielsko-polski' },
-        { name: 'ling.pl', url: 'https://ling.pl/' }
-       
+        { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/' },
+        { name: 'DictAI', url: 'chat.html?q=' + encodeURIComponent(dictAiPrompt) },
+        { name: 'OneLook', url: 'https://www.onelook.com/?w=' },
+        { name: 'diki.pl', url: 'https://www.diki.pl/' }
     ];
     
     // Dodaj domyślne i niestandardowe słowniki
@@ -1962,6 +1986,7 @@ function openSettings() {
     
     const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled') === 'true';
     const currentRatio = loadDefaultColumnRatio();
+    const openRepsAfterStart = localStorage.getItem('openRepsAfterStart') === 'true';
     
     settingsForm = document.createElement('div');
     settingsForm.id = 'review-settings-form';
@@ -1975,6 +2000,12 @@ function openSettings() {
             <label class="checkbox-label">
                 <input type="checkbox" id="bbcPlaylistCheckbox" ${bbcPlaylistEnabled ? 'checked' : ''}>
                 BBC learning English playlists
+            </label>
+        </div>
+        <div class="settings-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="openRepsAfterStartCheckbox" ${openRepsAfterStart ? 'checked' : ''}>
+                Open Repetitions after app start
             </label>
         </div>
         <div class="settings-group">
@@ -1996,6 +2027,12 @@ function openSettings() {
     checkbox.addEventListener('change', function() {
         localStorage.setItem('bbcPlaylistEnabled', this.checked);
         updatePlaylistVisibility();
+    });
+    
+    // Event listener dla checkboxa Open Reps After Start
+    const openRepsCheckbox = settingsForm.querySelector('#openRepsAfterStartCheckbox');
+    openRepsCheckbox.addEventListener('change', function() {
+        localStorage.setItem('openRepsAfterStart', this.checked);
     });
     
     // Event listener dla suwaka
@@ -2088,9 +2125,9 @@ function updatePlaylistVisibility() {
 window.addEventListener('load', function() {
     // Wczytaj stan z localStorage
     const bbcPlaylistEnabled = localStorage.getItem('bbcPlaylistEnabled');
-    // Jeśli nie ma zapisanego stanu, ustaw domyślnie na true
+    // Jeśli nie ma zapisanego stanu, ustaw domyślnie na false
     if (bbcPlaylistEnabled === null) {
-        localStorage.setItem('bbcPlaylistEnabled', 'true');
+        localStorage.setItem('bbcPlaylistEnabled', 'false');
     }
     updatePlaylistVisibility();
 });
@@ -2283,3 +2320,32 @@ function handleOrientationChange() {
 
 // Wywołaj funkcję przy starcie
 handleOrientationChange();
+
+// Add new function to handle adding BBC playlist
+function addBBCPlaylist() {
+    const playlistId = 'PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt';
+    const playlistName = 'BBC 6 Minute English';
+    
+    playlists.push({ id: playlistId, name: playlistName });
+    savePlaylistsToLocalStorage();
+    createPlaylistButtons();
+    loadPlaylist(playlistId);
+}
+
+// Add new function to handle filling the input with BBC playlist
+function fillBBCPlaylist() {
+    const playlistLink = 'https://www.youtube.com/playlist?list=PLcetZ6gSk96-FECmH9l7Vlx5VDigvgZpt';
+    const input = document.getElementById('custom-playlist-link');
+    const customContainer = document.querySelector('.custom-playlist-container');
+    const toggleButton = document.querySelector('.toggle-input-button');
+    
+    // Show the input container
+    customContainer.style.display = 'flex';
+    toggleButton.textContent = '-';
+    
+    // Fill the input with the playlist link
+    input.value = playlistLink;
+    
+    // Focus the input
+    input.focus();
+}

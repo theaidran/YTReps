@@ -1,0 +1,167 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+#chatbox {
+  width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  overflow-y: visible;
+  padding: 15px;
+  background-color: white;
+  margin-bottom: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#latest-response {
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ccc;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+}
+
+.spinner {
+  margin: 20px;
+  width: 20px;
+  height: 20px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #007BFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+   100% { transform: rotate(360deg); }
+}
+
+.user-message {
+  color: black;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 15px;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 8px 0;
+}
+
+.bot-message {
+  color: black;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 15px; 
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 8px 0;
+}
+
+.error-message {
+  color: red;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.info-message {
+  color: #0066cc;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 15px;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 8px 0;
+  background-color: #f0f8ff;
+  padding: 10px;
+  border-left: 4px solid #0066cc;
+  border-radius: 4px;
+}
+
+#user-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+#send-btn {
+  width: 120px;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+#send-btn:hover {
+  background-color: #0056b3;
+}
+
+#temperature-slider {
+  width: 300px;
+}
+
+.temperature-label {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#system-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+#save-btn, #load-file-btn, #new-chat-btn {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+#save-btn:hover, #load-file-btn:hover, #new-chat-btn:hover {
+  background-color: #218838;
+}
+
+#chat-list, #load-file {
+  margin-top: 10px;
+}
+
+.save-response-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.save-response-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Desktop responsive - increase chat height on wider screens */
+@media (min-width: 521px) {
+  #chatbox {
+    height: auto;
+  }
+}
+
+/* Mobile responsive - increase chat height on narrow screens */
+@media (max-width: 520px) {
+  #chatbox {
+    height: auto;
+  }
+}

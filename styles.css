@@ -149,11 +149,11 @@
             margin-bottom: 10px;
             height: auto;
             margin-top: 0;
-            margin-left: 20px; /* Zmieniamy z 25px na 20px */
+            margin-left: 5px; /* przesunięte w lewo o 20px */
         }
 
         .custom-playlist-container input {
-            width: 200px;
+            width: 302px;
             height: 36px;
             padding: 0 10px;
             font-size: 16px;
@@ -1057,7 +1057,7 @@
 
     .right-column { /* kolumna słownika */
         width: 100%;
-        padding-right: 5px;   /* odstep od prawej */
+        padding-right: 45px;   /* odstep od prawej */
         min-height: 250vh;
        /* max-height: auto;*/
     }
@@ -1072,9 +1072,13 @@
         font-size: 16px;
         border: 1px solid #ddd;
         border-radius: 4px;
-        width: 100%;
+        width: 103%;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: border-color 0.3s, box-shadow 0.3s;
+        
+    }
+    .iframe-container {
+        height: 110vh;
         
     }
 }
@@ -1085,14 +1089,14 @@
     }
 
     .right-column { /* kolumna słownika */
-        width: 105%;
-        padding-right: 85px;   /* odstep od prawej */
+        width: 100%;
+        padding-right: 75px;   /* odstep od prawej */
         min-height: 110vh;
         max-height: none;
     }
 
     .left-column { /* kolumna palyera */
-        width: 115%;
+        width: 100%;
         padding-right: 40px; /* nie dziala */
         padding-left: 20px; /* Dodajemy 40px wolnej przestrzeni z lewej strony */
         margin-right: 10px;
@@ -1157,11 +1161,16 @@
     padding: 10px 15px;
     cursor: pointer;
     background-color: #f1f1f1;
-    border: none;
+    border: 1px solid #ddd;
+    border-bottom: none;
     outline: none;
     transition: 0.3s;
     margin-right: 2px;
     position: relative; /* Dodajemy to */
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
 }
 
 .tab span {
@@ -1196,6 +1205,8 @@
 .tab.active {
     background-color: #fff;
     border-bottom: 2px solid #007BFF;
+    z-index: 1;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
 }
 
 #add-tab {
@@ -1564,11 +1575,14 @@ body.index-dark-mode .tabs-container {
 body.index-dark-mode .tab {
     background-color: #333;
     color: #e0e0e0;
+    border-color: #555;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 body.index-dark-mode .tab.active {
     background-color: #404040;
-    border-bottom-color: #007BFF;
+    border-bottom: 2px solid #007BFF;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
 }
 
 body.index-dark-mode #add-tab {
@@ -1879,5 +1893,23 @@ body.dark-mode .settings-group .checkbox-label[data-tooltip]::before {
 /* Dodajemy pozycjonowanie względne dla kontenera nadrzędnego */
 .right-column {
     position: relative;
+}
+
+.example-text {
+    font-size: 0.8em;
+    color: #666;
+    margin-left: 10px;
+    font-style: italic;
+}
+
+.example-text a {
+    color: #2196F3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.example-text a:hover {
+    text-decoration: underline;
+    color: #1976D2;
 }
 

@@ -3162,12 +3162,14 @@ body.dark-mode .start-review-button:hover {
 }
 
 .reps-default-checkbox-container {
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-left: 15px;
+}
+
+.reps-default-checkbox-container label {
+    font-size: 12px;
 }
 
 .reps-default-indicator {
@@ -3179,12 +3181,27 @@ body.dark-mode .start-review-button:hover {
 .reps-iframe-container {
     flex: 1;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+}
+
+.reps-iframe-container p {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    height: 0;
+    overflow: hidden;
 }
 
 .reps-dictionary-frame-mobile {
     width: 100%;
     height: 100%;
     border: none;
+    margin: 0;
+    padding: 0;
+    display: block;
+    vertical-align: top;
 }
 
 /* Style dla wersji mobilnej */
@@ -3216,8 +3233,7 @@ body.dark-mode .start-review-button:hover {
 }
 
 /* Style dla trybu ciemnego */
-body.dark-mode .reps-dictionary-header,
-body.dark-mode .reps-default-checkbox-container {
+body.dark-mode .reps-dictionary-header {
     background-color: #2d2d2d;
     border-color: #404040;
 }
@@ -3567,5 +3583,412 @@ body.dark-mode .show-examples-button:hover {
     display: block;
     margin-top: 4px;
 }
+
+/* Round Modal Styles */
+.round-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.round-modal.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.round-modal.hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.round-modal-content {
+    background: #28a745;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    width: 90%;
+}
+
+.round-modal.show .round-modal-content {
+    transform: scale(1);
+}
+
+.round-animation h2 {
+    color: white;
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: roundPulse 2s infinite;
+}
+
+.round-progress {
+    margin: 30px 0;
+}
+
+.round-duration {
+    width: 200px;
+    height: 80px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    animation: roundPulse 2s infinite;
+}
+
+.duration-text {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.round-animation p {
+    color: white;
+    font-size: 1.3em;
+    margin-bottom: 30px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+
+.round-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.round-ok-button, .round-cancel-button {
+    background: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 120px;
+}
+
+.round-cancel-button {
+    color: #007bff;
+}
+
+.round-ok-button {
+    color: #007bff;
+}
+
+.round-ok-button:hover, .round-cancel-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+    background: #f8f9fa;
+}
+
+.round-ok-button:active, .round-cancel-button:active {
+    transform: translateY(0);
+}
+
+@keyframes roundPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+
+
+/* Dark mode styles for round modal */
+body.dark-mode .round-modal-content {
+    background: #333;
+}
+
+body.dark-mode .round-animation h2,
+body.dark-mode .round-animation p,
+body.dark-mode .duration-text {
+    color: #e2e8f0;
+}
+
+
+
+body.dark-mode .round-ok-button, body.dark-mode .round-cancel-button {
+    background: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .round-cancel-button {
+    color: #4dabf7;
+}
+
+body.dark-mode .round-ok-button {
+    color: #4dabf7;
+}
+
+body.dark-mode .round-ok-button:hover, body.dark-mode .round-cancel-button:hover {
+    background: #404040;
+}
+
+/* Round counter in review */
+.round-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .round-counter {
+    background: rgba(77, 85, 104, 0.2);
+    color: #e2e8f0;
+    border-color: rgba(77, 85, 104, 0.4);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .round-modal-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .round-animation h2 {
+        font-size: 1.8em;
+    }
+    
+    .round-duration {
+        width: 160px;
+        height: 60px;
+    }
+    
+    .duration-text {
+        font-size: 1.4em;
+    }
+    
+    .round-animation p {
+        font-size: 1.1em;
+    }
+    
+
+    .round-buttons {
+        gap: 10px;
+    }
+    
+    .round-ok-button, .round-cancel-button {
+        padding: 10px 20px;
+        font-size: 0.9em;
+        width: 100px;
+    }
+    
+    .round-counter {
+        top: 5px;
+        right: 5px;
+        padding: 3px 8px;
+        font-size: 0.8em;
+    }
+}
+
+/* Dictionary tabs styles - unified with script.js */
+.reps-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    overflow: hidden;
+}
+
+#reps-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.reps-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    outline: none;
+    transition: 0.3s;
+    margin-right: 2px;
+    position: relative;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+}
+
+.reps-tab span {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    pointer-events: none;
+}
+
+.reps-close-tab {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 5px;
+    position: relative;
+    z-index: 1;
+}
+
+.reps-close-tab:hover {
+    color: #333;
+}
+
+.reps-tab:hover {
+    background-color: #ddd;
+}
+
+.reps-tab.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007BFF;
+    z-index: 1;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Dark mode styles for tabs - unified with script.js */
+body.dark-mode .reps-tabs-container {
+    background-color: #1a1a1a;
+}
+
+body.dark-mode .reps-tab {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .reps-tab:hover {
+    background-color: #404040;
+}
+
+body.dark-mode .reps-tab.active {
+    background-color: #404040;
+    border-bottom: 2px solid #007BFF;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+body.dark-mode .reps-close-tab {
+    color: #888;
+}
+
+body.dark-mode .reps-close-tab:hover {
+    color: #e0e0e0;
+}
+
+/* Removed scrollbar styles - using wrap layout instead */
+
+/* Mobile responsive tabs - unified with script.js */
+@media (max-width: 768px) {
+    .reps-tab {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .reps-tab span {
+        max-width: 100px;
+    }
+    
+    .reps-close-tab {
+        font-size: 16px;
+        padding: 0 3px;
+        margin-left: 3px;
+    }
+    
+    #reps-add-tab {
+        min-width: 30px;
+        min-height: 30px;
+        font-size: 20px;
+        padding: 3px 8px;
+    }
+}
+
+/* Add tab button styles - unified with script.js */
+#reps-add-tab {
+    padding: 5px 12px;
+    background-color: #f1f1f1;
+    color: #555555;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 1;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+#reps-add-tab:hover {
+    background-color: #ddd;
+    color: #333333;
+}
+
+/* Dark mode styles for add tab button - unified with script.js */
+body.dark-mode #reps-add-tab {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode #reps-add-tab:hover {
+    background-color: #404040;
+    color: #e0e0e0;
+}
+
+/* Button that opens Groq model settings */
+.model-settings {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    color: #667;
+    transition: color 0.2s ease;
+}
+
+.model-settings:hover {
+    color: #333;
+}
+
+
 
 

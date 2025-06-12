@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Groq/Fireworks/Claude Chatbot</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatstyle.css">
+  <style>
+    /* Hide chat content immediately on page load */
+    #chatbox, #latest-response {
+      opacity: 0;
+      transition: opacity 0.1s ease-in;
+    }
+    /* Show content after clearing */
+    .content-ready #chatbox, .content-ready #latest-response {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body class="bg-white min-h-screen">
+  <div class="w-full h-full bg-white" style="padding: 10px;">
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800" style="display: none;">API Chatbot: Groq, Fireworks, Claude</h1>
+
+    <!-- API Provider Selection -->
+    <div class="mb-4" style="display: none;">
+      <label for="api-provider" class="block text-lg font-semibold text-gray-700">Select API Provider:</label>
+      <select id="api-provider" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-base text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        <option value="groq">Groq</option>
+        <option value="fireworks">Fireworks</option>
+        <option value="claude">Claude</option>
+      </select>
+    </div>
+
+    <!-- API URL and Key Configuration -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" style="display: none;">
+      <div>
+        <label for="api-url" class="block text-lg font-semibold text-gray-700">API URL:</label>
+        <input type="text" id="api-url"  class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+      </div>
+
+      <div>
+        <label for="api-key" class="block text-lg font-semibold text-gray-700">API Key:</label>
+        <input type="text" id="api-key"  class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+      </div>
+    </div>
+
+    <!-- Model Selection -->
+    <div class="mb-4" style="display: none;">
+      <label for="model-select" class="block text-lg font-semibold text-gray-700">Model Name:</label>
+      <input type="text" id="model-select" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" value="llama3-70b-8192" placeholder="Enter model name">
+    </div>
+
+    <!-- Max Tokens Input -->
+    <div class="mb-4" style="display: none;">
+      <label for="max-tokens-input" class="block text-lg font-semibold text-gray-700">Max Tokens (4096 - 131072):</label>
+      <input type="number" id="max-tokens-input" value="8000" min="4096" max="131072" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+
+    <!-- Temperature Control -->
+    <div class="mb-4" style="display: none;">
+      <label for="temperature-slider" class="block text-lg font-semibold text-gray-700">Temperature: <span id="temperature-value">0.55</span></label>
+      <input type="range" id="temperature-slider" min="0" max="1" step="0.1" value="0.55" class="w-full mt-2 focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+
+    <!-- Top P Control -->
+    <div class="mb-4" style="display: none;">
+      <label for="top-p-slider" class="block text-lg font-semibold text-gray-700">Top P (nucleus sampling): <span id="top-p-value">1.0</span></label>
+      <input type="range" id="top-p-slider" min="0" max="1" step="0.05" value="1.0" class="w-full mt-2 focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+
+    <!-- Character Limit Input -->
+    <div class="mb-4" style="display: none;">
+      <label for="character-limit-input" class="block text-lg font-semibold text-gray-700">Chat history chars. Limit to send as one request:</label>
+      <input type="number" id="character-limit-input" min="1000" max="300000" value="25000" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+
+    <!-- History message limit input -->
+    <div class="mb-4" style="display: none;">
+      <label for="message-limit-input" class="block text-lg font-semibold text-gray-700">Chat history messages (you, bot). Limit to send as one request (e.g., 1-20):</label>
+      <input type="number" id="message-limit-input" min="1" max="20" value="10" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+
+    <!-- System Prompt Input -->
+    <div class="mb-4" style="display: none;">
+      <label for="system-input" class="block text-lg font-semibold text-gray-700">System Prompt:</label>
+      <input type="text" id="system-input" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" value="">
+    </div>
+
+    <!-- Characters Sent and Tokens -->
+    <div class="flex justify-between mb-4" style="display: none;">
+      <div>
+        <label for="sent-characters" class="text-lg font-semibold text-gray-700">Sent:</label>
+        <span id="sent-characters" class="text-lg font-semibold text-gray-700">126</span> chars /
+        <span id="sent-tokens" class="text-lg font-semibold text-gray-700">30</span> tokens
+      </div>
+      <div>
+        <label for="received-characters" class="text-lg font-semibold text-gray-700">Received:</label>
+        <span id="received-characters" class="text-lg font-semibold text-gray-700">30</span> chars /
+        <span id="received-tokens" class="text-lg font-semibold text-gray-700">8</span> tokens
+      </div>
+    </div>
+
+    <!-- Chatbox for Conversation History -->
+    <div id="chatbox" class="bg-gray-100 p-4 rounded-lg border border-gray-300 h-64 overflow-y-auto mb-4 shadow-sm"></div>
+    <!-- Spinner to Show Loading -->
+    <div id="spinner" class="spinner" style="display: none;"></div>
+    <!-- Latest Response Box -->
+    <div id="latest-response" class="bg-gray-100 p-4 rounded-lg border border-gray-300 h-32 overflow-y-auto mb-4 shadow-sm" style="display: none;"></div>
+
+    <!-- Message Input Field -->
+    <input type="text" id="user-input" placeholder="Ask a question..." class="w-full bg-gray-50 p-3 rounded-lg shadow-sm mb-4 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 border-gray-300">
+
+    <!-- Send Button -->
+	<button id="send-btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700" style="height: 40px; display: flex; align-items: center; justify-content: center;">Send</button>
+
+    <!-- Save Chat Button -->
+	<button id="save-btn" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700" style="display: none;">Save Chat</button>
+	
+    <!-- Load Chat from File Button -->
+    <button id="load-file-btn" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700" style="display: none;">Load from File</button>
+    <input type="file" id="load-file" style="display: none;" accept=".json">
+
+    <!-- New Chat Button -->
+    <button id="new-chat-btn" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700" style="display: none;">New Chat</button>
+
+    <!-- Save Response Button -->
+    <button id="save-response-btn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 save-response-btn hidden" style="display: none;">Save Response</button>
+
+  </div>
+
+  <script src="chat.js"></script>
+
+</body></html>

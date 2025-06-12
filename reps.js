@@ -2,12 +2,36 @@
 let currentLanguage = 'en'; // Domyślnie ustawiamy język angielski
 lastScrollPosition = 0;
 
+// Funkcja do odtwarzania tekstu
+window.speakWord2 = function(textareaId) {
+    const TtsLang = localStorage.getItem('ttsLanguage') || 'en';
+    const text = document.getElementById(textareaId).value;
+    const encodedText = encodeURIComponent(text);
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${TtsLang}&client=tw-ob`;
+    
+    const audio = new Audio(url);
+    audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+    });
+};
+
+
+
+
 // Dodaj te zmienne globalne na początku pliku
 let flashcardsToReview = [];
 let currentFlashcardIndex = 0;
 let currentReviewMode = null;
 let isSyncing = false; // Dodajemy zmienną isSyncing na początku
 
+// Round timer variables
+let reviewTimer = null;
+let reviewStartTime = null;
+let currentRound = 0;
+let isRoundPaused = false;
+
+// Dictionary tabs functionality
+let repsTabs = [];
 
 // Globalna zmienna do przechowywania fiszek
 let flashcards = [];
@@ -70,7 +94,15 @@ function addFlashcard(word, context, translation, mediaUrl = '', audioUrl = '') 
   updateFlashcardTable();
   updateStats();
   drawLearningProgressChart();
+  
+  // Sprawdź ustawienie domyślnego widoku
+  const defaultView = localStorage.getItem('reps_default_view') || 'browse';
+  if (defaultView === 'add') {
+    showSection('add');
+  } else {
   showSection('view');
+  }
+  
   const message = translations[currentLanguage].flashcardAdded || 'Flashcard has been added!';
   alert(message);
 }
@@ -195,6 +227,7 @@ function showSection(sectionId) {
 // Funkcja do rozpoczęcia powtórki
 function startReview() {
     console.log('Rozpoczęcie powtórki');
+    stopRoundTimer(); // Stop timer when going back to review mode selection
     showReviewModeSelection();
 }
 
@@ -386,6 +419,7 @@ function startSelectedReview() {
 
     currentFlashcardIndex = 0;
     if (flashcardsToReview.length > 0) {
+        startRoundTimer(); // Start the round timer when review begins
         showNextFlashcard();
     } 
     else if (currentReviewMode === 'new' || currentReviewMode === 'newToday') {
@@ -473,8 +507,91 @@ function gradeAnswer(grade) {
 
     saveFlashcards();
     currentFlashcardIndex++;
+    
+    // Dodaj animację odliczania przed przejściem do następnej fiszki
+    showCountdownAnimation(() => {
     showNextFlashcard();
     updateStats();
+    });
+}
+
+// Funkcja do wyświetlania animacji odliczania
+function showCountdownAnimation(callback) {
+    // Sprawdź ustawienie czasu animacji
+    const countdownTime = parseFloat(localStorage.getItem('countdown_animation_time') || '3.5');
+    
+    // Jeśli animacja jest wyłączona (0 sekund), od razu wywołaj callback
+    if (countdownTime === 0) {
+        callback();
+        return;
+    }
+    
+    // Ukryj przyciski oceny i pokaż animację odliczania
+    const reviewCard = document.getElementById('reviewCard');
+    const qualityButtons = reviewCard.querySelector('.quality-buttons');
+    
+    if (qualityButtons) {
+        qualityButtons.style.display = 'none';
+    }
+    
+    // Stwórz kontener dla animacji odliczania
+    const countdownContainer = document.createElement('div');
+    countdownContainer.className = 'countdown-container';
+    countdownContainer.style.cssText = `
+        text-align: center;
+        margin: 20px 0;
+        font-size: 2em;
+        font-weight: bold;
+        color: #007bff;
+        animation: pulse 1s ease-in-out infinite;
+    `;
+    
+    // Dodaj style animacji jeśli nie istnieją
+    if (!document.getElementById('countdown-styles')) {
+        const style = document.createElement('style');
+        style.id = 'countdown-styles';
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .countdown-container {
+                transition: all 0.3s ease;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    reviewCard.appendChild(countdownContainer);
+    
+    // Sekwencja animacji odliczania
+    const messages = ['Ok!', '3', '2', '1', 'Ready', 'Steady', 'Go!'];
+    let currentMessage = 0;
+    
+    // Oblicz czas na każdą wiadomość na podstawie ustawienia
+    // Pierwsza wiadomość "Ok!" będzie wyświetlana 2x dłużej
+    const totalMessages = messages.length + 1; // +1 bo pierwsza wiadomość trwa 2x dłużej
+    const baseTimePerMessage = (countdownTime * 1000) / totalMessages;
+    
+    function showNextMessage() {
+        if (currentMessage < messages.length) {
+            countdownContainer.textContent = messages[currentMessage];
+            
+            // Pierwsza wiadomość "Ok!" wyświetla się 2x dłużej
+            const displayTime = currentMessage === 0 ? baseTimePerMessage * 2 : baseTimePerMessage;
+            
+            currentMessage++;
+            setTimeout(showNextMessage, displayTime);
+        } else {
+            // Usuń kontener odliczania i wywołaj callback
+            countdownContainer.remove();
+            callback();
+        }
+    }
+    
+    // Rozpocznij animację
+    showNextMessage();
 }
 
 // Funkcja do restartu powtórki
@@ -874,8 +991,20 @@ function initializeApp() {
     if (!localStorage.getItem('gradeButtonMode')) {
         localStorage.setItem('gradeButtonMode', 'four');
     }
+    if (!localStorage.getItem('show_hard_cards')) {
+        localStorage.setItem('show_hard_cards', 'false'); // disabled for mobile
+    }
+    if (!localStorage.getItem('show_random')) {
+        localStorage.setItem('show_random', 'false'); // disabled for mobile
+    }
+    if (!localStorage.getItem('show_cards_number')) {
+        localStorage.setItem('show_cards_number', 'false'); // disabled for mobile
+    }
+    if (!localStorage.getItem('show_new_today')) {
+        localStorage.setItem('show_new_today', 'false'); // disabled for mobile
+    }
     if (!localStorage.getItem('exampleButtonPrompt')) {
-        localStorage.setItem('exampleButtonPrompt', 'You are an English teacher. Give me 6 short and simple sentences with the word {word}. 3 sentences and 3 questions. Use 3 different tenses. Do not inform me about tenses. Use real-world examples. \n\n After that, give me an example of a very short story, maximum 6 sentences, easy to understand. Later explain this word in the story with different words.');
+        localStorage.setItem('exampleButtonPrompt', 'You are an English teacher. Give me 6 sentences with the word {word}. 3 sentences and 3 questions. Use 3 different tenses. Do not inform me about tenses. Use real-world examples. \n\n After that, give me an example of a very short story, maximum 6 sentences, easy to understand. Later explain this word in the story with different words.');
     }
 
     // Najpierw próbujemy załadować fiszki z localStorage
@@ -930,7 +1059,14 @@ function initializeApp() {
   initializeStatsSection();
   initializeReviewSection();
   updateStats();
-  showSection('view');  // Zmienione z 'add' na 'view'
+  
+  // Sprawdź ustawienie domyślnego widoku
+  const defaultView = localStorage.getItem('reps_default_view') || 'browse';
+  if (defaultView === 'add') {
+    showSection('add');
+  } else {
+    showSection('view');  // 'browse' flashcard
+  }
   loadSavedLanguage();
   setupAutoResizingTextareas(); // Dodaj tę linię
    // Dodaj window.saveFlashcards i window.handleSync do globalnego obiektu
@@ -983,6 +1119,11 @@ function initializeApp() {
         localStorage.setItem('enable_sync_after_review', 'true'); // Domyślnie wyłączone
     }
     
+    // Dodaj inicjalizację ustawienia reps_default_view jeśli nie istnieje
+    if (localStorage.getItem('reps_default_view') === null) {
+        localStorage.setItem('reps_default_view', 'browse'); // Domyślnie Browse flashcard
+    }
+    
     // Dodaj wywołanie funkcji aktualizującej widoczność przycisku Save
     updateSaveButtonVisibility();
 
@@ -1026,10 +1167,18 @@ function initializeApp() {
         toggleDictionaryBtn.addEventListener('click', () => {
             const isMobileScreen = window.matchMedia('(max-width: 768px)').matches;
             
-            // Najpierw usuń istniejący kontener lub iframe jeśli istnieje
+            // Sprawdź czy kontener już istnieje
             const existingContainer = document.getElementById('dictionary-container');
             if (existingContainer) {
-                existingContainer.remove();
+                // Jeśli kontener już istnieje, tylko go pokaż
+                existingContainer.classList.add('show');
+                dictionaryFrame.style.display = 'none';
+                
+                // Przywróć zakładki jeśli istnieją
+                setTimeout(() => {
+                    repsInitializeFirstTab();
+                }, 100);
+                return;
             }
             
             // Dla obu wersji (mobile i desktop) tworzymy nowy kontener
@@ -1039,17 +1188,8 @@ function initializeApp() {
             
             // Pobierz aktualny domyślny słownik i niestandardowe słowniki
             const defaultDictionary = localStorage.getItem('defaultDictionary');
-            const customDictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
-            
             // Przygotuj opcje dla selecta, włączając niestandardowe słowniki
-            const dictionaryOptions = [
-                { url: 'https://www.onelook.com/', name: 'onelook.com' },
-                { url: 'https://you.com/search?q=' + encodeURIComponent('You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.') + '&tbm=youchat&chatMode=default', name: 'you.com (ai)' },
-                { url: 'https://www.diki.pl/', name: 'diki.pl' },
-                { url: 'https://dict.com/angielsko-polski', name: 'dict.com' },
-                { url: 'https://ling.pl/', name: 'ling.pl' },
-                ...customDictionaries
-            ].map(dict => `
+            const dictionaryOptions = getAllDictionaries().map(dict => `
                 <option value="${dict.url}" ${defaultDictionary === dict.url ? 'selected' : ''}>
                     ${dict.name}
                 </option>
@@ -1065,8 +1205,6 @@ function initializeApp() {
                             <option value="remove_dictionary">Remove dictionary</option>
                         </select>
                     </div>
-                </div>
-                
                 <div class="reps-default-checkbox-container">
                     <input type="checkbox" id="reps-dictionary-default-checkbox" 
                            ${defaultDictionary ? 'checked' : ''} 
@@ -1075,10 +1213,17 @@ function initializeApp() {
                         Set as Default
                         <span class="reps-default-indicator">${defaultDictionary ? '' : ''}</span>
                     </label>
+                    </div>
                 </div>
                 
-                <div class="reps-iframe-container">
-                    <iframe class="reps-dictionary-frame-mobile" src="${defaultDictionary || 'https://www.onelook.com/'}"></iframe>
+                <div class="reps-tabs-container">
+                    <div id="reps-tabs">
+                        <button id="reps-add-tab" onclick="repsAddNewTabFromButton()">+</button>
+                    </div>
+                </div>
+                
+                <div class="reps-iframe-container" id="reps-iframe-container">
+                    <p>No dictionary selected</p>
                 </div>`;
             
             // Wstawiamy nowy kontener w miejsce iframe'a
@@ -1087,6 +1232,11 @@ function initializeApp() {
             
             // Ukrywamy oryginalny iframe
             dictionaryFrame.style.display = 'none';
+            
+            // Initialize first tab
+            setTimeout(() => {
+                repsInitializeFirstTab();
+            }, 100);
         });
     }
 }
@@ -1656,6 +1806,78 @@ function openReviewSettings() {
             </div>
         </div>
 
+        <div class="settings-group">
+            <label data-translate="roundDuration">Round duration (minutes):</label>
+            <div class="radio-group horizontal">
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="disabled" 
+                        ${(localStorage.getItem('round_duration') || '6') === 'disabled' ? 'checked' : ''}>
+                    <span class="radio-label" data-translate="disabled">Disabled</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="3" 
+                        ${(localStorage.getItem('round_duration') || '6') === '3' ? 'checked' : ''}>
+                    <span class="radio-label">3</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="6" 
+                        ${(localStorage.getItem('round_duration') || '6') === '6' ? 'checked' : ''}>
+                    <span class="radio-label">6</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="9" 
+                        ${(localStorage.getItem('round_duration') || '6') === '9' ? 'checked' : ''}>
+                    <span class="radio-label">9</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="12" 
+                        ${(localStorage.getItem('round_duration') || '6') === '12' ? 'checked' : ''}>
+                    <span class="radio-label">12</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="roundDuration" value="15" 
+                        ${(localStorage.getItem('round_duration') || '6') === '15' ? 'checked' : ''}>
+                    <span class="radio-label">15</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <label data-translate="countdownAnimationTime">Countdown animation time (seconds):</label>
+            <div class="radio-group horizontal">
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="0" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '0' ? 'checked' : ''}>
+                    <span class="radio-label" data-translate="disabled">Disabled</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="2" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '2' ? 'checked' : ''}>
+                    <span class="radio-label">2s</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="3" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '3' ? 'checked' : ''}>
+                    <span class="radio-label">3s</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="4" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '4' ? 'checked' : ''}>
+                    <span class="radio-label">4s</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="5" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '5' ? 'checked' : ''}>
+                    <span class="radio-label">5s</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="countdownTime" value="7" 
+                        ${(localStorage.getItem('countdown_animation_time') || '4') === '7' ? 'checked' : ''}>
+                    <span class="radio-label">7s</span>
+                </label>
+            </div>
+        </div>
+
         <div class="settings-group review-modes-options">
             <label data-translate="reviewModesVisibility">Show review modes:</label>
             <div class="checkbox-option">
@@ -1794,13 +2016,23 @@ function saveAlgorithmSettings() {
         newCardsPerDay = document.getElementById('customNewCards').value;
     }
     
+    // Dodaj zapisywanie czasu animacji odliczania
+    const selectedCountdownTime = document.querySelector('input[name="countdownTime"]:checked');
+    const countdownTime = selectedCountdownTime ? selectedCountdownTime.value : '3.5';
+    
+    // Dodaj zapisywanie czasu trwania rundy
+    const selectedRoundDuration = document.querySelector('input[name="roundDuration"]:checked');
+    const roundDuration = selectedRoundDuration ? selectedRoundDuration.value : '6';
+    
     localStorage.setItem('reviewAlgorithm', algorithm);
     localStorage.setItem('gradeButtonMode', buttonMode);
     localStorage.setItem('show_new_today', showNewToday);
     localStorage.setItem('show_hard_cards', showHardCards);
     localStorage.setItem('show_random', showRandom);
-    localStorage.setItem('new_cards_per_day', newCardsPerDay); // Dodaj tę linię
+    localStorage.setItem('new_cards_per_day', newCardsPerDay);
     localStorage.setItem('show_cards_number', showCardsNumber);
+    localStorage.setItem('countdown_animation_time', countdownTime);
+    localStorage.setItem('round_duration', roundDuration);
     
     updateStats();
     drawLearningProgressChart();
@@ -2224,9 +2456,25 @@ function showNextFlashcard() {
                 <button class="review-edit-button" onclick="editFlashcardDuringReview(${flashcard.id})" data-translate="edit">Edit</button>
                 ${algorithm === 'leitner' ? leitnerInfo : ''}
                 <p><strong data-translate="wordPhrase">Word / Phrase:</strong></p>
-                <pre>${flashcard.word}</pre>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <textarea id="word-${currentFlashcardIndex}" style="display: none;">${flashcard.word}</textarea>
+                    <pre style="margin: 0;">${flashcard.word}</pre>
+                    <button type="button" class="speaker-button" onclick="speakWord2('word-${currentFlashcardIndex}')" style="background: none; border: none; cursor: pointer; padding: 0;">
+                        <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </button>
+                </div>
                 <p><strong data-translate="contextExample">Context / Example:</strong></p>
-                <pre>${flashcard.context || 'No context provided'}</pre>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <textarea id="context-${currentFlashcardIndex}" style="display: none;">${flashcard.context || 'No context provided'}</textarea>
+                    <pre style="margin: 0;">${flashcard.context || 'No context provided'}</pre>
+                    <button type="button" class="speaker-button" onclick="speakWord3('context-${currentFlashcardIndex}')" style="background: none; border: none; cursor: pointer; padding: 0;">
+                        <svg width="23" height="23" viewBox="0 0 24 24" fill="#333333">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </button>
+                </div>
                 ${flashcard.mediaUrl ? `<img src="${flashcard.mediaUrl}" alt="media" width="200">` : ''}
                 ${flashcard.audioUrl ? `<audio controls><source src="${flashcard.audioUrl}" type="audio/mpeg"></audio>` : ''}
                 <div class="button-row">
@@ -2241,7 +2489,18 @@ function showNextFlashcard() {
                 </div>
             </div>
         `;
+        // Funkcja do odtwarzania tekstu
+    window.speakWord3 = function(textareaId) {
+        const TtsLang = localStorage.getItem('ttsLanguage') || 'en';
+        const text = document.getElementById(textareaId).value;
+        const encodedText = encodeURIComponent(text);
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${TtsLang}&client=tw-ob`;
         
+        const audio = new Audio(url);
+        audio.play().catch(error => {
+            console.error('Error playing audio:', error);
+        });
+    };
         updateLeitnerProgress();
         changeLanguage();
     } else {
@@ -2272,9 +2531,159 @@ function showNextFlashcard() {
         }
         
         setTimeout(() => {
+            stopRoundTimer(); // Stop timer when review ends
             showReviewModeSelection();
         }, 2000);
     }
+}
+
+// Round timer functions
+function startRoundTimer() {
+    if (reviewTimer) {
+        clearInterval(reviewTimer);
+    }
+    
+    // Check if round timer is disabled
+    const roundDurationSetting = localStorage.getItem('round_duration') || '6';
+    if (roundDurationSetting === 'disabled') {
+        return; // Don't start timer if disabled
+    }
+    
+    reviewStartTime = Date.now();
+    currentRound = 1;
+    isRoundPaused = false;
+    
+    // Get round duration from settings
+    const roundDurationMinutes = parseInt(roundDurationSetting);
+    const roundDurationMs = roundDurationMinutes * 60 * 1000; // Convert minutes to milliseconds
+    
+    reviewTimer = setInterval(() => {
+        if (!isRoundPaused) {
+            showRoundFinished();
+        }
+    }, roundDurationMs);
+}
+
+function stopRoundTimer() {
+    if (reviewTimer) {
+        clearInterval(reviewTimer);
+        reviewTimer = null;
+    }
+    currentRound = 0;
+    isRoundPaused = false;
+}
+
+function pauseRoundTimer() {
+    isRoundPaused = true;
+}
+
+function resumeRoundTimer() {
+    isRoundPaused = false;
+}
+
+function showRoundFinished() {
+    pauseRoundTimer();
+    
+    // Create round finished modal
+    const modal = document.createElement('div');
+    modal.className = 'round-modal';
+    const roundText = translations[currentLanguage].roundFinished ? 
+        translations[currentLanguage].roundFinished.replace('{round}', currentRound) :
+        `Round ${currentRound} is finished!`;
+    const readyText = translations[currentLanguage].areYouReady || "Are you ready for next round?";
+    const okText = translations[currentLanguage].okButton || "OK";
+    const finishText = translations[currentLanguage].finish || "Finish";
+    
+    // Get round duration for display
+    const roundDurationMinutes = parseInt(localStorage.getItem('round_duration') || '6');
+    const durationText = `${roundDurationMinutes} ${roundDurationMinutes === 1 ? 'minute' : 'minutes'}`;
+    
+    modal.innerHTML = `
+        <div class="round-modal-content">
+            <div class="round-animation">
+                <h2>${roundText}</h2>
+                <div class="round-progress">
+                    <div class="round-duration">
+                        <span class="duration-text">${durationText}</span>
+                    </div>
+                </div>
+                <p>${readyText}</p>
+                <div class="round-buttons">
+                    <button onclick="cancelRoundAndReturnToMenu()" class="round-cancel-button">${finishText}</button>
+                    <button onclick="continueToNextRound()" class="round-ok-button">${okText}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add click outside to continue functionality
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            continueToNextRound();
+        }
+    });
+    
+    // Prevent clicks inside the modal content from triggering the outside click
+    modal.querySelector('.round-modal-content').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    document.body.appendChild(modal);
+    
+    // Add animation class after a small delay
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 100);
+}
+
+window.continueToNextRound = function() {
+    const modal = document.querySelector('.round-modal');
+    if (modal) {
+        modal.classList.add('hide');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+    
+    currentRound++;
+    resumeRoundTimer();
+    
+    // Restart timer for next round
+    if (reviewTimer) {
+        clearInterval(reviewTimer);
+    }
+    
+    // Check if round timer is disabled
+    const roundDurationSetting = localStorage.getItem('round_duration') || '6';
+    if (roundDurationSetting === 'disabled') {
+        return; // Don't restart timer if disabled
+    }
+    
+    // Get round duration from settings
+    const roundDurationMinutes = parseInt(roundDurationSetting);
+    const roundDurationMs = roundDurationMinutes * 60 * 1000; // Convert minutes to milliseconds
+    
+    reviewTimer = setInterval(() => {
+        if (!isRoundPaused) {
+            showRoundFinished();
+        }
+    }, roundDurationMs);
+}
+
+window.cancelRoundAndReturnToMenu = function() {
+    const modal = document.querySelector('.round-modal');
+    if (modal) {
+        modal.classList.add('hide');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+    
+    // Stop the round timer completely
+    stopRoundTimer();
+    
+    // Return to review mode selection
+    startReview();
 }
 
 
@@ -2465,6 +2874,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (apiKey) {
       setupAutomaticSync();
   }
+  
+  // Dodaj obsługę linku "My Playlists" - ustaw flagę przed przejściem do index.html
+  const myPlaylistsLink = document.querySelector('a[href="index.html"]');
+  if (myPlaylistsLink) {
+      myPlaylistsLink.addEventListener('click', () => {
+          sessionStorage.setItem('returnedFromReps', 'true');
+      });
+  }
+  
+  // Wyczyść flagę goingToReps jeśli użytkownik dotarł do reps.html
+  if (sessionStorage.getItem('goingToReps') === 'true') {
+      sessionStorage.removeItem('goingToReps');
+  }
 });
 
 // Dodaj nową funkcję inicjalizacji przycisku synchronizacji
@@ -2517,14 +2939,36 @@ function openMainSettings() {
     
     // Pobierz zapisany prompt lub użyj domyślnego
     const savedPrompt = localStorage.getItem('exampleButtonPrompt') ;
+    const savedGroqApiKey = localStorage.getItem('groq_api_key') || '';
     settingsDialog.innerHTML = `
         <h2 data-translate="mainSettings">Main Settings</h2>
+
+        <div class="settings-section">
+            <h3>Groq API key:</h3>
+            <div class="form-group">
+                <div class="api-key-input">
+                    <input type="password" id="groq-api-key" style="width: 100%; padding: 8px; margin-bottom: 4px;" placeholder="Enter your Groq API key" value="${savedGroqApiKey}">
+                    <button type="button" class="toggle-password" onclick="toggleGroqPasswordVisibility(this)">👁</button>
+                    <button type="button" class="remove-api-key" onclick="removeGroqApiKey()">✕</button>
+                    <button type="button" class="model-settings" onclick="openGroqModelSettings()">⋮</button>
+                </div>
+                <small>API key for DictAI chatbot integration</small>
+            </div>
+        </div>
 
         <div class="settings-section">
           <h3>Flashcard Context "Show Examples" - Prompt</h3>
             <div class="form-group">
                 <textarea id="exampleButtonPrompt" rows="2" style="width: 100%;">${savedPrompt}</textarea>
                 <small>Use {word} as placeholder for the current word</small>
+            </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>DictAI - Prompt</h3>
+            <div class="form-group">
+                <textarea id="dictAiPrompt" rows="4" style="width: 100%;">${localStorage.getItem('dictAiPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.'}</textarea>
+                <small>Prompt used for DictAI dictionary integration</small>
             </div>
 
                         <!-- Dodajemy sekcję języka TTS -->
@@ -2627,8 +3071,28 @@ function openMainSettings() {
                         </select>
                     <small>Language used for text to speech pronunciation</small>
                 </div>
+            </div>
+                </div>
             
+        <div class="settings-section">
+            <h3>Repetitions Default View</h3>
+            <div class="settings-content">
+                <div class="settings-group">
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="reps-default-view" value="browse" id="reps-view-browse" ${localStorage.getItem('reps_default_view') === 'browse' || !localStorage.getItem('reps_default_view') ? 'checked' : ''}>
+                            <span>Browse flashcard</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="reps-default-view" value="add" id="reps-view-add" ${localStorage.getItem('reps_default_view') === 'add' ? 'checked' : ''}>
+                            <span>Add Flashcard</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="settings-section">
             <h3 data-translate="syncSettings">Synchronization Settings</h3>
             <p class="settings-description" data-translate="syncDescription">Synchronization allows you to study on two devices.</p>
             <div class="settings-content">
@@ -2772,6 +3236,7 @@ function openMainSettings() {
         const newExportToServer = document.getElementById('export-to-server').checked;
         const newEnableAutoSave = document.getElementById('enable-auto-save').checked;
         const newEnableSyncAfterReview = document.getElementById('enable-sync-after-review').checked;
+        const newRepsDefaultView = document.querySelector('input[name="reps-default-view"]:checked').value;
         
         if (newApiKey !== currentApiKey) {
             try {
@@ -2796,11 +3261,19 @@ function openMainSettings() {
         localStorage.setItem('export_to_server', newExportToServer);
         localStorage.setItem('enable_auto_save', newEnableAutoSave);
         localStorage.setItem('enable_sync_after_review', newEnableSyncAfterReview);
+        localStorage.setItem('reps_default_view', newRepsDefaultView);
 
             // Zapisz template promptu
         const promptTemplate = document.getElementById('exampleButtonPrompt').value;
         localStorage.setItem('exampleButtonPrompt', promptTemplate);
 
+        // Zapisz DictAI prompt
+        const dictAiPrompt = document.getElementById('dictAiPrompt').value;
+        localStorage.setItem('dictAiPrompt', dictAiPrompt);
+
+        // Zapisz Groq API key
+        const groqApiKey = document.getElementById('groq-api-key').value;
+        localStorage.setItem('groq_api_key', groqApiKey);
 
         const ttsLangValue = document.getElementById('ttsLanguage').value;
     
@@ -2964,6 +3437,27 @@ function removeApiKey() {
     }
 }
 
+// Funkcja do przełączania widoczności hasła Groq API key
+function toggleGroqPasswordVisibility(button) {
+    const input = button.parentElement.querySelector('input');
+    if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🔒';
+    } else {
+        input.type = 'password';
+        button.textContent = '👁';
+    }
+}
+
+// Funkcja do usuwania Groq API key
+function removeGroqApiKey() {
+    if (confirm('Are you sure you want to remove the Groq API key?')) {
+        localStorage.removeItem('groq_api_key');
+        document.getElementById('groq-api-key').value = '';
+        showNotification('Groq API key has been removed', 'success');
+    }
+}
+
 // Dodaj funkcję do aktualizacji widoczności przycisku Save
 function updateSaveButtonVisibility() {
     const saveButton = document.getElementById('save-button');
@@ -3087,8 +3581,14 @@ function repsChangeDictionary() {
         addNewDictionary();
     } else if (repsSelect.value === 'remove_dictionary') {
         removeDictionary();
-    } else if (repsSelect && repsIframe) {
-        repsIframe.src = repsSelect.value;
+    } else {
+        // Dodaj parametr dark=1 do URL jeśli tryb ciemny jest aktywny
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const urlWithDarkMode = isDarkMode ? 
+            `${repsSelect.value}${repsSelect.value.includes('?') ? '&' : '?'}dark=1` : 
+            repsSelect.value;
+            
+        repsAddNewTab();
         
         const defaultDictionary = localStorage.getItem('defaultDictionary');
         repsCheckbox.checked = (defaultDictionary === repsSelect.value);
@@ -3126,6 +3626,7 @@ function hideDictionary() {
     
     if (dictionaryContainer) {
         dictionaryContainer.classList.remove('show');
+        // Nie usuwamy iframe'ów, tylko ukrywamy kontener
     } else if (dictionaryFrame) {
         dictionaryFrame.classList.remove('show');
     }
@@ -3163,20 +3664,28 @@ function addNewDictionary() {
                 url = 'https://' + url;
             }
             
-            const repsSelect = document.getElementById('reps-dictionary-select');
-            const option = document.createElement('option');
-            option.value = url;
-            option.textContent = name;
-            
-            const addNewOption = repsSelect.querySelector('option[value="add_new"]');
-            repsSelect.insertBefore(option, addNewOption);
-            
-            repsSelect.value = url;
-            repsChangeDictionary();
-            
+            // Zapisz do localStorage
             const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
             dictionaries.push({ name, url });
             localStorage.setItem('customDictionaries', JSON.stringify(dictionaries));
+            
+            // Przebuduj dropdown używając getAllDictionaries()
+            const repsSelect = document.getElementById('reps-dictionary-select');
+            const allDictionaries = getAllDictionaries();
+            const dictionaryOptions = allDictionaries.map(dict => `
+                <option value="${dict.url}" ${dict.url === url ? 'selected' : ''}>
+                    ${dict.name}
+                </option>
+            `).join('');
+            
+            repsSelect.innerHTML = `
+                ${dictionaryOptions}
+                <option value="add_new">Add new</option>
+                <option value="remove_dictionary">Remove dictionary</option>
+            `;
+            
+            repsSelect.value = url;
+            repsChangeDictionary();
         }
         
         dialog.close();
@@ -3223,17 +3732,38 @@ function removeDictionary() {
         const optionToRemove = Array.from(repsSelect.options).find(option => option.text === dictionaryToRemove);
         
         if (optionToRemove) {
-            repsSelect.removeChild(optionToRemove);
-            
+            // Usuń z localStorage
             const dictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
             const updatedDictionaries = dictionaries.filter(dict => dict.name !== dictionaryToRemove);
             localStorage.setItem('customDictionaries', JSON.stringify(updatedDictionaries));
             
+            // Sprawdź czy to był defaultowy słownik
             if (localStorage.getItem('defaultDictionary') === optionToRemove.value) {
                 localStorage.removeItem('defaultDictionary');
                 document.getElementById('reps-dictionary-default-checkbox').checked = false;
             }
             
+            // Przebuduj dropdown używając getAllDictionaries()
+            const allDictionaries = getAllDictionaries();
+            const defaultDictionary = localStorage.getItem('defaultDictionary');
+            const dictionaryOptions = allDictionaries.map(dict => `
+                <option value="${dict.url}" ${defaultDictionary === dict.url ? 'selected' : ''}>
+                    ${dict.name}
+                </option>
+            `).join('');
+            
+            repsSelect.innerHTML = `
+                ${dictionaryOptions}
+                <option value="add_new">Add new</option>
+                <option value="remove_dictionary">Remove dictionary</option>
+            `;
+            
+            // Ustaw na pierwszy dostępny słownik jeśli usunięto aktualnie wybrany
+            if (repsSelect.value === '' || repsSelect.value === 'add_new' || repsSelect.value === 'remove_dictionary') {
+                repsSelect.value = repsSelect.querySelector('option:not([value="add_new"]):not([value="remove_dictionary"])').value;
+            }
+            
+            repsChangeDictionary();
             alert(`Dictionary "${dictionaryToRemove}" has been removed.`);
         }
         
@@ -3252,6 +3782,7 @@ function removeDictionary() {
 
 // Dodaj nową funkcję do edycji fiszki podczas powtórki
 function editFlashcardDuringReview(id) {
+    pauseRoundTimer(); // Pause the round timer when entering edit mode
     const flashcard = flashcards.find(f => f.id === id);
     if (flashcard) {
 
@@ -3354,6 +3885,7 @@ function updateFlashcardDuringReview(id, updatedData) {
 
         showSection('review');
         showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+        resumeRoundTimer(); // Resume the round timer when returning to review
         changeLanguage();
     }
 }
@@ -3362,7 +3894,21 @@ function updateFlashcardDuringReview(id, updatedData) {
 function cancelEditDuringReview() {
     showSection('review');
     showNextFlashcard(); // Pokaż ponownie aktualną fiszkę
+    resumeRoundTimer(); // Resume the round timer when returning to review
     changeLanguage();
+}
+
+// Funkcja pomocnicza do pobierania wszystkich słowników
+function getAllDictionaries() {
+    const customDictionaries = JSON.parse(localStorage.getItem('customDictionaries') || '[]');
+    const dictAiPrompt = localStorage.getItem('dictAiPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.';
+    return [
+        { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/' },
+        { name: 'DictAI', url: 'chat.html?q=' + encodeURIComponent(dictAiPrompt) },
+        { name: 'OneLook', url: 'https://www.onelook.com/?w=' },
+        { name: 'diki.pl', url: 'https://www.diki.pl/' },
+        ...customDictionaries
+    ];
 }
 
 // Dodaj nową funkcję do obsługi przycisku Show me examples
@@ -3372,26 +3918,40 @@ function showExamples(word) {
     if (toggleDictionaryBtn) {
         toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
         
-        // Wybieramy you.com z listy słowników
+        // Wybieramy DictAI z listy słowników
         const dictionarySelect = document.querySelector('.reps-dictionary-select');
         if (dictionarySelect) {
-            // Znajdujemy i wybieramy opcję z you.com
-            const options = Array.from(dictionarySelect.options);
-            const youcomOption = options[1]; // Druga opcja na liście
-            if (youcomOption) {
-                dictionarySelect.value = youcomOption.value;
-                // Wywołujemy event change aby zaktualizować słownik
-                dictionarySelect.dispatchEvent(new Event('change'));
+            // Znajdź URL dla DictAI
+            const allDictionaries = getAllDictionaries();
+            const dictAI = allDictionaries.find(dict => dict.name === 'DictAI');
+            if (dictAI) {
+                // Przebuduj opcje dropdown'a z DictAI jako selected
+                const dictionaryOptions = allDictionaries.map(dict => `
+                    <option value="${dict.url}" ${dict.name === 'DictAI' ? 'selected' : ''}>
+                        ${dict.name}
+                    </option>
+                `).join('');
+                
+                dictionarySelect.innerHTML = `
+                    ${dictionaryOptions}
+                    <option value="add_new">Add new</option>
+                    <option value="remove_dictionary">Remove dictionary</option>
+                `;
+                
+                // Ustaw value na DictAI
+                dictionarySelect.value = dictAI.url;
+                // Wywołujemy funkcję repsChangeDictionary() bezpośrednio
+                repsChangeDictionary();
             }
         }
     }
 
-    // Następnie ustawiamy URL dla you.com
+    // Następnie ustawiamy URL dla DictAI z słowem w zapytaniu  
     // Pobierz zapisany prompt lub użyj domyślnego
-    const promptTemplate = localStorage.getItem('exampleButtonPrompt');    
+    const promptTemplate = localStorage.getItem('exampleButtonPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word. Word: {word}';    
     const prompt = promptTemplate.replace('{word}', word);
     const encodedPrompt = encodeURIComponent(prompt);
-    const url = `https://you.com/search?q=${encodedPrompt}&tbm=youchat&chatMode=default`;
+    const url = `chat.html?q=${encodedPrompt}`;
     
     // Znajdź ramkę słownika i ustaw URL
     const dictionaryFrame = document.querySelector('.reps-dictionary-frame-mobile');
@@ -3399,6 +3959,320 @@ function showExamples(word) {
         dictionaryFrame.src = url;
         dictionaryFrame.removeAttribute('hidden');
     }
+    
+    // Na urządzeniach mobilnych (poniżej 520px) przewiń do widoku słownika
+    if (window.innerWidth <= 520) {
+        setTimeout(() => {
+            const dictionaryContainer = document.querySelector('.reps-dictionary-container');
+            if (dictionaryContainer) {
+                dictionaryContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 300); // Krótkie opóźnienie żeby słownik zdążył się otworzyć
+    }
+}
+
+// Dictionary tabs functionality
+function repsAddNewTab() {
+    const dictionarySelect = document.getElementById('reps-dictionary-select');
+    const selectedDictionary = dictionarySelect.value;
+    const dictionaryName = dictionarySelect.options[dictionarySelect.selectedIndex].text;
+    
+    // Skip if it's add_new or remove_dictionary
+    if (selectedDictionary === 'add_new' || selectedDictionary === 'remove_dictionary') {
+        return;
+    }
+    
+    // Remove "No dictionary selected" message
+    const iframeContainer = document.getElementById('reps-iframe-container');
+    if (iframeContainer.innerHTML.includes('No dictionary selected')) {
+        iframeContainer.innerHTML = '';
+    }
+    
+    const newTab = {
+        id: Date.now(),
+        name: dictionaryName,
+        url: selectedDictionary
+    };
+    
+    repsTabs.push(newTab);
+    repsRenderTabs();
+    repsCreateIframe(newTab);
+    repsSwitchToTab(newTab.id);
+}
+
+function repsCreateIframe(tab) {
+    const iframeContainer = document.getElementById('reps-iframe-container');
+    const iframe = document.createElement('iframe');
+    iframe.src = tab.url;
+    iframe.id = `reps-iframe-${tab.id}`;
+    iframe.className = 'reps-dictionary-frame-mobile';
+    iframe.style.display = 'none';
+    iframeContainer.appendChild(iframe);
+}
+
+function repsSwitchToTab(tabId) {
+    const tab = repsTabs.find(t => t.id === tabId);
+    if (!tab) return;
+    
+    // Aktualizuj stan w tablicy
+    repsTabs.forEach(t => t.active = (t.id === tabId));
+    
+    const iframeContainer = document.getElementById('reps-iframe-container');
+    const iframes = iframeContainer.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        iframe.style.display = 'none';
+    });
+    
+    const activeIframe = document.getElementById(`reps-iframe-${tabId}`);
+    if (activeIframe) {
+        activeIframe.style.display = 'block';
+    }
+    
+    // Odśwież zakładki żeby pokazać aktywną
+    repsRenderTabs();
+}
+
+function repsRenderTabs() {
+    const tabsContainer = document.getElementById('reps-tabs');
+    if (!tabsContainer) return;
+    
+    // Zachowaj przycisk + jeśli istnieje
+    const addButton = document.getElementById('reps-add-tab');
+    
+    // Wyczyść kontener
+    tabsContainer.innerHTML = '';
+    
+    // Dodaj wszystkie zakładki
+    repsTabs.forEach(tab => {
+        const tabElement = document.createElement('div');
+        tabElement.className = `reps-tab ${tab.active ? 'active' : ''}`;
+        tabElement.setAttribute('data-id', tab.id);
+        tabElement.onclick = () => repsSwitchToTab(tab.id);
+        
+        const tabText = document.createElement('span');
+        tabText.textContent = tab.name;
+        
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '×';
+        closeButton.className = 'reps-close-tab';
+        closeButton.onclick = (e) => {
+            e.stopPropagation();
+            repsCloseTab(tab.id);
+        };
+        
+        tabElement.appendChild(tabText);
+        tabElement.appendChild(closeButton);
+        tabsContainer.appendChild(tabElement);
+    });
+    
+    // Dodaj przycisk + na końcu po wszystkich zakładkach
+    if (addButton) {
+        tabsContainer.appendChild(addButton);
+    } else {
+        // Jeśli przycisk nie istnieje, utwórz go
+        const newAddButton = document.createElement('button');
+        newAddButton.id = 'reps-add-tab';
+        newAddButton.textContent = '+';
+        newAddButton.onclick = () => window.repsAddNewTabFromButton();
+        tabsContainer.appendChild(newAddButton);
+    }
+}
+
+function repsCloseTab(tabId) {
+    const tabIndex = repsTabs.findIndex(t => t.id === tabId);
+    if (tabIndex === -1) return;
+
+    // Remove tab from array
+    repsTabs.splice(tabIndex, 1);
+
+    // Remove corresponding iframe
+    const iframe = document.getElementById(`reps-iframe-${tabId}`);
+    if (iframe) {
+        iframe.remove();
+    }
+
+    // If closing active tab, switch to another
+    const activeTab = document.querySelector('.reps-tab.active');
+    if (activeTab && activeTab.getAttribute('data-id') == tabId) {
+        if (repsTabs.length > 0) {
+            repsSwitchToTab(repsTabs[0].id);
+        } else {
+            // If no more tabs, show empty message
+            const iframeContainer = document.getElementById('reps-iframe-container');
+            iframeContainer.innerHTML = '<p>No dictionary selected</p>';
+        }
+    }
+
+    // Re-render tabs
+    repsRenderTabs();
+}
+
+function repsInitializeFirstTab() {
+    // Jeśli już mamy zakładki, nie twórz nowych - tylko przywróć istniejące
+    if (repsTabs.length > 0) {
+        repsRenderTabs();
+        // Przywróć wszystkie iframe'y
+        repsTabs.forEach(tab => {
+            const existingIframe = document.getElementById(`reps-iframe-${tab.id}`);
+            if (!existingIframe) {
+                repsCreateIframe(tab);
+            }
+        });
+        // Przełącz na pierwszą zakładkę
+        repsSwitchToTab(repsTabs[0].id);
+        return;
+    }
+    
+    const defaultDictionary = localStorage.getItem('defaultDictionary');
+    const dictionarySelect = document.getElementById('reps-dictionary-select');
+    
+    if (defaultDictionary && dictionarySelect) {
+        dictionarySelect.value = defaultDictionary;
+        const selectedOption = dictionarySelect.options[dictionarySelect.selectedIndex];
+        
+        if (selectedOption && selectedOption.value !== 'add_new' && selectedOption.value !== 'remove_dictionary') {
+            // Remove "No dictionary selected" message
+            const iframeContainer = document.getElementById('reps-iframe-container');
+            if (iframeContainer && iframeContainer.innerHTML.includes('No dictionary selected')) {
+                iframeContainer.innerHTML = '';
+            }
+            
+            const firstTab = {
+                id: Date.now(),
+                name: selectedOption.text,
+                url: defaultDictionary
+            };
+            
+            repsTabs.push(firstTab);
+            repsRenderTabs();
+            repsCreateIframe(firstTab);
+            repsSwitchToTab(firstTab.id);
+        }
+    }
+}
+
+// Function to add new tab from + button
+window.repsAddNewTabFromButton = function repsAddNewTabFromButton() {
+    const dictionarySelect = document.getElementById('reps-dictionary-select');
+    if (!dictionarySelect) return;
+    
+    const selectedUrl = dictionarySelect.value;
+    const selectedName = dictionarySelect.options[dictionarySelect.selectedIndex].text;
+    
+    // Skip if it's add_new or remove_dictionary
+    if (selectedUrl === 'add_new' || selectedUrl === 'remove_dictionary') {
+        return;
+    }
+    
+    // Always create a new tab instance, even if dictionary already exists
+    
+    // Remove "No dictionary selected" message
+    const iframeContainer = document.getElementById('reps-iframe-container');
+    if (iframeContainer.innerHTML.includes('No dictionary selected')) {
+        iframeContainer.innerHTML = '';
+    }
+    
+    // Count existing tabs with the same dictionary to create unique names
+    const existingCount = repsTabs.filter(tab => tab.url === selectedUrl).length;
+    const tabName = existingCount > 0 ? `${selectedName} (${existingCount + 1})` : selectedName;
+    
+    const newTab = {
+        id: Date.now(),
+        name: tabName,
+        url: selectedUrl
+    };
+    
+    repsTabs.push(newTab);
+    repsRenderTabs();
+    repsCreateIframe(newTab);
+    repsSwitchToTab(newTab.id);
+}
+
+// === Groq model settings dialog ===
+function openGroqModelSettings() {
+    if (document.getElementById('groq-model-settings-overlay')) return; // Prevent duplicates
+    const savedModel = localStorage.getItem('groq_model') || 'meta-llama/llama-4-scout-17b-16e-instruct';
+    const savedTemperature = localStorage.getItem('groq_temperature') || '0.1';
+    const savedMaxTokens = localStorage.getItem('groq_max_tokens') || '8192';
+    const savedTopP = localStorage.getItem('groq_top_p') || '1.0';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'dialog-overlay';
+    overlay.id = 'groq-model-settings-overlay';
+    overlay.onclick = closeGroqModelSettings;
+
+    const dialog = document.createElement('div');
+    dialog.className = 'pushbullet-dialog groq-model-dialog';
+    dialog.innerHTML = `
+        <h3>Groq Model Settings</h3>
+        <div class="form-group">
+            <label>Model:</label>
+            <select id="groq-model-select" style="width:100%; padding:8px; margin-bottom:8px;">
+                <option value="meta-llama/llama-4-scout-17b-16e-instruct" ${savedModel === 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : ''}>meta-llama/llama-4-scout-17b-16e-instruct</option>
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct" ${savedModel === 'meta-llama/llama-4-maverick-17b-128e-instruct' ? 'selected' : ''}>meta-llama/llama-4-maverick-17b-128e-instruct</option>
+                <option value="llama3-70b-8192" ${savedModel === 'llama3-70b-8192' ? 'selected' : ''}>llama3-70b-8192</option>
+                <option value="llama-3.3-70b-versatile" ${savedModel === 'llama-3.3-70b-versatile' ? 'selected' : ''}>llama-3.3-70b-versatile</option>
+                <option value="custom">Custom...</option>
+            </select>
+            <input type="text" id="groq-model-input" placeholder="Custom model name" style="width:100%; padding:8px; margin-bottom:8px;" value="${savedModel}">
+        </div>
+        <div class="form-group">
+            <label>Temperature (0-1):</label>
+            <input type="number" id="groq-temperature-input" min="0" max="1" step="0.05" style="width:100%; padding:8px; margin-bottom:8px;" value="${savedTemperature}">
+        </div>
+        <div class="form-group">
+            <label>Top P (0-1):</label>
+            <input type="number" id="groq-top-p-input" min="0" max="1" step="0.05" style="width:100%; padding:8px; margin-bottom:8px;" value="${savedTopP}">
+        </div>
+        <div class="form-group">
+            <label>Max tokens (128 - 131072):</label>
+            <input type="number" id="groq-max-tokens-input" min="128" max="131072" style="width:100%; padding:8px; margin-bottom:8px;" value="${savedMaxTokens}">
+        </div>
+        <div class="dialog-buttons">
+            <button class="submit-button" id="groq-model-save-btn">Save</button>
+            <button class="cancel-button" id="groq-model-cancel-btn">Cancel</button>
+        </div>`;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+
+    const modelSelect = dialog.querySelector('#groq-model-select');
+    const modelInput = dialog.querySelector('#groq-model-input');
+
+    modelSelect.addEventListener('change', () => {
+        if (modelSelect.value === 'custom') {
+            modelInput.focus();
+        } else {
+            modelInput.value = modelSelect.value;
+        }
+    });
+
+    dialog.querySelector('#groq-model-save-btn').addEventListener('click', () => {
+        const model = modelInput.value.trim();
+        const temperature = parseFloat(dialog.querySelector('#groq-temperature-input').value);
+        const topP = parseFloat(dialog.querySelector('#groq-top-p-input').value);
+        const maxTokens = parseInt(dialog.querySelector('#groq-max-tokens-input').value);
+
+        if (model) localStorage.setItem('groq_model', model);
+        if (!isNaN(temperature)) localStorage.setItem('groq_temperature', temperature.toString());
+        if (!isNaN(topP)) localStorage.setItem('groq_top_p', topP.toString());
+        if (!isNaN(maxTokens)) localStorage.setItem('groq_max_tokens', maxTokens.toString());
+
+        showNotification('Groq model settings saved', 'success');
+        closeGroqModelSettings();
+    });
+
+    dialog.querySelector('#groq-model-cancel-btn').addEventListener('click', closeGroqModelSettings);
+}
+
+function closeGroqModelSettings() {
+    const dialog = document.querySelector('.groq-model-dialog');
+    const overlay = document.getElementById('groq-model-settings-overlay');
+    if (dialog) dialog.remove();
+    if (overlay) overlay.remove();
 }
 
 
