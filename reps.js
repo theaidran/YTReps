@@ -518,7 +518,7 @@ function gradeAnswer(grade) {
 // Funkcja do wyświetlania animacji odliczania
 function showCountdownAnimation(callback) {
     // Sprawdź ustawienie czasu animacji
-    const countdownTime = parseFloat(localStorage.getItem('countdown_animation_time') || '3.5');
+    const countdownTime = parseFloat(localStorage.getItem('countdown_animation_time') || '3');
     
     // Jeśli animacja jest wyłączona (0 sekund), od razu wywołaj callback
     if (countdownTime === 0) {
@@ -1847,32 +1847,32 @@ function openReviewSettings() {
             <div class="radio-group horizontal">
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="0" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '0' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '0' ? 'checked' : ''}>
                     <span class="radio-label" data-translate="disabled">Disabled</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="2" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '2' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '2' ? 'checked' : ''}>
                     <span class="radio-label">2s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="3" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '3' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '3' ? 'checked' : ''}>
                     <span class="radio-label">3s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="4" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '4' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '4' ? 'checked' : ''}>
                     <span class="radio-label">4s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="5" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '5' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '5' ? 'checked' : ''}>
                     <span class="radio-label">5s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="7" 
-                        ${(localStorage.getItem('countdown_animation_time') || '4') === '7' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '3') === '7' ? 'checked' : ''}>
                     <span class="radio-label">7s</span>
                 </label>
             </div>
@@ -2018,7 +2018,7 @@ function saveAlgorithmSettings() {
     
     // Dodaj zapisywanie czasu animacji odliczania
     const selectedCountdownTime = document.querySelector('input[name="countdownTime"]:checked');
-    const countdownTime = selectedCountdownTime ? selectedCountdownTime.value : '3.5';
+    const countdownTime = selectedCountdownTime ? selectedCountdownTime.value : '3';
     
     // Dodaj zapisywanie czasu trwania rundy
     const selectedRoundDuration = document.querySelector('input[name="roundDuration"]:checked');
@@ -3918,59 +3918,52 @@ function showExamples(word) {
     if (toggleDictionaryBtn) {
         toggleDictionaryBtn.click(); // Symulujemy kliknięcie przycisku Dictionary
         
-        // Wybieramy DictAI z listy słowników
-        const dictionarySelect = document.querySelector('.reps-dictionary-select');
-        if (dictionarySelect) {
-            // Znajdź URL dla DictAI
-            const allDictionaries = getAllDictionaries();
-            const dictAI = allDictionaries.find(dict => dict.name === 'DictAI');
-            if (dictAI) {
-                // Przebuduj opcje dropdown'a z DictAI jako selected
-                const dictionaryOptions = allDictionaries.map(dict => `
-                    <option value="${dict.url}" ${dict.name === 'DictAI' ? 'selected' : ''}>
-                        ${dict.name}
-                    </option>
-                `).join('');
-                
-                dictionarySelect.innerHTML = `
-                    ${dictionaryOptions}
-                    <option value="add_new">Add new</option>
-                    <option value="remove_dictionary">Remove dictionary</option>
-                `;
-                
-                // Ustaw value na DictAI
-                dictionarySelect.value = dictAI.url;
-                // Wywołujemy funkcję repsChangeDictionary() bezpośrednio
-                repsChangeDictionary();
-            }
-        }
-    }
-
-    // Następnie ustawiamy URL dla DictAI z słowem w zapytaniu  
-    // Pobierz zapisany prompt lub użyj domyślnego
-    const promptTemplate = localStorage.getItem('exampleButtonPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word. Word: {word}';    
-    const prompt = promptTemplate.replace('{word}', word);
-    const encodedPrompt = encodeURIComponent(prompt);
-    const url = `chat.html?q=${encodedPrompt}`;
-    
-    // Znajdź ramkę słownika i ustaw URL
-    const dictionaryFrame = document.querySelector('.reps-dictionary-frame-mobile');
-    if (dictionaryFrame) {
-        dictionaryFrame.src = url;
-        dictionaryFrame.removeAttribute('hidden');
-    }
-    
-    // Na urządzeniach mobilnych (poniżej 520px) przewiń do widoku słownika
-    if (window.innerWidth <= 520) {
         setTimeout(() => {
-            const dictionaryContainer = document.querySelector('.reps-dictionary-container');
-            if (dictionaryContainer) {
-                dictionaryContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                });
+            // Pobierz zapisany prompt lub użyj domyślnego
+            const promptTemplate = localStorage.getItem('exampleButtonPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word. Word: {word}';
+            const prompt = promptTemplate.replace('{word}', word);
+            const encodedPrompt = encodeURIComponent(prompt);
+            const url = `chat.html?q=${encodedPrompt}`;
+
+            // Sprawdź, czy już istnieje zakładka Examples dla tego słowa
+            const existingExamplesTab = repsTabs.find(tab => tab.name === `Examples: ${word}`);
+            
+            if (existingExamplesTab) {
+                // Jeśli zakładka już istnieje, po prostu przełącz na nią
+                repsSwitchToTab(existingExamplesTab.id);
+            } else {
+                // Utwórz nową zakładkę Examples
+                const newTab = {
+                    id: Date.now(),
+                    name: `Examples: ${word}`,
+                    url: url,
+                    active: true
+                };
+                
+                // Usuń status aktywny z innych zakładek
+                repsTabs.forEach(tab => tab.active = false);
+                
+                // Dodaj nową zakładkę na początku tablicy (będzie pierwsza po lewej)
+                repsTabs.unshift(newTab);
+                
+                repsRenderTabs();
+                repsCreateIframe(newTab);
+                repsSwitchToTab(newTab.id);
             }
-        }, 300); // Krótkie opóźnienie żeby słownik zdążył się otworzyć
+            
+            // Na urządzeniach mobilnych (poniżej 520px) przewiń do widoku słownika
+            if (window.innerWidth <= 520) {
+                setTimeout(() => {
+                    const dictionaryContainer = document.querySelector('.reps-dictionary-container');
+                    if (dictionaryContainer) {
+                        dictionaryContainer.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }
+                }, 300); // Krótkie opóźnienie żeby słownik zdążył się otworzyć
+            }
+        }, 100); // Krótkie opóźnienie, żeby słownik zdążył się otworzyć
     }
 }
 
