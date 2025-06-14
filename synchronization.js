@@ -458,6 +458,12 @@ async function processChunks(chunks) {
         console.log('Saving updated flashcards');
         window.flashcards = flashcards;
         safeSaveFlashcards();
+        
+        // Odśwież tabelę w interfejsie użytkownika
+        if (typeof window.updateFlashcardTable === 'function') {
+            window.updateFlashcardTable();
+        }
+        
         console.log('Flashcards updated after sync');
     } else {
         console.log('No changes to save');

@@ -518,7 +518,7 @@ function gradeAnswer(grade) {
 // Funkcja do wyświetlania animacji odliczania
 function showCountdownAnimation(callback) {
     // Sprawdź ustawienie czasu animacji
-    const countdownTime = parseFloat(localStorage.getItem('countdown_animation_time') || '3');
+    const countdownTime = parseFloat(localStorage.getItem('countdown_animation_time') || '2');
     
     // Jeśli animacja jest wyłączona (0 sekund), od razu wywołaj callback
     if (countdownTime === 0) {
@@ -781,8 +781,8 @@ function createExportBlob() {
   return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 }
 
-// Oryginalna funkcja exportFlashcards (bez zmian)
-function exportFlashcards() {
+// Funkcja do zapisywania fiszek do pliku
+function saveFlashcardsToFile() {
   const blob = createExportBlob();
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -794,6 +794,273 @@ function exportFlashcards() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// Funkcja do kopiowania fiszek do schowka
+async function copyFlashcardsToClipboard() {
+  try {
+    const blob = createExportBlob();
+    const text = await blob.text();
+    
+    await navigator.clipboard.writeText(text);
+    showNotification(translations[currentLanguage].copiedToClipboard, 'success');
+  } catch (error) {
+    console.error('Error copying to clipboard:', error);
+    showNotification('Error copying to clipboard', 'error');
+  }
+}
+
+// Funkcja do pokazania opcji eksportu
+function showExportOptions() {
+  const exportDialog = document.createElement('div');
+  exportDialog.className = 'confirm-dialog export-dialog';
+  exportDialog.innerHTML = `
+    <div class="confirm-content">
+      <h3 data-translate="exportOptions">Export Options</h3>
+      <div class="export-buttons">
+        <button class="export-clipboard-btn" data-translate="copyToClipboard">Copy flashcards to clipboard</button>
+        <button class="export-file-btn" data-translate="saveToFile">Save to file</button>
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-no" data-translate="cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(exportDialog);
+  changeLanguage();
+
+  const clipboardBtn = exportDialog.querySelector('.export-clipboard-btn');
+  const fileBtn = exportDialog.querySelector('.export-file-btn');
+  const cancelBtn = exportDialog.querySelector('.confirm-no');
+
+  clipboardBtn.addEventListener('click', () => {
+    copyFlashcardsToClipboard();
+    exportDialog.remove();
+  });
+
+  fileBtn.addEventListener('click', () => {
+    saveFlashcardsToFile();
+    exportDialog.remove();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    exportDialog.remove();
+  });
+
+  exportDialog.addEventListener('click', (e) => {
+    if (e.target === exportDialog) {
+      exportDialog.remove();
+    }
+  });
+}
+
+// Zachowaj starą funkcję dla kompatybilności wstecznej
+function exportFlashcards() {
+  showExportOptions();
+}
+
+// Funkcja do importu fiszek z pliku
+function importFlashcardsFromFile() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv';
+  input.onchange = function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      processImportFile(file);
+    }
+  };
+  input.click();
+}
+
+// Funkcja do importu fiszek ze schowka
+async function importFlashcardsFromClipboard() {
+  try {
+    // Sprawdź czy clipboard API jest dostępne
+    if (navigator.clipboard && window.isSecureContext) {
+      const text = await navigator.clipboard.readText();
+      if (text.trim()) {
+        processImportText(text);
+        showNotification(translations[currentLanguage].importedFromClipboard, 'success');
+        return;
+      } else {
+        showNotification('Clipboard is empty', 'error');
+        return;
+      }
+    } else {
+      // Fallback - pokaż dialog do ręcznego wklejenia
+      showPasteDialog();
+    }
+  } catch (error) {
+    console.error('Error reading from clipboard:', error);
+    // Jeśli API nie działa, pokaż dialog do ręcznego wklejenia
+    showPasteDialog();
+  }
+}
+
+// Funkcja do przetwarzania pliku importu
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const content = e.target.result;
+    processImportText(content);
+  };
+  reader.readAsText(file);
+}
+
+// Funkcja do przetwarzania tekstu importu (wspólna dla pliku i schowka)
+function processImportText(content) {
+  // Dzielimy na wiersze, ale zachowujemy <br> wewnątrz pól
+  const lines = content.split(/\r?\n/).filter(line => line.trim());
+  let importedCount = 0;
+  let duplicateCount = 0;
+  let updatedCount = 0;
+
+  // Funkcja do przywracania oryginalnego tekstu z CSV
+  const restoreText = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/<br>/g, '\n')  // zamień <br> z powrotem na znaki nowej linii
+      .replace(/\\n/g, '\n');   // obsłuż escapowane znaki nowej linii
+  };
+
+  // Pomijamy pierwszy wiersz (nagłówki)
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    // Prosty podział po średnikach
+    const values = line.split(';');
+
+    const [
+      front, 
+      back, 
+      context, 
+      mediaUrl, 
+      audioUrl,
+      algorithm,
+      firstReviewDate,
+      lastReviewed,
+      nextReview,
+      difficulty,
+      streak,
+      easinessFactor,
+      interval,
+      repetitions,
+      leitnerBox
+    ] = values;
+
+    if (front && back) {
+      // Przywróć oryginalne formatowanie tekstu
+      const restoredFront = restoreText(front);
+      const restoredBack = restoreText(back);
+      const restoredContext = restoreText(context);
+
+      // Sprawdź czy fiszka już istnieje
+      const existingFlashcard = flashcards.find(f => 
+        f.word === restoredFront && 
+        f.translation === restoredBack && 
+        f.context === (restoredContext || '')
+      );
+
+      if (existingFlashcard) {
+        // Aktualizuj istniejącą fiszkę
+        const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
+        const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
+
+        if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
+          Object.assign(existingFlashcard, {
+            firstReviewDate: firstReviewDate || existingFlashcard.firstReviewDate,
+            lastReviewed: lastReviewed || existingFlashcard.lastReviewed,
+            nextReview: nextReview || existingFlashcard.nextReview,
+            difficulty: difficulty || existingFlashcard.difficulty,
+            streak: parseInt(streak) || existingFlashcard.streak,
+            easinessFactor: parseFloat(easinessFactor) || existingFlashcard.easinessFactor,
+            interval: parseInt(interval) || existingFlashcard.interval,
+            repetitions: parseInt(repetitions) || existingFlashcard.repetitions,
+            leitnerBox: parseInt(leitnerBox) || existingFlashcard.leitnerBox
+          });
+          updatedCount++;
+        } else {
+          duplicateCount++;
+        }
+      } else {
+        // Dodaj nową fiszkę
+        flashcards.push({
+          id: Date.now() + Math.random(),
+          word: restoredFront,
+          translation: restoredBack,
+          context: restoredContext || '',
+          mediaUrl: mediaUrl || '',
+          audioUrl: audioUrl || '',
+          firstReviewDate: firstReviewDate || null,
+          lastReviewed: lastReviewed || null,
+          nextReview: nextReview || null,
+          difficulty: difficulty || 'medium',
+          streak: parseInt(streak) || 0,
+          easinessFactor: parseFloat(easinessFactor) || 2.5,
+          interval: parseInt(interval) || 0,
+          repetitions: parseInt(repetitions) || 0,
+          leitnerBox: parseInt(leitnerBox) || 1,
+          createdAt: new Date().toISOString()
+        });
+        importedCount++;
+      }
+    }
+  }
+
+  saveFlashcards();
+  updateFlashcardTable();
+  updateStats();
+  
+  const message = `Zaimportowano ${importedCount} nowych fiszek, zaktualizowano ${updatedCount}, pominięto ${duplicateCount} duplikatów.`;
+  showNotification(message, 'success');
+}
+
+// Funkcja do pokazania opcji importu
+function showImportOptions() {
+  const importDialog = document.createElement('div');
+  importDialog.className = 'confirm-dialog import-dialog';
+  importDialog.innerHTML = `
+    <div class="confirm-content">
+      <h3 data-translate="importOptions">Import Options</h3>
+      <div class="import-buttons">
+        <button class="import-file-btn" data-translate="importFromFile">Import from file</button>
+        <button class="import-clipboard-btn" data-translate="importFromClipboard">Import from clipboard</button>
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-no" data-translate="cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(importDialog);
+  changeLanguage();
+
+  const fileBtn = importDialog.querySelector('.import-file-btn');
+  const clipboardBtn = importDialog.querySelector('.import-clipboard-btn');
+  const cancelBtn = importDialog.querySelector('.confirm-no');
+
+  fileBtn.addEventListener('click', () => {
+    importFlashcardsFromFile();
+    importDialog.remove();
+  });
+
+  clipboardBtn.addEventListener('click', () => {
+    importFlashcardsFromClipboard();
+    importDialog.remove();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    importDialog.remove();
+  });
+
+  importDialog.addEventListener('click', (e) => {
+    if (e.target === importDialog) {
+      importDialog.remove();
+    }
+  });
 }
 
 // Nowa funkcja do wysyłania eksportu przez Pushbullet
@@ -817,125 +1084,9 @@ function escapeCSV(str) {
   return '"' + str.replace(/"/g, '""').replace(/\n/g, ' ') + '"';
 }
 
-// Funkcja do importu fiszek
+// Zachowaj starą funkcję dla kompatybilności wstecznej
 function importFlashcards() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv';
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const content = e.target.result;
-            // Dzielimy na wiersze, ale zachowujemy <br> wewnątrz pól
-            const lines = content.split(/\r?\n/).filter(line => line.trim());
-            let importedCount = 0;
-            let duplicateCount = 0;
-            let updatedCount = 0;
-
-            // Funkcja do przywracania oryginalnego tekstu z CSV
-            const restoreText = (text) => {
-                if (!text) return '';
-                return text
-                    .replace(/<br>/g, '\n')  // zamień <br> z powrotem na znaki nowej linii
-                    .replace(/\\n/g, '\n');   // obsłuż escapowane znaki nowej linii
-            };
-
-            // Pomijamy pierwszy wiersz (nagłówki)
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                // Prosty podział po średnikach
-                const values = line.split(';');
-
-                const [
-                    front, 
-                    back, 
-                    context, 
-                    mediaUrl, 
-                    audioUrl,
-                    algorithm,
-                    firstReviewDate,
-                    lastReviewed,
-                    nextReview,
-                    difficulty,
-                    streak,
-                    easinessFactor,
-                    interval,
-                    repetitions,
-                    leitnerBox
-                ] = values;
-
-                if (front && back) {
-                    // Przywróć oryginalne formatowanie tekstu
-                    const restoredFront = restoreText(front);
-                    const restoredBack = restoreText(back);
-                    const restoredContext = restoreText(context);
-
-                    // Sprawdź czy fiszka już istnieje
-                    const existingFlashcard = flashcards.find(f => 
-                        f.word === restoredFront && 
-                        f.translation === restoredBack && 
-                        f.context === (restoredContext || '')
-                    );
-
-                    if (existingFlashcard) {
-                        // Aktualizuj istniejącą fiszkę
-                        const existingLastReviewed = existingFlashcard.lastReviewed ? new Date(existingFlashcard.lastReviewed) : null;
-                        const newLastReviewed = lastReviewed ? new Date(lastReviewed) : null;
-
-                        if (newLastReviewed && (!existingLastReviewed || newLastReviewed > existingLastReviewed)) {
-                            Object.assign(existingFlashcard, {
-                                firstReviewDate: firstReviewDate || existingFlashcard.firstReviewDate,
-                                lastReviewed: lastReviewed || existingFlashcard.lastReviewed,
-                                nextReview: nextReview || existingFlashcard.nextReview,
-                                difficulty: difficulty || existingFlashcard.difficulty,
-                                streak: parseInt(streak) || existingFlashcard.streak,
-                                easinessFactor: parseFloat(easinessFactor) || existingFlashcard.easinessFactor,
-                                interval: parseInt(interval) || existingFlashcard.interval,
-                                repetitions: parseInt(repetitions) || existingFlashcard.repetitions,
-                                leitnerBox: parseInt(leitnerBox) || existingFlashcard.leitnerBox
-                            });
-                            updatedCount++;
-                        } else {
-                            duplicateCount++;
-                        }
-                    } else {
-                        // Dodaj nową fiszkę
-                        flashcards.push({
-                            id: Date.now() + Math.random(),
-                            word: restoredFront,
-                            translation: restoredBack,
-                            context: restoredContext || '',
-                            mediaUrl: mediaUrl || '',
-                            audioUrl: audioUrl || '',
-                            firstReviewDate: firstReviewDate || null,
-                            lastReviewed: lastReviewed || null,
-                            nextReview: nextReview || null,
-                            difficulty: difficulty || 'medium',
-                            streak: parseInt(streak) || 0,
-                            easinessFactor: parseFloat(easinessFactor) || 2.5,
-                            interval: parseInt(interval) || 0,
-                            repetitions: parseInt(repetitions) || 0,
-                            leitnerBox: parseInt(leitnerBox) || 1,
-                            createdAt: new Date().toISOString()
-                        });
-                        importedCount++;
-                    }
-                }
-            }
-
-            saveFlashcards();
-            updateFlashcardTable();
-            updateStats();
-            
-            const message = `Zaimportowano ${importedCount} nowych fiszek, zaktualizowano ${updatedCount}, pominięto ${duplicateCount} duplikatów.`;
-            showNotification(message, 'success');
-        };
-        reader.readAsText(file);
-    };
-    input.click();
+  showImportOptions();
 }
 
 // Funkcja do przełączania informacji o powtórkach
@@ -1847,32 +1998,32 @@ function openReviewSettings() {
             <div class="radio-group horizontal">
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="0" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '0' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '0' ? 'checked' : ''}>
                     <span class="radio-label" data-translate="disabled">Disabled</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="2" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '2' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '2' ? 'checked' : ''}>
                     <span class="radio-label">2s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="3" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '3' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '3' ? 'checked' : ''}>
                     <span class="radio-label">3s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="4" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '4' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '4' ? 'checked' : ''}>
                     <span class="radio-label">4s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="5" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '5' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '5' ? 'checked' : ''}>
                     <span class="radio-label">5s</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="countdownTime" value="7" 
-                        ${(localStorage.getItem('countdown_animation_time') || '3') === '7' ? 'checked' : ''}>
+                        ${(localStorage.getItem('countdown_animation_time') || '2') === '7' ? 'checked' : ''}>
                     <span class="radio-label">7s</span>
                 </label>
             </div>
@@ -2018,7 +2169,7 @@ function saveAlgorithmSettings() {
     
     // Dodaj zapisywanie czasu animacji odliczania
     const selectedCountdownTime = document.querySelector('input[name="countdownTime"]:checked');
-    const countdownTime = selectedCountdownTime ? selectedCountdownTime.value : '3';
+    const countdownTime = selectedCountdownTime ? selectedCountdownTime.value : '2';
     
     // Dodaj zapisywanie czasu trwania rundy
     const selectedRoundDuration = document.querySelector('input[name="roundDuration"]:checked');
@@ -4266,6 +4417,66 @@ function closeGroqModelSettings() {
     const overlay = document.getElementById('groq-model-settings-overlay');
     if (dialog) dialog.remove();
     if (overlay) overlay.remove();
+}
+
+// Dialog do ręcznego wklejenia danych ze schowka
+function showPasteDialog() {
+  const pasteDialog = document.createElement('div');
+  pasteDialog.className = 'confirm-dialog paste-dialog';
+  pasteDialog.innerHTML = `
+    <div class="confirm-content">
+      <h3 data-translate="importFromClipboard">Import from clipboard</h3>
+      <p style="margin: 10px 0; color: #666; font-size: 14px;" data-translate="pasteInstructions">Paste copied CSV data in the field below:</p>
+      <textarea id="pasteArea" data-placeholder="pasteDataHere" rows="8" style="width: 100%; margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+      <div class="confirm-buttons">
+        <button class="confirm-yes" data-translate="importFromClipboard">Import</button>
+        <button class="confirm-no" data-translate="cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(pasteDialog);
+  changeLanguage();
+
+  // Set placeholder after changeLanguage
+  const textarea = pasteDialog.querySelector('#pasteArea');
+  textarea.placeholder = translations[currentLanguage].pasteDataHere || 'Paste CSV data here...';
+
+  const importBtn = pasteDialog.querySelector('.confirm-yes');
+  const cancelBtn = pasteDialog.querySelector('.confirm-no');
+
+  // Automatycznie focus na textarea
+  setTimeout(() => {
+    textarea.focus();
+    textarea.select();
+  }, 100);
+
+  importBtn.addEventListener('click', () => {
+    const text = textarea.value.trim();
+    if (text) {
+      try {
+        processImportText(text);
+        showNotification(translations[currentLanguage].importedFromClipboard, 'success');
+      } catch (error) {
+        showNotification('Error processing data: ' + error.message, 'error');
+      }
+    } else {
+      showNotification('Please paste CSV data first', 'error');
+      return;
+    }
+    pasteDialog.remove();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    pasteDialog.remove();
+  });
+
+  // Zamknij po kliknięciu tła
+  pasteDialog.addEventListener('click', (e) => {
+    if (e.target === pasteDialog) {
+      pasteDialog.remove();
+    }
+  });
 }
 
 

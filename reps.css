@@ -1936,6 +1936,125 @@ body.dark-mode #superMemoIntervalsChart {
     background-color: #5a6268;
 }
 
+/* Style dla przycisków eksportu */
+.export-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.export-clipboard-btn,
+.export-file-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.export-clipboard-btn:hover {
+    background-color: #0056b3;
+}
+
+.export-file-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Style dla przycisków eksportu w trybie ciemnym */
+body.dark-mode .export-clipboard-btn,
+body.dark-mode .export-file-btn {
+    background-color: #0d6efd;
+    color: white;
+}
+
+body.dark-mode .export-clipboard-btn:hover,
+body.dark-mode .export-file-btn:hover {
+    background-color: #0b5ed7;
+}
+
+/* Style dla przycisków importu */
+.import-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.import-file-btn,
+.import-clipboard-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.import-file-btn:hover {
+    background-color: #0056b3;
+}
+
+.import-clipboard-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Style dla przycisków importu w trybie ciemnym */
+body.dark-mode .import-file-btn,
+body.dark-mode .import-clipboard-btn {
+    background-color: #0d6efd;
+    color: white;
+}
+
+body.dark-mode .import-file-btn:hover,
+body.dark-mode .import-clipboard-btn:hover {
+    background-color: #0b5ed7;
+}
+
+body.dark-mode .confirm-content {
+    background: #3a3a3a;
+    color: #e9ecef;
+}
+
+body.dark-mode .confirm-content h3 {
+    color: #dc3545;
+}
+
+body.dark-mode .confirm-content p {
+    color: #ced4da;
+}
+
+/* Specjalny styl dla nagłówka eksportu - ciemniejszy niebieski kolor */
+.export-dialog .confirm-content h3 {
+    color: #0056b3;
+}
+
+/* Styl dla nagłówka eksportu w trybie ciemnym - pozostaje ciemniejszy niebieski */
+body.dark-mode .export-dialog .confirm-content h3 {
+    color: #0056b3;
+}
+
+/* Specjalny styl dla nagłówka importu - niebieski kolor */
+.import-dialog .confirm-content h3 {
+    color: #0056b3;
+}
+
+/* Styl dla nagłówka importu w trybie ciemnym - pozostaje niebieski */
+body.dark-mode .import-dialog .confirm-content h3 {
+    color: #0056b3;
+}
+
 /* Style dla ikony ładowania */
 .loading-icon {
     display: inline-block;
@@ -3987,6 +4106,61 @@ body.dark-mode #reps-add-tab:hover {
 
 .model-settings:hover {
     color: #333;
+}
+
+body.dark-mode .import-clipboard-btn:hover {
+    background-color: #0b5ed7;
+}
+
+/* Style dla paste dialog */
+.paste-dialog .confirm-content {
+    max-width: 500px;
+    width: 95%;
+}
+
+.paste-dialog textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+body.dark-mode .paste-dialog textarea {
+    background-color: #2a2a2a;
+    color: #e9ecef;
+    border-color: #555;
+}
+
+body.dark-mode .paste-dialog p {
+    color: #ced4da;
+}
+
+/* Specjalny styl dla przycisku Import w paste dialog - niebieski kolor */
+.paste-dialog .confirm-yes {
+    background-color: #007bff;
+    color: white;
+}
+
+body.dark-mode .paste-dialog .confirm-yes:hover {
+    background-color: #0056b3;
+}
+
+/* Styl dla trybu ciemnego */
+body.dark-mode .paste-dialog .confirm-yes {
+    background-color: #0d6efd;
+    color: white;
+}
+
+body.dark-mode .paste-dialog .confirm-yes:hover {
+    background-color: #0b5ed7;
+}
+
+/* Specjalny styl dla nagłówka paste dialog - czarny kolor */
+.paste-dialog .confirm-content h3 {
+    color: #000000;
+}
+
+/* Styl dla nagłówka paste dialog w trybie ciemnym - pozostaje czarny */
+body.dark-mode .paste-dialog .confirm-content h3 {
+    color: #000000;
 }
 
 
