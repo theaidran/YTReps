@@ -33,7 +33,7 @@ Also, it has integration with dictionaries like wiktionary.org, and you can add 
 * To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use bult-in synchronization/save feature (uBlock Origin needs to be off or set to website exception).
 
 ## Mobile
-*  It is designed to be used on desktops. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable unnecessary review modes in settings.
+*  It is designed to be used on desktops. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable some of unnecessary review modes in settings.
 *  You can install it as an app on a desktop or smartphone. On a desktop browser, click Install in the right side of the address bar. On a smartphone, in a mobile browser, click settings (three dots icon) and choose "Add to Home screen," then choose install. 
 
 ## Links
