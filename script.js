@@ -1299,10 +1299,8 @@ function loadCustomDictionaries() {
     // Dodaj domyślne słowniki
     const dictAiPrompt = localStorage.getItem('dictAiPrompt') || 'You are an English teacher. Give me the meaning of the word in the next prompt. Just ask about the word. Explain in different words and provide me 3 example sentences with this word.';
     const defaultDictionaries = [
-        { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/' },
-        { name: 'DictAI', url: 'chat.html?q=' + encodeURIComponent(dictAiPrompt) },
-        { name: 'OneLook', url: 'https://www.onelook.com/?w=' },
-        { name: 'diki.pl', url: 'https://www.diki.pl/' }
+        { name: 'Wiktionary', url: 'https://wiktionary.org' },
+        { name: 'DictAI', url: 'chat.html?q=' + encodeURIComponent(dictAiPrompt) }
     ];
     
     // Dodaj domyślne i niestandardowe słowniki
