@@ -37,7 +37,7 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 *  You can install it as an app on a desktop or smartphone. On a desktop browser, click Install in the right side of the address bar. On a smartphone, in a mobile browser, click settings (three dots icon) and choose "Add to Home screen," then choose install. 
 
 ## Links
-*  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YReps/refs/heads/main/6%20minutes.apk)
+*  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk)
 *  Windows version [YoutubeReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YoutubeReps.exe)
   
 
