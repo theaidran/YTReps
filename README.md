@@ -18,7 +18,7 @@ A simple web application to enhance English language learning through watching v
 The main goal here was to create an app as a simple HTML file, which you can run straight from your desktop, no servers, no frameworks, no API required.
 Basicly, it is a clean YouTube player where you can add notes to each video and save it as a flashcard. Later, you can switch to the Repetitions page and start the review process.
 It has compatibility with Anki format, so you can export/import flashcards to your favorite mobile/desktop app, if you are used too.
-Also, it has integration with dictionaries like onelook.com, and you can add your own.   
+Also, it has integration with dictionaries like wiktionary.org, and you can add your own.   
 
 ## How It Works
 1. Select an built-in BBC playlist or add your own video/playlist.
