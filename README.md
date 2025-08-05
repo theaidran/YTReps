@@ -38,7 +38,7 @@ Also, it has integration with dictionaries like onelook.com, and you can add you
 
 ## Links
 *  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk)
-*  Windows version [YoutubeReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YoutubeReps.exe)
+*  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YoutubeReps.exe)
   
 
 
