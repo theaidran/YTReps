@@ -34,7 +34,7 @@ Also, it has integration with dictionaries like wiktionary.org, and you can add 
 
 ## Links
 *  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk)
-*  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YoutubeReps.exe)
+*  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YTReps.exe)
   
 
 
