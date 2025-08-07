@@ -23,7 +23,7 @@ Also, it has integration with free dictionaries like wiktionary.org, and you can
 ## Tips
 * Navigate the dictionary frame with your browser navigation bar (go back , refresh) or keyboard: go back (alt + <-).
 * Navigate YouTube player with a physical keyboard as usual. Left arrow (<-) jump back 5 seconds. Right arrow (->) jump forward 5 seconds. Play/Pause with Spacebar.
-* To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use bult-in synchronization/save feature (uBlock Origin needs to be off or set to website exception).
+* To work on two devices, you can import/export files by, e.g., Opera flow, email, or try to use bult-in synchronization/save feature by free service provider pushbullet.com (uBlock Origin needs to be off or set to website exception).
 
 ## Mobile
 *  It is designed to be used on desktops. But the repetitions part is useful to make reviews on smartphones, especially if you use the synchronization feature with a desktop. To better experience, you can disable some of unnecessary review modes in settings.
