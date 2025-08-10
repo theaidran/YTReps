@@ -32,6 +32,7 @@ Also, it has integration with free dictionaries like wiktionary.org, and you can
 ## Links
 *  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk)
 *  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YTReps.exe)
+*  Web app https://theaidran.github.io/YTReps
   
 
 
