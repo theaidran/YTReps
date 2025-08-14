@@ -30,8 +30,8 @@ Also, it has integration with free dictionaries like wiktionary.org, and you can
 *  You can install it as an app on a desktop or smartphone. On a desktop browser, click Install in the right side of the address bar. On a smartphone, in a mobile browser, click settings (three dots icon) and choose "Add to Home screen," then choose install. 
 
 ## Links
-*  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk)
-*  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YTReps.exe)
+*  Android version under name [6 minutes](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/6%20minutes.apk) (offline)
+*  Windows version [YTReps](https://raw.githubusercontent.com/theaidran/YTReps/refs/heads/main/YTReps.exe) (offline)
 *  Web app https://theaidran.github.io/YTReps
   
 
